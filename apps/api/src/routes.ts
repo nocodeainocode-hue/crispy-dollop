@@ -28,10 +28,11 @@ export function buildRouter(c: Ctx) {
   // ───────────── Kullanıcı girişi (e-posta + 6 haneli kod) ─────────────
   r.post('/auth/request-code', rateLimit(6, 60_000), h(async (req, res) => {
     const b = parse(z.object({ email, name: z.string().trim().max(80).optional(), locale }), req.body);
-    const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
+    const review = !!c.cfg.reviewEmail && !!c.cfg.reviewCode && b.email === c.cfg.reviewEmail;
+    const code = review ? c.cfg.reviewCode! : String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
     await run(c.db, 'INSERT INTO login_codes(email,code_hash,expires_at,attempts,name) VALUES(?,?,?,0,?) ON CONFLICT(email) DO UPDATE SET code_hash=excluded.code_hash, expires_at=excluded.expires_at, attempts=0, name=excluded.name',
       b.email, sha256(b.email + code), c.now() + 10 * 60_000, b.name ?? null);
-    await c.mail({ to: b.email, kind: 'login_code', ...T(b.locale ?? reqLocale(req)).code(code) });
+    if (!review) await c.mail({ to: b.email, kind: 'login_code', ...T(b.locale ?? reqLocale(req)).code(code) });
     // Kullanıcı var mı yok mu sızdırılmaz: her zaman aynı yanıt
     res.json({ ok: true });
   }));

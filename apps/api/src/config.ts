@@ -18,6 +18,9 @@ export const config = {
   smtpUrl: process.env.SMTP_URL, // örn. smtps://user:pass@smtp.example.com — yoksa mailler yalnızca outbox'a yazılır
   mailFrom: process.env.MAIL_FROM ?? 'QuitVow <no-reply@quitvow.local>',
   adminEmail: process.env.ADMIN_EMAIL ?? 'admin@quitvow.local',
+  // Google Play inceleme hesabı: bu adrese mail gitmez, giriş kodu sabittir (6 hane). İkisi de doluysa açılır.
+  reviewEmail: process.env.REVIEW_EMAIL?.trim().toLowerCase() || undefined,
+  reviewCode: /^\d{6}$/.test(process.env.REVIEW_CODE ?? '') ? process.env.REVIEW_CODE : undefined,
   adminPassword: process.env.ADMIN_PASSWORD, // yoksa ilk açılışta rastgele üretilip loglanır
   // Sabit kurallar
   // Satın alma: Google Play doğrulaması bağlanana kadar üretim DIŞINDA paket otomatik "demo" olarak verilir; üretimde varsayılan kapalı.
