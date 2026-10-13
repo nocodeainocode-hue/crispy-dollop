@@ -1,0 +1,9 @@
+# Netlify: landing sayfası (site/). Bağımlılık yok; build yalnızca Node ile HTML üretir.
+[build]
+  base = "site"
+  command = "node build.mjs"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  SITE_URL = "https://quitvow.com.tr"
