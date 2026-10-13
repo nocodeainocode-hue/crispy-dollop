@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{meta.title}}</title>
+<meta name="description" content="{{meta.description}}">
+<meta property="og:title" content="{{meta.ogTitle}}">
+<meta property="og:description" content="{{meta.ogDescription}}">
+<meta property="og:image" content="{{root}}img/ikon-180.png">
+<meta property="og:locale" content="{{meta.ogLocale}}">
+<meta name="theme-color" content="#0A0A0C">
+{{alternates}}
+<link rel="icon" href="{{root}}img/favicon-32.png">
+<link rel="apple-touch-icon" href="{{root}}img/ikon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{root}}style.css">
+</head>
+<body>
+
+<div class="langhint" id="langhint" hidden></div>
+
+<div class="wrap">
+  <nav>
+    <a class="brand" href="./">
+      <svg viewBox="0 0 512 512" aria-hidden="true"><path d="M156 232V76H356V232H312V120H200V232Z" fill="#E9E7E7"/><rect x="106" y="236" width="92" height="94" fill="#E9E7E7"/><rect x="210" y="236" width="92" height="94" fill="#E9E7E7"/><rect x="314" y="236" width="92" height="94" fill="#E9E7E7"/><rect x="106" y="342" width="92" height="94" fill="#E9E7E7"/><rect x="210" y="342" width="92" height="94" fill="#EC3013"/><rect x="314" y="342" width="92" height="94" fill="#E9E7E7"/></svg>
+      QuitVow
+    </a>
+    <div class="navright">
+      <span class="chip">{{nav.chip}}</span>
+      <div class="langs" aria-label="{{nav.language}}">{{langSwitch}}</div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="kicker">{{hero.kicker}}</div>
+      <h1 style="margin-top:16px">{{hero.title}}</h1>
+      <p class="lead">{{hero.lead}}</p>
+      <div class="soon" role="note">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 2.2 13.4 12l-9.8 9.8c-.4-.2-.6-.6-.6-1.1V3.3c0-.5.2-.9.6-1.1Zm10.9 10.9 2.5 2.5-11.3 6.4 8.8-8.9Zm3.6-4 3 1.7c.8.5.8 1.8 0 2.3l-3 1.7-2.8-2.8 2.8-2.9ZM5.7 2l11.3 6.4-2.5 2.5L5.7 2Z" fill="#0A0A0C"/></svg>
+        <span><small>{{hero.soonSmall}}</small>{{hero.soon}}</span>
+      </div>
+      <p class="note">{{hero.note}}</p>
+    </div>
+    <div class="phone"><img src="{{root}}img/{{lang}}/home.webp" width="540" height="1080" alt="{{img.home}}"></div>
+  </header>
+</div>
+
+<section id="how">
+  <div class="wrap">
+    <div class="kicker">{{how.kicker}}</div>
+    <h2>{{how.title}}</h2>
+    <div class="rows">
+      {{#each how.rows}}<div class="row"><span class="no">{{it.no}}</span><div><h3>{{it.title}}</h3><p>{{it.text}}</p></div></div>
+      {{/each}}
+    </div>
+    <div class="grid90" aria-hidden="true" id="grid90"></div>
+  </div>
+</section>
+
+<section id="crisis">
+  <div class="wrap split">
+    <div>
+      <div class="kicker">{{crisis.kicker}}</div>
+      <h2>{{crisis.title}}</h2>
+      <p class="lead">{{crisis.lead}}</p>
+      <ul class="ticks">
+        {{#each crisis.ticks}}<li>{{it}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="phone"><img src="{{root}}img/{{lang}}/crisis.webp" width="540" height="1080" loading="lazy" alt="{{img.crisis}}"></div>
+  </div>
+</section>
+
+<section id="guardians">
+  <div class="wrap split rev">
+    <div class="phone"><img src="{{root}}img/{{lang}}/guardians.webp" width="540" height="1080" loading="lazy" alt="{{img.guardians}}"></div>
+    <div>
+      <div class="kicker">{{guardians.kicker}}</div>
+      <h2>{{guardians.title}}</h2>
+      <p class="lead">{{guardians.lead}}</p>
+      <ul class="ticks">
+        {{#each guardians.ticks}}<li>{{it}}</li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="science">
+  <div class="wrap">
+    <div class="kicker">{{science.kicker}}</div>
+    <h2>{{science.title}}</h2>
+    <div class="cards">
+      {{#each science.cards}}<div class="card"><h3>{{it.title}}</h3><p>{{it.text}}</p><div class="src">{{it.src}}</div></div>
+      {{/each}}
+    </div>
+  </div>
+</section>
+
+<section id="games">
+  <div class="wrap split">
+    <div>
+      <div class="kicker">{{games.kicker}}</div>
+      <h2>{{games.title}}</h2>
+      <p class="lead">{{games.lead}}</p>
+      <ul class="ticks">
+        {{#each games.ticks}}<li>{{it}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="phone"><img src="{{root}}img/{{lang}}/sudoku.webp" width="540" height="1080" loading="lazy" alt="{{img.sudoku}}"></div>
+  </div>
+</section>
+
+<section id="packs">
+  <div class="wrap">
+    <div class="kicker">{{packs.kicker}}</div>
+    <h2>{{packs.title}}</h2>
+    <div class="plans">
+      {{#each packs.plans}}<div class="plan{{it.cls}}"><div class="d">{{it.days}}<small>{{packs.unit}}</small></div><p>{{it.text}}</p></div>
+      {{/each}}
+    </div>
+    <p class="note">{{packs.note}}</p>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="wrap">
+    <div class="kicker">{{privacy.kicker}}</div>
+    <h2>{{privacy.title}}</h2>
+    <div class="rows">
+      {{#each privacy.rows}}<div class="row"><span class="no">{{it.no}}</span><div><h3>{{it.title}}</h3><p>{{it.text}}</p></div></div>
+      {{/each}}
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="kicker">{{footer.kicker}}</div>
+    <div class="help">
+      {{#each footer.lines}}<a href="tel:{{it.tel}}" class="{{it.cls}}"><b>{{it.name}}</b>{{it.sub}}</a>
+      {{/each}}
+    </div>
+    <p>{{footer.disclaimer}}</p>
+    <p style="margin-top:18px;color:var(--mute)">© 2026 QuitVow</p>
+  </div>
+</footer>
+
+<script>
+  // 90 hücre: 22 dolu, 23. gün bugün
+  const g = document.getElementById('grid90');
+  for (let i = 0; i < 90; i++) { const c = document.createElement('i'); if (i < 22) c.className = 'on'; else if (i === 22) c.className = 'now'; g.appendChild(c); }
+  // Tarayıcı dili bu sayfanın dili değilse ve o dilde sayfa varsa: yönlendirmeden, küçük bir öneri göster (arama motorlarını etkilemez)
+  const HINTS = {{hints}};
+  try {
+    const want = (navigator.language || '').slice(0, 2).toLowerCase();
+    if (want !== '{{lang}}' && HINTS[want] && localStorage.getItem('quitvow.lang.dismiss') !== '1') {
+      const h = document.getElementById('langhint');
+      h.innerHTML = '<a href="' + HINTS[want].href + '">' + HINTS[want].text + ' →</a><button aria-label="×">×</button>';
+      h.querySelector('button').onclick = () => { h.hidden = true; try { localStorage.setItem('quitvow.lang.dismiss', '1'); } catch (e) {} };
+      h.hidden = false;
+    }
+  } catch (e) {}
+</script>
+</body>
+</html>

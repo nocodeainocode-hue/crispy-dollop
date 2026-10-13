@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link rel="stylesheet" href="_ds/modernist-22c864fa-6abb-40ae-8cdd-e88ec104244b/styles.css"><style>body{margin:0;background:#dcdada}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08)}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#201e1d;color:#fff;text-decoration:none}.dv-tname{font:800 14px 'Archivo',sans-serif;color:#201e1d}.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 12px 'Archivo',sans-serif;color:rgba(0,0,0,.6)}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.1);color:#201e1d;text-decoration:none}.dv-opt:target .dv-oid{background:#ec3013;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 'Archivo',sans-serif;color:rgba(0,0,0,.55)}@keyframes sq{0%,100%{transform:scale(.55)}50%{transform:scale(1)}}@keyframes pl{0%,100%{opacity:1}50%{opacity:.35}}button{font-family:'Archivo',sans-serif}</style></helmet>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Üç yön · Modernist · kumar · destekleyici ton</span></div>
+<div class="dv-opts">
+<sc-for list="{{ opts }}" as="o" hint-placeholder-count="3">
+<div class="dv-opt" id="{{ o.id }}">
+<div class="dv-olabel"><a class="dv-oid" href="#{{ o.id }}">{{ o.id }}</a>{{ o.label }}</div>
+<div style="width:372px;height:780px;background:#201e1d;padding:10px;box-sizing:border-box;border-radius:36px">
+<div style="width:100%;height:100%;border-radius:26px;overflow:hidden;display:flex;flex-direction:column;background:{{ o.bg }};color:{{ o.fg }};font-family:'Archivo',sans-serif">
+<div style="flex:none;height:40px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 22px 4px;font-size:13px;font-weight:600"><span>9:41</span><span>●●●</span></div>
+
+<sc-if value="{{ o.isPakt }}" hint-placeholder-val="{{ true }}"><div style="flex:1;display:flex;flex-direction:column;padding:12px 20px 20px;gap:14px;overflow:auto">
+<div style="font-size:11px;letter-spacing:.1em;font-weight:600">PAKT · 1 / 1</div>
+<div style="font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.02em">Kendine bir söz ver. Tutman için yanındayız.</div>
+<div style="font-size:14px;line-height:1.45;color:{{ o.dim }}">Emanet para, sözünü tutmayı kolaylaştırır. Sürece hazır olduğunda geri alırsın.</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);border:2px solid currentColor"><sc-for list="{{ o.amounts }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.pick }}" style="border:0;border-left:{{ a.bl }};padding:12px 0 12px 12px;text-align:left;background:{{ a.bg }};color:{{ a.fg }};font-size:15px;font-weight:800;cursor:pointer">{{ a.label }}</button></sc-for></div>
+<div style="border-top:2px solid currentColor"><sc-for list="{{ o.guardians }}" as="g" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:2px solid currentColor;font-size:14px"><span><b>{{ g.n }}</b> · {{ g.r }}</span><span style="font-size:11px;font-weight:600">DAVET EDİLDİ</span></div></sc-for></div>
+<div style="font-size:12px;line-height:1.5;color:{{ o.dim }}">Vasilerin sana destek olur. Kilitleri kaldırmak için 2 vasinin onayı gerekir.</div>
+<div style="flex:1"></div>
+<button onClick="{{ o.toHome }}" style="border:0;background:{{ o.cta }};color:{{ o.ctaFg }};padding:16px;text-align:left;font-size:16px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between"><span>{{ o.amtFmt }} emanete al, başla</span><span>→</span></button></div></sc-if>
+
+<sc-if value="{{ o.isHome }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column;min-height:0">
+
+<sc-if value="{{ o.va }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column">
+<div style="display:grid;grid-template-columns:1fr 1fr;border-top:2px solid currentColor;border-bottom:2px solid currentColor">
+<div style="padding:14px 20px;border-right:2px solid currentColor"><div style="font-size:11px;letter-spacing:.1em;font-weight:600">TEMİZ</div><div style="font-size:84px;line-height:.95;font-weight:800;letter-spacing:-.04em">12</div><div style="font-size:13px">gün · harika gidiyorsun</div></div>
+<div style="padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between"><div style="font-size:11px;letter-spacing:.1em;font-weight:600">EMANET</div><div style="font-size:26px;font-weight:800;letter-spacing:-.02em">{{ o.amtFmt }}</div><div style="font-size:12px;color:#605d5d">güvende, kilitli</div></div></div>
+<button onClick="{{ o.toVerify }}" style="border:0;border-bottom:2px solid currentColor;background:transparent;color:inherit;padding:14px 20px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center"><span><span style="display:block;font-size:11px;letter-spacing:.1em;font-weight:600;color:#ae1800;animation:pl 1.6s infinite">● KISA KONTROL BEKLİYOR</span><span style="font-size:15px;font-weight:800">15 dk içinde doğrula</span></span><span style="font-size:20px;font-weight:800">→</span></button>
+<div style="padding:14px 20px;flex:1;border-bottom:2px solid currentColor"><div style="font-size:11px;letter-spacing:.1em;font-weight:600;margin-bottom:6px">KORUMA</div><div style="font-size:14px;line-height:1.9">Bahis siteleri engelli ✓<br>Banka harcama izleme ✓<br>Cihaz kilidi (MDM) ✓<br>3 vasi bağlı ✓</div></div>
+<button onClick="{{ o.toCrisis }}" style="border:0;background:#ec3013;color:#f3f2f2;padding:22px 20px;text-align:left;font-size:22px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between"><span>Krizdeyim</span><span>→</span></button></div></sc-if>
+
+<sc-if value="{{ o.vb }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column">
+<div style="padding:8px 20px 0"><div style="font-size:13px;font-weight:600">Kumarı bırakma yolculuğun</div><div style="font-size:190px;line-height:.82;font-weight:800;letter-spacing:-.06em;margin-left:-8px">12</div><div style="font-size:24px;font-weight:800;line-height:1.1;margin-top:10px">gün. Her gün bir kazanç.</div></div>
+<div style="flex:1"></div>
+<div style="background:#201e1d;color:#f3f2f2;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;border-bottom:2px solid #605d5d;padding-bottom:10px"><span style="font-size:13px">Emanet</span><b style="font-size:18px">{{ o.amtFmt }}</b></div>
+<button onClick="{{ o.toVerify }}" style="border:0;border-bottom:2px solid #605d5d;background:transparent;color:inherit;padding:0 0 10px;text-align:left;font-size:14px;cursor:pointer;display:flex;justify-content:space-between"><span>Kısa kontrol bekliyor · 15 dk</span><b>→</b></button>
+<button onClick="{{ o.toCrisis }}" style="border:0;background:#ec3013;color:#f3f2f2;padding:16px;text-align:left;font-size:18px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between"><span>Krizdeyim</span><span>→</span></button></div></div></sc-if>
+
+<sc-if value="{{ o.vc }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column;padding:8px 20px 20px;gap:16px">
+<div><div style="font-size:11px;letter-spacing:.1em;font-weight:600;color:#bab6b6">BU HAFTA</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px"><sc-for list="{{ o.week }}" as="d" hint-placeholder-count="7"><div style="aspect-ratio:1;background:{{ d.bg }};color:{{ d.fg }};border:2px solid #f3f2f2;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">{{ d.t }}</div></sc-for></div></div>
+<div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-.02em">12 gün. Bugün de kazandın sayılır.</div>
+<div style="border-top:2px solid #605d5d;border-bottom:2px solid #605d5d;display:grid;grid-template-columns:1fr 1fr"><div style="padding:12px 0;border-right:2px solid #605d5d"><div style="font-size:11px;color:#bab6b6;letter-spacing:.1em">EMANET</div><div style="font-size:22px;font-weight:800">{{ o.amtFmt }}</div></div><div style="padding:12px 0 12px 14px"><div style="font-size:11px;color:#bab6b6;letter-spacing:.1em">VASİLER</div><div style="font-size:22px;font-weight:800">3 kişi</div></div></div>
+<button onClick="{{ o.toVerify }}" style="border:2px solid #f3f2f2;background:transparent;color:#f3f2f2;padding:13px;text-align:left;font-size:14px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between"><span>Kısa kontrol · 15 dk</span><span>→</span></button>
+<div style="flex:1"></div>
+<button onClick="{{ o.toCrisis }}" style="border:0;background:#ec3013;color:#fff;padding:20px;text-align:left;font-size:20px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between"><span>Krizdeyim</span><span>→</span></button></div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ o.isVerify }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column;padding:12px 20px 20px;gap:14px">
+<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600"><button onClick="{{ o.toHome }}" style="border:0;background:none;color:inherit;font-size:13px;font-weight:600;padding:0;cursor:pointer">← Geri</button><span>{{ o.vTimer }}</span></div>
+<div style="font-size:32px;line-height:1.05;font-weight:800;letter-spacing:-.02em">{{ o.vTitle }}</div>
+<div style="flex:1;border:2px dashed currentColor;background:{{ o.panel }};display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font-family:ui-monospace,Menlo,monospace;font-size:12px">KAMERA · NEFES / TÜKÜRÜK TESTİ<br>çerçeveye göster</div>
+<div style="font-size:14px;line-height:1.45;color:{{ o.dim }}">{{ o.vText }}</div>
+<button onClick="{{ o.vNext }}" style="border:0;background:{{ o.cta }};color:{{ o.ctaFg }};padding:16px;text-align:left;font-size:16px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between"><span>{{ o.vBtn }}</span><span>→</span></button></div></sc-if>
+
+<sc-if value="{{ o.isCrisis }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column;padding:12px 20px 20px;gap:14px">
+<div style="font-size:11px;letter-spacing:.1em;font-weight:600">TELEFON 15 DK KİLİTLİ · ACİL ARAMA AÇIK</div>
+<div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-.02em">Dalga gelir, geçer. Yanındayız.</div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative"><div style="width:190px;height:190px;border:2px solid currentColor;background:{{ o.panel }};animation:sq 8s ease-in-out infinite"></div><div style="position:absolute;font-size:44px;font-weight:800;letter-spacing:-.02em">{{ o.timer }}</div></div>
+<div style="font-size:13px;color:{{ o.dim }}">4 sn nefes al · 4 sn tut · 6 sn ver</div>
+<div style="border-top:2px solid currentColor"><sc-for list="{{ o.calls }}" as="c" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:2px solid currentColor;font-size:14px"><b>{{ c.n }}</b><span style="font-size:11px;font-weight:600">{{ c.s }}</span></div></sc-for></div>
+<div style="display:flex;gap:8px"><button onClick="{{ o.skip }}" style="flex:1;border:2px solid currentColor;background:transparent;color:inherit;padding:12px;text-align:left;font-size:12px;font-weight:600;cursor:pointer">Demo: süreyi atla</button><button onClick="{{ o.endCrisis }}" style="flex:1;border:0;background:{{ o.cta }};color:{{ o.ctaFg }};padding:12px;text-align:left;font-size:14px;font-weight:800;cursor:pointer;opacity:{{ o.endOp }}">{{ o.endLabel }}</button></div></div></sc-if>
+
+<sc-if value="{{ o.isRelapse }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column;padding:12px 20px 20px;gap:14px;overflow:auto">
+<div style="font-size:11px;letter-spacing:.1em;font-weight:600">KAYMA OLDU</div>
+<div style="font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.02em">Bu sondan çok bir duraklama.</div>
+<div style="font-size:14px;line-height:1.45;color:{{ o.dim }}">Söz bozuldu, ama 12 gün gerçek. Şimdi yapılanlar ve sıradaki adım:</div>
+<div style="border-top:2px solid currentColor"><sc-for list="{{ o.acts }}" as="a" hint-placeholder-count="4"><div style="padding:10px 0;border-bottom:2px solid currentColor;font-size:14px">{{ a }}</div></sc-for></div>
+<div style="border:2px solid currentColor;padding:12px;font-size:13px;line-height:1.5"><div style="font-size:11px;letter-spacing:.1em;font-weight:600;margin-bottom:4px">VASİLERE GİDEN MESAJ</div>“Bugün sözümü tutamadım ve tekrar kumar oynadım. Konuşmak için seni arayacağım.”</div>
+<div style="flex:1"></div>
+<button onClick="{{ o.toPakt }}" style="border:0;background:{{ o.cta }};color:{{ o.ctaFg }};padding:16px;text-align:left;font-size:16px;font-weight:800;cursor:pointer;display:flex;justify-content:space-between"><span>Yeniden başla · 0. gün</span><span>→</span></button></div></sc-if>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:4px;width:372px"><sc-for list="{{ o.tabs }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.go }}" style="border:1px solid #201e1d;background:{{ t.bg }};color:{{ t.fg }};padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer">{{ t.l }}</button></sc-for></div>
+</div></sc-for>
+</div>
+<p class="dv-next">Dene: <a class="dv-oid" href="#1a">1a</a> ızgarası + <a class="dv-oid" href="#1b">1b</a> kırmızı sayı · <a class="dv-oid" href="#1c">1c</a> gece modunu tüm ekranlara yay · ödeme / vasi taraf ekranı ekle</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { scr: { a: 'pakt', b: 'pakt', c: 'pakt' }, left: { a: 900, b: 900, c: 900 }, vs: { a: 0, b: 0, c: 0 }, amt: 5000 };
+  componentDidMount() { this.t = setInterval(() => this.setState(s => { const l = { ...s.left }; let ch = false; for (const k in l) if (s.scr[k] === 'crisis' && l[k] > 0) { l[k]--; ch = true; } return ch ? { left: l } : null; }), 1000); }
+  componentWillUnmount() { clearInterval(this.t); }
+  fmt(n) { return '₺' + n.toLocaleString('tr-TR'); }
+  mmss(s) { return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
+  renderVals() {
+    const s = this.state;
+    const defs = [
+      { k: 'a', id: '1a', label: 'Izgara — açık zemin, 2px çizgiler, hücreli panel', bg: '#f3f2f2', fg: '#201e1d', cta: '#ec3013', ctaFg: '#f3f2f2', panel: '#eae9e9', dim: '#605d5d' },
+      { k: 'b', id: '1b', label: 'Afiş — kırmızı zemin, dev sayı', bg: '#ec3013', fg: '#201e1d', cta: '#201e1d', ctaFg: '#f3f2f2', panel: '#dd2b0f', dim: '#201e1d' },
+      { k: 'c', id: '1c', label: 'Gece — koyu zemin, haftalık ızgara', bg: '#201e1d', fg: '#f3f2f2', cta: '#ec3013', ctaFg: '#ffffff', panel: '#2d2b2b', dim: '#bab6b6' }
+    ];
+    const tabsDef = [['pakt', 'Pakt'], ['home', 'Panel'], ['verify', 'Doğrulama'], ['crisis', 'Kriz'], ['relapse', 'Nüks']];
+    const names = [['Elif', 'Eşin'], ['Murat', 'Arkadaşın'], ['Baba', 'Baban']];
+    const opts = defs.map(d => {
+      const k = d.k, cur = s.scr[k], vs = s.vs[k], left = s.left[k];
+      const go = (sc) => () => this.setState(st => ({ scr: { ...st.scr, [k]: sc }, left: sc === 'crisis' ? { ...st.left, [k]: 900 } : st.left, vs: sc === 'verify' ? { ...st.vs, [k]: 0 } : st.vs }));
+      return Object.assign({}, d, {
+        isPakt: cur === 'pakt', isHome: cur === 'home', isVerify: cur === 'verify', isCrisis: cur === 'crisis', isRelapse: cur === 'relapse',
+        va: k === 'a', vb: k === 'b', vc: k === 'c', amtFmt: this.fmt(s.amt),
+        amounts: [2500, 5000, 10000].map((a, i) => ({ label: this.fmt(a), pick: () => this.setState({ amt: a }), bg: s.amt === a ? d.fg : 'transparent', fg: s.amt === a ? d.bg : d.fg, bl: i ? '2px solid currentColor' : '0' })),
+        guardians: names.map(n => ({ n: n[0], r: n[1] })),
+        toHome: go('home'), toVerify: go('verify'), toCrisis: go('crisis'), toPakt: go('pakt'),
+        week: ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'].map((t, i) => ({ t, bg: i < 6 ? '#ec3013' : 'transparent', fg: '#fff' })),
+        vTimer: vs === 2 ? 'TAMAM' : '14:32 kaldı', vTitle: vs === 0 ? 'Kısa bir kontrol. Hadi bakalım.' : vs === 1 ? 'Kontrol ediliyor…' : 'Harika, temizsin.',
+        vText: vs === 2 ? 'Sonuç kaydedildi. Vasilerine iyi haber gitti.' : 'Süre dolmadan tamamlarsan sorun yok. Kolay gelsin.',
+        vBtn: vs === 0 ? 'Testi kaydet' : vs === 1 ? 'Analiz ediliyor…' : 'Panele dön',
+        vNext: () => { if (vs === 0) { this.setState(st => ({ vs: { ...st.vs, [k]: 1 } })); setTimeout(() => this.setState(st => ({ vs: { ...st.vs, [k]: 2 } })), 1800); } else if (vs === 2) go('home')(); },
+        timer: this.mmss(left), skip: () => this.setState(st => ({ left: { ...st.left, [k]: Math.max(0, st.left[k] - 600) } })),
+        calls: [{ n: 'Elif', s: 'ARANIYOR…' }, { n: 'Murat', s: 'MESAJ GİTTİ' }, { n: 'Baba', s: 'MESAJ GİTTİ' }],
+        endLabel: left > 0 ? 'Kilitli' : 'Atlattım ✓', endOp: left > 0 ? 0.45 : 1, endCrisis: () => { if (left === 0) go('home')(); },
+        acts: [this.fmt(s.amt) + ' anti-bağış kurumuna aktarıldı', '3 vasiye mesaj gönderildi', 'Sayaç sıfırlandı', 'Önerilen: bugün bir vasiyle konuş'],
+        tabs: tabsDef.map(t => ({ l: t[1], go: go(t[0]), bg: cur === t[0] ? '#201e1d' : 'transparent', fg: cur === t[0] ? '#fff' : '#201e1d' }))
+      });
+    });
+    return { opts };
+  }
+}
+</script>
+</body>
+</html>

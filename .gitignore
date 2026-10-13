@@ -1,0 +1,21 @@
+node_modules/
+.env
+.env.local
+apps/api/data/
+.expo/
+dist/
+
+# gizli anahtarlar ve imza dosyaları (asla GitHub'a gitmesin)
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.p8
+*.p12
+*.pem
+*.key
+*service-account*.json
+google-services*.json
+# yerel araç ayarları
+.claude/
+*.tsbuildinfo
