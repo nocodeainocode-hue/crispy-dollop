@@ -14,6 +14,7 @@ export const config = {
   webUrl: process.env.WEB_URL ?? 'http://localhost:5173',
   appUrl: process.env.APP_URL ?? 'https://play.google.com/store/apps/details?id=com.quitvow.app',
   corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:8081,http://localhost:8099').split(','),
+  resendApiKey: process.env.RESEND_API_KEY, // varsa mailler Resend HTTPS API ile gider (SMTP'den önce gelir)
   smtpUrl: process.env.SMTP_URL, // örn. smtps://user:pass@smtp.example.com — yoksa mailler yalnızca outbox'a yazılır
   mailFrom: process.env.MAIL_FROM ?? 'QuitVow <no-reply@quitvow.local>',
   adminEmail: process.env.ADMIN_EMAIL ?? 'admin@quitvow.local',

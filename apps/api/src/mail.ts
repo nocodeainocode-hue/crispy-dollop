@@ -7,22 +7,41 @@ import { asLocale, type Locale } from './i18n.js';
 export type Mail = { to: string; subject: string; body: string; kind: string };
 export type Mailer = (m: Mail) => Promise<void>;
 
-/** Her mail önce outbox'a yazılır (denetim/destek için); SMTP_URL varsa ayrıca gönderilir. Hata akışı bozmaz. */
-export function createMailer(db: Db, cfg: Config): Mailer {
-  const transport = cfg.smtpUrl ? nodemailer.createTransport(cfg.smtpUrl) : null;
+type Send = (m: Mail) => Promise<unknown>;
+
+/** Gönderim yolu: RESEND_API_KEY (HTTPS; SMTP'yi kapatan barındırmalarda, örn. Railway Hobby) ya da SMTP_URL. İkisi de yoksa null. */
+export function createTransport(cfg: Pick<Config, 'resendApiKey' | 'smtpUrl' | 'mailFrom'>, fetchFn: typeof fetch = fetch): Send | null {
+  if (cfg.resendApiKey) return async (m) => {
+    const r = await fetchFn('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${cfg.resendApiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: cfg.mailFrom, to: [m.to], subject: m.subject, text: m.body }),
+    });
+    if (!r.ok) throw new Error(`Resend ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  };
+  if (cfg.smtpUrl) {
+    const t = nodemailer.createTransport(cfg.smtpUrl);
+    return (m) => t.sendMail({ from: cfg.mailFrom, to: m.to, subject: m.subject, text: m.body });
+  }
+  return null;
+}
+
+/** Her mail önce outbox'a yazılır (denetim/destek için); gönderim yolu varsa ayrıca gönderilir. Hata akışı bozmaz. */
+export function createMailer(db: Db, cfg: Config, fetchFn?: typeof fetch): Mailer {
+  const send = createTransport(cfg, fetchFn);
   return async (m) => {
     const id = uid();
     await run(db, 'INSERT INTO outbox(id,to_addr,subject,body,kind,status,created_at) VALUES(?,?,?,?,?,?,?)',
-      id, m.to, m.subject, m.body, m.kind, transport ? 'queued' : 'logged', Date.now());
+      id, m.to, m.subject, m.body, m.kind, send ? 'queued' : 'logged', Date.now());
     if (!cfg.prod) {
       console.log(`[mail:${m.kind}] → ${m.to} · ${m.subject}`);
       // Geliştirmede SMTP yok: kodları konsola da yaz ki telefonda denerken admin paneline bakmak gerekmesin
       if (m.kind === 'login_code') console.log(`   >>> GİRİŞ KODU (${m.to}): ${/(\d{6})/.exec(m.body)?.[1]}`);
       if (m.kind === 'invite') console.log(`   >>> ŞAHİT DAVET KODU (${m.to}): ${/([0-9A-Z]{5}-[0-9A-Z]{5})/.exec(m.body)?.[1]}`);
     }
-    if (!transport) return;
-    // SMTP gönderimi akışı bekletmez; sonucu outbox'a yazılır
-    transport.sendMail({ from: cfg.mailFrom, to: m.to, subject: m.subject, text: m.body })
+    if (!send) return;
+    // Gönderim akışı bekletmez; sonucu outbox'a yazılır
+    send(m)
       .then(() => run(db, "UPDATE outbox SET status='sent' WHERE id=?", id))
       .catch(e => run(db, "UPDATE outbox SET status='failed', error=? WHERE id=?", String(e?.message ?? e), id))
       .catch(() => {});
