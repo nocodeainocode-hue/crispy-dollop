@@ -3,6 +3,7 @@ import { View, Pressable } from 'react-native';
 import { useApp } from '../store';
 import { useServer } from '../server';
 import { API_URL } from '../api';
+import { useBilling } from '../billing';
 import VowRecorder, { type Vow } from '../components/VowRecorder';
 import { Screen, Body, Back, ActionBar, HoldBar, NumRow, Field, Opt, Science, T, Kicker, Hair, TopChips, StepProgress } from '../components/ui';
 import { useL, useH, currencySymbol, joinNames } from '../i18n';
@@ -31,6 +32,10 @@ export default function Setup() {
   const [reason, setReason] = useState('');
   const [gs, setGs] = useState([{ id: 'g1', name: '', email: '', phone: '' }, { id: 'g2', name: '', email: '', phone: '' }, { id: 'g3', name: '', email: '', phone: '' }]);
   const [goal, setGoal] = useState(30);
+  const bill = useBilling();
+  const canBuy = bill?.billing !== false; // bilinmiyorken engelleme; sunucu zaten paketi doğrular
+  // Satış kapalıyken (Play ödemesi bağlanana kadar) yalnızca ücretsiz deneme seçilebilir
+  useEffect(() => { if (!canBuy && goal !== 7) setGoal(7); }, [canBuy]);
   const [solo, setSolo] = useState(false); // vasisiz başla: zaman kilidi
   const [hideHabit, setHideHabit] = useState(false); // vasiler alışkanlığı görmesin
   const [openG, setOpenG] = useState<string | null>('g1'); // açık şahit kutusu (aynı anda bir tane)
@@ -216,9 +221,12 @@ export default function Setup() {
         {step === 4 && <>
           <Head big={L.setup.packTitle} small={L.setup.packSmall} />
           <Hair />
-          {PACKS.map((x, i) => <Opt delay={120 + i * 60} key={x.d} label={x.l} sub={x.sub} on={goal === x.d} onPress={() => setGoal(x.d)} />)}
+          {PACKS.map((x, i) => {
+            const soon = !canBuy && x.d !== 7;
+            return <Opt delay={120 + i * 60} key={x.d} label={x.l} sub={soon ? L.packs.soon : x.sub} on={goal === x.d} onPress={() => { if (!soon) setGoal(x.d); }} />;
+          })}
           {discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
-          <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.setup.demoNote}</T>
+          {(bill?.demo || !canBuy) && <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{bill?.demo ? L.setup.demoNote : L.setup.soonNote}</T>}
           <Science src={L.setup.packSrc}>{L.setup.packScience}</Science>
         </>}
 
@@ -271,7 +279,7 @@ export default function Setup() {
             <T size={40} ls={-1.6} style={{ marginTop: 4 }}>{L.setup.packDays(goal)}</T>
             <T w="r" size={12} color={c.dim} style={{ marginTop: 4 }}>{L.setup.packKind(goal === 7)}</T>
           </View>
-          <T w="r" size={11.5} color={trialBlocked ? c.acc2 : c.mute} style={{ paddingHorizontal: 16, paddingTop: 8 }}>{trialBlocked ? L.setup.trialUsed : L.setup.demoShort}</T>
+          <T w="r" size={11.5} color={trialBlocked ? c.acc2 : c.mute} style={{ paddingHorizontal: 16, paddingTop: 8 }}>{trialBlocked ? (canBuy ? L.setup.trialUsed : L.setup.trialUsedSoon) : bill?.demo ? L.setup.demoShort : ''}</T>
           <View style={{ paddingTop: 14 }}>
             <Field label={L.setup.signLabel} placeholder={L.setup.signPh} value={sign} onChangeText={setSign} />
             <Pressable onPress={() => setConsent(!consent)} style={{ flexDirection: 'row', paddingHorizontal: 16, paddingTop: 4 }}>

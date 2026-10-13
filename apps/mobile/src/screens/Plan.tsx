@@ -20,12 +20,13 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
   const pack = a.goalDays > 7;
   const day = Math.min(a.goalDays, Math.floor((Date.now() - a.startedAt) / DAY) + 1);
   const [demo, setDemo] = useState<boolean | null>(null);
+  const [canBuy, setCanBuy] = useState(true); // Play ödemesi bağlanana kadar üretimde false: paketler "yakında"
   const [pick, setPick] = useState(90); // 90 gün önceden seçili; tek dokunuşla değiştirilir
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null); // ok: bilgi (beyaz), değilse hata (kırmızı)
 
   const [discount, setDiscount] = useState(0);
-  useEffect(() => { srv.me().then(m => { setDemo(m.demoPurchases); setDiscount(m.nextPackDiscount ?? 0); }).catch(() => {}); }, []);
+  useEffect(() => { srv.me().then(m => { setDemo(m.demoPurchases); setCanBuy(m.demoPurchases || !!m.playEnabled); setDiscount(m.nextPackDiscount ?? 0); }).catch(() => {}); }, []);
 
   const upgrade = async () => {
     if (!pick) return;
@@ -76,7 +77,8 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
         <NumRow no={pack ? '✓' : '—'} last>{L.plan.u3}</NumRow>
         <T w="r" size={12} lh={17} color={c.mute} style={{ padding: 16, paddingTop: 10 }}>{L.plan.free}</T>
 
-        {!pack && <>
+        {!pack && !canBuy && <T w="r" size={12.5} lh={18} color={c.dim} style={{ paddingHorizontal: 16 }}>{L.plan.soon}</T>}
+        {!pack && canBuy && <>
           <Kicker color={c.dim} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.plan.upgradeKicker}</Kicker>
           <Hair />
           {UP.map((x, i) => <Opt key={x.d} delay={80 + i * 60} label={x.l} sub={x.sub} on={pick === x.d} onPress={() => setPick(x.d)} />)}
@@ -98,7 +100,7 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
         </Pressable>
       )}
       {!pack && paywall && <ActionBar label={L.plan.later} right="" kind="ghost" height={52} size={14} onPress={() => onLater?.()} />}
-      {!pack && <ActionBar label={busy ? L.plan.processing : pick ? L.plan.buy(pick) : L.plan.pickFirst} disabled={!pick || busy} onPress={upgrade} />}
+      {!pack && canBuy && <ActionBar label={busy ? L.plan.processing : pick ? L.plan.buy(pick) : L.plan.pickFirst} disabled={!pick || busy} onPress={upgrade} />}
       {pack && <ActionBar label={busy ? L.plan.preparing : L.plan.share} disabled={busy} onPress={share} />}
     </Screen>
   );

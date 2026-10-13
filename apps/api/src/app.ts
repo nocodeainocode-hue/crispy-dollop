@@ -25,7 +25,7 @@ export async function createApp(opts: { cfg?: Partial<Config>; now?: () => numbe
   // Geliştirmede her origin'e izin ver (Expo web portu değişebiliyor); üretimde yalnızca CORS_ORIGINS listesi
   app.use(cors({ origin: cfg.prod ? cfg.corsOrigins : true }));
   app.use(express.json({ limit: '100kb' }));
-  app.get('/health', (_req, res) => res.json({ ok: true, db: db.kind, play: !!ctx.play }));
+  app.get('/health', (_req, res) => res.json({ ok: true, db: db.kind, play: !!ctx.play, demo: cfg.demoPurchases, billing: cfg.demoPurchases || !!ctx.play }));
   app.use(buildRouter(ctx));
   app.use((req, res) => res.status(404).json({ error: translateError('Bulunamadı', reqLocale(req)) }));
   app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
