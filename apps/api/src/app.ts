@@ -20,6 +20,7 @@ export async function createApp(opts: { cfg?: Partial<Config>; now?: () => numbe
 
   const app = express();
   app.disable('x-powered-by');
+  if (cfg.trustProxy) app.set('trust proxy', cfg.trustProxy);
   if (!cfg.prod) app.use((req, res, next) => { res.on('finish', () => console.log(`[${req.method}] ${req.path} → ${res.statusCode}`)); next(); });
   // Geliştirmede her origin'e izin ver (Expo web portu değişebiliyor); üretimde yalnızca CORS_ORIGINS listesi
   app.use(cors({ origin: cfg.prod ? cfg.corsOrigins : true }));

@@ -4,6 +4,8 @@ const need = (k: string) => { const v = process.env[k]; if (!v) throw new Error(
 export const config = {
   prod,
   port: Number(process.env.PORT ?? 4000),
+  // Önünde kaç ters vekil (nginx/Caddy/Railway) var: hız sınırı gerçek istemci IP'sini görsün diye. Üretimde varsayılan 1.
+  trustProxy: Number(process.env.TRUST_PROXY ?? (prod ? 1 : 0)),
   // Veritabanı: DATABASE_URL varsa Supabase/Postgres; yoksa gömülü Postgres (PGlite) → ./data/pglite
   databaseUrl: process.env.DATABASE_URL,
   pgliteDir: process.env.PGLITE_DIR ?? './data/pglite',
