@@ -90,6 +90,7 @@ export default {
   },
   footer: {
     kicker: 'Free helplines',
+    privacy: 'Privacy', privacyHref: 'en/privacy/', terms: 'Terms', termsHref: 'en/terms/',
     lines: [
       { tel: '18004262537', name: '1-800-GAMBLER', sub: 'Gambling helpline · US', cls: '' },
       { tel: '08088020133', name: '0808 8020 133', sub: 'National Gambling Helpline · UK', cls: '' },

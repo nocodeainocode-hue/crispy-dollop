@@ -67,6 +67,49 @@ for (const l of LANGS) {
   fs.writeFileSync(path.join(dir, 'index.html'), html);
   console.log('✓', path.relative(HERE, path.join(dir, 'index.html')));
 }
+// Yasal sayfalar: src/legal/<dil>.mjs → dist/<dil-dizini>/<yol>/index.html (gizlilik, koşullar)
+const company = (await import(pathToFileURL(path.join(SRC, 'legal', 'company.mjs')).href)).default;
+const todo = Object.entries(company).filter(([, v]) => typeof v === 'string' && /\[.+\]/.test(v)).map(([k]) => k);
+if (todo.length) console.warn(`⚠ src/legal/company.mjs içinde doldurulmamış alanlar: ${todo.join(', ')} (yayından önce doldur)`);
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+for (const l of LANGS) {
+  const legal = (await import(pathToFileURL(path.join(SRC, 'legal', `${l}.mjs`)).href)).default(company);
+  for (const kind of ['privacy', 'terms']) {
+    const pg = legal[kind];
+    const root = l === DEFAULT ? '../' : '../../';
+    const canon = SITE_URL ? `<link rel="canonical" href="${SITE_URL}/${dirOf(l)}${pg.path}/">` : '';
+    const html = `<!doctype html>
+<html lang="${l}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(pg.title)} · QuitVow</title>
+<meta name="theme-color" content="#0A0A0C">
+${canon}
+<link rel="icon" href="${root}img/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="${root}style.css">
+</head>
+<body>
+<div class="wrap legal">
+  <nav><a class="brand" href="${root}${dirOf(l)}">QuitVow</a><a href="${root}${dirOf(l)}">${legal.back}</a></nav>
+  <article>
+    <div class="kicker">${legal.updatedLabel}: ${company.updated[l]}</div>
+    <h1>${esc(pg.title)}</h1>
+    ${pg.body}
+  </article>
+</div>
+</body>
+</html>
+`;
+    const dir = path.join(OUT, dirOf(l), pg.path);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'index.html'), html);
+    console.log('✓', path.relative(HERE, path.join(dir, 'index.html')));
+  }
+}
 fs.copyFileSync(path.join(SRC, 'style.css'), path.join(OUT, 'style.css'));
 fs.cpSync(path.join(SRC, 'img'), path.join(OUT, 'img'), { recursive: true });
 console.log('✓ dist/style.css, dist/img/');

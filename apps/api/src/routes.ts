@@ -76,6 +76,8 @@ export function buildRouter(c: Ctx) {
       if (p.status === 'active' || p.status === 'pending') (await notifyGuardians(c, p.id, () => T(u?.locale).closed(u?.name ?? ''), 'closed'));
     }
     await run(c.db, 'DELETE FROM users WHERE id=?', id);
+    // Kişinin kendine giden mail kayıtları (giriş kodları vb.) ve bekleyen kodu da hemen silinir; şahitlere gidenler 90 günde temizlenir
+    if (u) { await run(c.db, 'DELETE FROM outbox WHERE to_addr=?', u.email); await run(c.db, 'DELETE FROM login_codes WHERE email=?', u.email); }
     res.json({ ok: true });
   }));
 

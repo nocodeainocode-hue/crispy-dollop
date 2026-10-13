@@ -137,6 +137,13 @@ export async function nextPackDiscount(c: Ctx, userId: string) {
  * Haftalık iyi haber (kullanıcı açtıysa): son 7 günde kaç gün günlük kontrol yapıldığını şahitlere bildirir.
  * Yalnızca bildiğimizi söyler: kontrol sayısı ve o hafta tekrar oynama bildirilmediği. Haftada tek. Periyodik çalıştırılır.
  */
+/** Saklama süresi: gönderilen e-postaların kaydı 90 gün tutulur (destek/denetim), süresi geçen giriş kodları silinir. Gizlilik politikasında yazan budur. */
+export const OUTBOX_RETENTION_MS = 90 * DAY;
+export async function purgeOld(c: Ctx) {
+  await run(c.db, 'DELETE FROM outbox WHERE created_at < ?', c.now() - OUTBOX_RETENTION_MS);
+  await run(c.db, 'DELETE FROM login_codes WHERE expires_at < ?', c.now());
+}
+
 export async function sendWeeklyDigests(c: Ctx) {
   const week = 7 * DAY, now = c.now();
   const rows = await all(c.db, "SELECT * FROM pacts WHERE status='active' AND weekly_digest=TRUE AND started_at <= ? AND (digest_at IS NULL OR digest_at <= ?)", now - week, now - week);
