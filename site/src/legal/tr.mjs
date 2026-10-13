@@ -86,7 +86,7 @@ export default (co) => ({
 <p>QuitVow'u indirerek ya da kullanarak bu koşulları kabul etmiş olursun. Hizmeti ${co.legalName} ("biz") sunar.</p>
 
 <h2>1. QuitVow nedir, ne değildir</h2>
-<p>QuitVow, kumar ve bahis alışkanlığını bırakmak isteyenler için bir taahhüt ve takip aracıdır: sözleşme, şahitler, kriz modu ve günlük takip sunar. <b>QuitVow bir tedavi, tıbbi cihaz ya da psikolojik danışmanlık hizmeti değildir ve başarı garantisi vermez.</b> Kumar bozukluğunda profesyonel destek almanı öneririz. Kendine ya da başkasına zarar verme düşüncen varsa hemen <b>112</b>'yi ara. Türkiye'de ücretsiz destek için: ALO 182, Yeşilay Danışmanlık Merkezi 115.</p>
+<p>QuitVow, kumar ve bahis alışkanlığını bırakmak isteyenler için bir taahhüt ve takip aracıdır: sözleşme, şahitler, kriz modu ve günlük takip sunar. <b>QuitVow bir tedavi, tıbbi cihaz ya da psikolojik danışmanlık hizmeti değildir ve başarı garantisi vermez.</b> Kumar bağımlılığında profesyonel destek almanı öneririz. Kendine ya da başkasına zarar verme düşüncen varsa hemen <b>112</b>'yi ara. Türkiye'de ücretsiz destek için: ALO 182, Yeşilay Danışmanlık Merkezi 115.</p>
 
 <h2>2. Kimler kullanabilir</h2>
 <p>QuitVow'u kullanmak için 18 yaşını doldurmuş olmalısın. Hesabın kişiseldir; giriş kodlarını kimseyle paylaşma.</p>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, ActivityIndicator, useColorScheme } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Archivo_400Regular, Archivo_600SemiBold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo';
 import { Provider, useApp } from './src/store';
 import { ServerProvider, useServer } from './src/server';
@@ -69,5 +70,5 @@ function Root() {
 export default function App() {
   const [loaded] = useFonts({ Archivo_400Regular, Archivo_600SemiBold, Archivo_800ExtraBold });
   if (!loaded) return <View style={{ flex: 1, backgroundColor: c.bg }} />;
-  return <Provider><ServerProvider><Root /></ServerProvider></Provider>;
+  return <SafeAreaProvider><Provider><ServerProvider><Root /></ServerProvider></Provider></SafeAreaProvider>;
 }

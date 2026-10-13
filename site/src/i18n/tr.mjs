@@ -96,6 +96,6 @@ export default {
       { tel: '115', name: 'Yeşilay · 115', sub: 'Bağımlılık danışmanlığı', cls: '' },
       { tel: '112', name: 'Acil · 112', sub: 'Hayati tehlike varsa hemen ara', cls: 'urgent' },
     ],
-    disclaimer: 'QuitVow bir tedavi değildir ve başarı garantisi vermez. Kumar bozukluğunda en iyi desteklenen yöntem bilişsel davranışçı terapidir; profesyonel destek almanı öneririz.',
+    disclaimer: 'QuitVow bir tedavi değildir ve başarı garantisi vermez. Kumar bağımlılığında en iyi desteklenen yöntem bilişsel davranışçı terapidir; profesyonel destek almanı öneririz.',
   },
 };

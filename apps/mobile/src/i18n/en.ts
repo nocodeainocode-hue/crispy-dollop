@@ -41,7 +41,7 @@ const en: Dict = {
   setup: {
     steps: ['TRIGGERS', 'WHY', 'WITNESSES', 'PACK', 'CONSEQUENCES', 'LETTER', 'ACCOUNT', 'CONTRACT', 'VOW VIDEO · OPTIONAL'],
     stepKicker: (n: number, total: number, name: string) => `STEP ${n}/${total} · ${name}`,
-    brand: 'Lock\nIn.',
+    brand: 'Quit\nVow.',
     haveAccount: 'I already have an account · sign in →',
     loggedInNoPact: "You're signed in. This account has no active pact, so let's set one up.",
     triggersTitle: 'What sets\nyou off?',

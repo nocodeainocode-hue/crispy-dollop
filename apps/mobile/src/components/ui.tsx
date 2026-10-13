@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, Platform, TextInput, TextInputProps, TextProps, ViewStyle, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c, F } from '../theme';
 import { ND, EASE, dur, Rise, usePulse } from './motion';
 import { useL } from '../i18n';
@@ -21,12 +22,14 @@ export function Screen({ children, crisis }: { children: React.ReactNode; crisis
     backgroundImage: `linear-gradient(${c.tint(c.grid)} 1px,transparent 1px),linear-gradient(90deg,${c.tint(c.grid)} 1px,transparent 1px)`,
     backgroundSize: '22px 22px',
   } : {};
+  // İçerik durum çubuğunun altında başlar; alttaki butonlar sistem gezinme çubuğunun (sanal tuşlar) üstünde kalır
+  const ins = useSafeAreaInsets();
   return (
     <View style={{ flex: 1, backgroundColor: c.outer, alignItems: 'center' }}>
       <View style={{ flex: 1, width: '100%', maxWidth: 430, backgroundColor: c.bg, overflow: 'hidden' }}>
         <LinearGradient colors={crisis ? ['#5E1509', c.bg] : [c.glow, c.bg]} locations={[0, crisis ? 0.72 : 0.55]} style={StyleSheet.absoluteFill} />
         <View pointerEvents="none" style={[StyleSheet.absoluteFill, grid]} />
-        <View style={{ flex: 1, paddingTop: Platform.OS === 'web' ? 18 : 52 }}>{children}</View>
+        <View style={{ flex: 1, paddingTop: Platform.OS === 'web' ? 18 : Math.max(ins.top + 8, 24), paddingBottom: ins.bottom }}>{children}</View>
       </View>
     </View>
   );

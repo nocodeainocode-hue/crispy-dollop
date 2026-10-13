@@ -62,7 +62,7 @@ GİZLİLİK
 
 ÖNEMLİ
 
-QuitVow bir tedavi değildir ve başarı garantisi vermez. Kumar bozukluğunda en iyi desteklenen yöntem bilişsel davranışçı terapidir; profesyonel destek almanı öneririz. Kendine ya da başkasına zarar verme düşüncen varsa hemen 112'yi ara.
+QuitVow bir tedavi değildir ve başarı garantisi vermez. Kumar bağımlılığında en iyi desteklenen yöntem bilişsel davranışçı terapidir; profesyonel destek almanı öneririz. Kendine ya da başkasına zarar verme düşüncen varsa hemen 112'yi ara.
 ```
 
 ### Paket satışı açıldığında tam açıklamaya eklenecek bölüm
