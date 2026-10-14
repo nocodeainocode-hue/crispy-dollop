@@ -20,3 +20,8 @@ google-services*.json
 .claude/
 *.tsbuildinfo
 !apps/web/.env.canli
+
+# yerel Android derleme çıktıları
+apps/mobile/modules/*/android/build/
+.cxx/
+.gradle/

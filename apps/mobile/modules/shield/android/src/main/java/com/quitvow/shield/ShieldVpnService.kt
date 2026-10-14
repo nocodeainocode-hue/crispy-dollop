@@ -25,8 +25,8 @@ class ShieldVpnService : VpnService() {
   companion object {
     const val ACTION_START = "com.quitvow.shield.START"
     const val ACTION_STOP = "com.quitvow.shield.STOP"
-    private val TUN_ADDR = byteArrayOf(10, 111, 222, 1)
-    private val DNS_ADDR = byteArrayOf(10, 111, 222, 2)
+    private val TUN_ADDR = byteArrayOf(10, 111, 222.toByte(), 1)
+    private val DNS_ADDR = byteArrayOf(10, 111, 222.toByte(), 2)
     private const val HEARTBEAT_HOURS = 3L
 
     @Volatile var running = false

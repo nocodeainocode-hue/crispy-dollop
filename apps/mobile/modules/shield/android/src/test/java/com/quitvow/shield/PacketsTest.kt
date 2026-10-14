@@ -7,8 +7,8 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class PacketsTest {
-  private val client = byteArrayOf(10, 111, 222, 1)
-  private val dns = byteArrayOf(10, 111, 222, 2)
+  private val client = byteArrayOf(10, 111, 222.toByte(), 1)
+  private val dns = byteArrayOf(10, 111, 222.toByte(), 2)
 
   /** "jojobet1045.com" için A sorgusu (id 0x1234, RD=1) */
   private fun query(name: String, qtype: Int = 1): ByteArray {
