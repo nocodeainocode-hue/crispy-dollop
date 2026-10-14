@@ -7,12 +7,12 @@
     "preview": {
       "distribution": "internal",
       "android": { "buildType": "apk" },
-      "env": { "EXPO_PUBLIC_API_URL": "https://crispy-dollop-production.up.railway.app" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://api.quitvow.com.tr" }
     },
     "production": {
       "autoIncrement": true,
       "android": { "buildType": "app-bundle" },
-      "env": { "EXPO_PUBLIC_API_URL": "https://crispy-dollop-production.up.railway.app" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://api.quitvow.com.tr" }
     }
   },
   "submit": {
