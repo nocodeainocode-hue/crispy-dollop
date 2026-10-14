@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Pressable, Alert } from 'react-native';
+import { View, Pressable, Alert, PermissionsAndroid, Platform } from 'react-native';
 import { Screen, Body, Back, ActionBar, NumRow, T, Kicker, Hair, Field } from '../components/ui';
 import { Rise } from '../components/motion';
 import { c } from '../theme';
@@ -35,6 +35,8 @@ export default function ShieldScreen({ go }: { go: Go }) {
       if (!(await Shield!.prepare())) { setMsg({ text: L.shield.denied, ok: false }); return; }
       if (!Shield!.start()) { setMsg({ text: L.shield.denied, ok: false }); return; }
       Shield!.refresh().catch(() => {}); // listeyi arka planda indir
+      // "Bahis sitesi engellendi" bildirimi için (Android 13+ izin ister; vermezse engel yine çalışır)
+      if (Platform.OS === 'android' && Number(Platform.Version) >= 33) PermissionsAndroid.request('android.permission.POST_NOTIFICATIONS' as any).catch(() => {});
     } finally { setBusy(false); }
   };
   const disable = () => {

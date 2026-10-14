@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, ActivityIndicator, useColorScheme } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, useColorScheme, AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Archivo_400Regular, Archivo_600SemiBold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo';
@@ -11,6 +11,8 @@ import Guardians, { Completed, VowScreen } from './src/screens/Pending';
 import Plan from './src/screens/Plan';
 import Profile from './src/screens/Profile';
 import ShieldScreen from './src/screens/Shield';
+import { Shield } from './modules/shield';
+import { useL } from './src/i18n';
 import Home from './src/screens/Home';
 import Verify from './src/screens/Verify';
 import Crisis from './src/screens/Crisis';
@@ -26,6 +28,18 @@ function Root() {
   const a = useApp();
   const srv = useServer();
   const [scr, setScr] = useState<Scr>('home');
+  const L = useL();
+  // Engel servisi bildirimleri doğru dilde yazsın
+  useEffect(() => { Shield?.setLocale(L.locale.startsWith('tr') ? 'tr' : 'en'); }, [L.locale]);
+  // "Bahis sitesi engellendi" bildirimine dokunulduysa kriz modunda aç
+  useEffect(() => {
+    if (!Shield) return;
+    const take = () => { if (Shield!.takeOpenRequest() === 'crisis') setScr('crisis'); };
+    take();
+    const sub = Shield.addListener('onOpen', e => { if (e.screen === 'crisis') setScr('crisis'); });
+    const st = AppState.addEventListener('change', s => { if (s === 'active') take(); });
+    return () => { sub.remove(); st.remove(); };
+  }, []);
   const system = useColorScheme();
   // Kriz ekranı bilinçli olarak her temada koyu-kırmızı: dikkati toplayan an
   const inCrisis = a.role !== 'guardian' && a.onboarded && !!srv.token && (a.crisisUntil > Date.now() || scr === 'crisis');

@@ -118,8 +118,10 @@ class ShieldVpnService : VpnService() {
       val udp = Packets.parseUdp4(buf, n) ?: continue
       if (udp.dstPort != 53 || !udp.dst.contentEquals(DNS_ADDR)) continue
       val q = Packets.parseQuery(buf, udp.payloadOffset, udp.payloadLength)
-      if (q != null && matcher?.check(q.name) != null) {
+      val reason = if (q != null) matcher?.check(q.name) else null
+      if (q != null && reason != null) {
         ShieldStore.countBlocked(this)
+        if (reason != Matcher.Reason.DOH) ShieldNotifier.blocked(this)
         write(Packets.buildUdp4(DNS_ADDR, 53, udp.src, udp.srcPort, Packets.nxdomain(buf, udp.payloadOffset, q)))
         continue
       }

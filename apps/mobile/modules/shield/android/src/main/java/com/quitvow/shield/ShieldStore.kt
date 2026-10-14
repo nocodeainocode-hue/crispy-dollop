@@ -29,6 +29,8 @@ object ShieldStore {
   fun setAuth(ctx: Context, apiUrl: String, token: String?) =
     prefs(ctx).edit().putString("apiUrl", apiUrl.trimEnd('/')).putString("token", token).apply()
   fun apiUrl(ctx: Context): String? = prefs(ctx).getString("apiUrl", null)
+  fun setLocale(ctx: Context, lang: String) = prefs(ctx).edit().putString("locale", lang).apply()
+  fun locale(ctx: Context): String = prefs(ctx).getString("locale", "tr") ?: "tr"
   fun token(ctx: Context): String? = prefs(ctx).getString("token", null)
 
   private fun today() = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())

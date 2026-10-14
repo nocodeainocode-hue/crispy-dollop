@@ -33,7 +33,7 @@ class ShieldModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("QuitVowShield")
-    Events("onStatus")
+    Events("onStatus", "onOpen")
 
     OnCreate { ShieldVpnService.listener = { runCatching { sendEvent("onStatus", status()) } } }
     OnDestroy { ShieldVpnService.listener = null }
@@ -73,6 +73,20 @@ class ShieldModule : Module() {
     }
 
     Function("setAuth") { apiUrl: String, token: String? -> ShieldStore.setAuth(ctx, apiUrl, token) }
+    Function("setLocale") { lang: String -> ShieldStore.setLocale(ctx, lang) }
+
+    /** Uygulama engel bildiriminden açıldıysa hangi ekranı istediğini bir kez verir ("crisis"), sonra siler. */
+    Function("takeOpenRequest") {
+      val intent = appContext.currentActivity?.intent
+      val v = intent?.getStringExtra(ShieldNotifier.EXTRA_OPEN)
+      if (v != null) intent.removeExtra(ShieldNotifier.EXTRA_OPEN)
+      v
+    }
+    OnNewIntent { intent ->
+      val v = intent.getStringExtra(ShieldNotifier.EXTRA_OPEN) ?: return@OnNewIntent
+      intent.removeExtra(ShieldNotifier.EXTRA_OPEN)
+      runCatching { sendEvent("onOpen", mapOf("screen" to v)) }
+    }
 
     AsyncFunction("refresh") {
       val changed = runCatching { ShieldStore.refresh(ctx) }.getOrDefault(false)

@@ -19,10 +19,13 @@ type Native = {
   start(): boolean;
   stop(): boolean;
   setAuth(apiUrl: string, token: string | null): void;
+  setLocale(lang: 'tr' | 'en'): void;
+  takeOpenRequest(): string | null;
   refresh(): Promise<ShieldStatus>;
   check(name: string): Promise<'DOH' | 'LIST' | 'RULE' | null>;
   openVpnSettings(): void;
   addListener(event: 'onStatus', fn: (s: ShieldStatus) => void): EventSubscription;
+  addListener(event: 'onOpen', fn: (e: { screen: string }) => void): EventSubscription;
 };
 
 export const Shield: Native | null = Platform.OS === 'android' ? requireOptionalNativeModule<Native>('QuitVowShield') : null;

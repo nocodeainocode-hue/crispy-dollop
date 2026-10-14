@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bildirim simgesi: uygulama ikonundaki kilit (tek renk; sistem renklendirir) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="24dp" android:height="24dp" android:viewportWidth="512" android:viewportHeight="512">
+  <path android:fillColor="#FFFFFFFF" android:pathData="M156,232V76H356V232H312V120H200V232Z" />
+  <path android:fillColor="#FFFFFFFF" android:pathData="M106,236h92v94h-92z M210,236h92v94h-92z M314,236h92v94h-92z M106,342h92v94h-92z M314,342h92v94h-92z" />
+</vector>

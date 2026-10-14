@@ -33,6 +33,9 @@ class MatcherTest {
     assertEquals(Matcher.Reason.RULE, m.check("2014marsbahis.com"))
     assertEquals(Matcher.Reason.RULE, m.check("canli-bahis-siteleri.com"))
     assertEquals(Matcher.Reason.RULE, m.check("superslot77.xyz"))
+    assertEquals(Matcher.Reason.RULE, m.check("virusbettr1150.com"))  // araya "tr" giren yeni adres (2026-10)
+    assertEquals(Matcher.Reason.RULE, m.check("yenisitebettr77.net"))
+    assertEquals(Matcher.Reason.RULE, m.check("alevcasinogiris2025.com"))
     assertEquals(Matcher.Reason.RULE, m.check("royalcasino.com.tr"))
   }
 
