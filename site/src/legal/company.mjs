@@ -1,10 +1,7 @@
-// Gizlilik politikası ve kullanım koşullarındaki şirket bilgileri. Köşeli parantezli alanlar doldurulmadan yayına alma:
-// derleme bunları uyarı olarak listeler.
+// Gizlilik politikası ve kullanım koşullarındaki şirket bilgileri. Köşeli parantezli alan kalırsa derleme uyarır.
 export default {
-  legalName: '[ŞİRKET UNVANI]',          // örn. "Örnek Yazılım Ltd. Şti."
-  address: '[ŞİRKET ADRESİ]',            // tebligat adresi
-  mersis: '[MERSİS / VERGİ NO]',
-  email: 'destek@quitvow.com.tr',        // KVKK başvuruları ve destek: bu adresin gerçekten mail alabildiğinden emin ol
-  court: '[İL]',                         // uyuşmazlıklarda yetkili mahkeme/icra daireleri (şirket merkezinin ili)
-  updated: { tr: '13 Ekim 2026', en: '13 October 2026' },
+  legalName: 'OmniPure Marketing LLC',
+  address: '1209 Mountain Rd Pl NE Ste N, Albuquerque, NM 87110, USA',
+  email: 'destek@quitvow.com.tr', // KVKK başvuruları ve destek: bu adresin gerçekten mail alabildiğinden emin ol
+  updated: { tr: '14 Ekim 2026', en: '14 October 2026' },
 };

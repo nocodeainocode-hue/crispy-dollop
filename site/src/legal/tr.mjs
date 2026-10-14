@@ -9,7 +9,8 @@ export default (co) => ({
 <p>Bu metin, QuitVow mobil uygulamasını ve quitvow.com.tr sitesini kullanırken kişisel verilerinin nasıl işlendiğini, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında açıklar. Kısaca: <b>Banka ya da hesap bilgini istemeyiz, reklam ve analiz aracı kullanmayız, "neden" notun, mektubun, günlüğün ve imza videon yalnızca telefonunda kalır.</b></p>
 
 <h2>1. Veri sorumlusu</h2>
-<p>${co.legalName}<br>${co.address}<br>MERSİS / Vergi No: ${co.mersis}<br>E-posta: <a href="mailto:${co.email}">${co.email}</a></p>
+<p>${co.legalName} (Amerika Birleşik Devletleri, New Mexico'da kurulu şirket)<br>${co.address}<br>E-posta: <a href="mailto:${co.email}">${co.email}</a></p>
+<p>Türkiye'de yaşayan kullanıcıların verileri için 6698 sayılı KVKK kapsamındaki yükümlülüklerimize uyarız.</p>
 
 <h2>2. Yalnızca telefonunda kalan veriler</h2>
 <p>Aşağıdakiler sunucumuza hiç gönderilmez; yalnızca cihazında saklanır ve uygulamayı silince ya da hesabını silince cihazdan da silinir:</p>
@@ -113,7 +114,7 @@ export default (co) => ({
 <p>Verilerinin nasıl işlendiği <a href="../gizlilik/">Gizlilik Politikası</a>'nda anlatılır.</p>
 
 <h2>10. Uygulanacak hukuk</h2>
-<p>Bu koşullar Türkiye Cumhuriyeti hukukuna tabidir. Uyuşmazlıklarda, tüketici olarak başvurabileceğin tüketici hakem heyetleri ve tüketici mahkemeleri saklı kalmak üzere, ${co.court} mahkemeleri ve icra daireleri yetkilidir.</p>
+<p>Bu koşullar ABD New Mexico eyaleti hukukuna tabidir. Bu seçim, yaşadığın ülkenin tüketiciyi koruyan zorunlu kurallarını ortadan kaldırmaz: Türkiye'de yaşıyorsan 6502 sayılı Tüketicinin Korunması Hakkında Kanun'dan doğan hakların ve tüketici hakem heyetleri ile tüketici mahkemelerine başvurma hakkın saklıdır.</p>
 
 <h2>11. İletişim</h2>
 <p><a href="mailto:${co.email}">${co.email}</a> · ${co.legalName}, ${co.address}</p>

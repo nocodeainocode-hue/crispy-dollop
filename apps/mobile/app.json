@@ -40,7 +40,16 @@
         }
       ],
       "expo-localization",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0A0A0C",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "extra": {
       "eas": {

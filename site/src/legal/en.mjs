@@ -9,7 +9,7 @@ export default (co) => ({
 <p>This policy explains how personal data is processed when you use the QuitVow mobile app and the quitvow.com.tr website. In short: <b>we never ask for bank or account details, we use no advertising or analytics tools, and your "why" note, your letter, your journal and your vow video stay only on your phone.</b></p>
 
 <h2>1. Controller</h2>
-<p>${co.legalName}<br>${co.address}<br>Registration / tax no: ${co.mersis}<br>Email: <a href="mailto:${co.email}">${co.email}</a></p>
+<p>${co.legalName} (a limited liability company organised in New Mexico, USA)<br>${co.address}<br>Email: <a href="mailto:${co.email}">${co.email}</a></p>
 
 <h2>2. Data that stays only on your phone</h2>
 <p>The following is never sent to our servers. It is stored only on your device and is removed from it when you delete the app or your account:</p>
@@ -113,7 +113,7 @@ export default (co) => ({
 <p>How your data is processed is described in the <a href="../privacy/">Privacy Policy</a>.</p>
 
 <h2>10. Governing law</h2>
-<p>These terms are governed by the laws of the Republic of Türkiye, without affecting the mandatory consumer protections of the country where you live. Subject to those protections, the courts of ${co.court} have jurisdiction.</p>
+<p>These terms are governed by the laws of the State of New Mexico, USA. This choice does not remove the mandatory consumer protections of the country where you live, including your right to bring a claim before the consumer bodies and courts there.</p>
 
 <h2>11. Contact</h2>
 <p><a href="mailto:${co.email}">${co.email}</a> · ${co.legalName}, ${co.address}</p>
