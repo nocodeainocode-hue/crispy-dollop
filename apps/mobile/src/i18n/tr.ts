@@ -134,6 +134,8 @@ const tr = {
     testBlocked: 'Engelli ✓',
     testOpen: 'Engelli değil',
     otherVpn: 'Android aynı anda tek VPN çalıştırır: başka bir VPN uygulaması açılırsa engel kapanır.',
+    notifBody: 'Engel bir bahis sitesini durdurduğunda sana kısa bir bildirimle haber verelim; dokununca kriz modu açılır.',
+    notifBtn: 'Bildirimlere izin ver',
     consentNote: 'Android sana “VPN bağlantısı” izni soracak. Bu, filtrenin telefonunun içinde çalışması için gerekli; trafiğin dışarı çıkmaz.',
     enable: 'Engeli aç',
     reenable: 'Engeli yeniden aç',

@@ -133,6 +133,8 @@ const en: Dict = {
     testBlocked: 'Blocked ✓',
     testOpen: 'Not blocked',
     otherVpn: 'Android runs one VPN at a time: starting another VPN app turns the blocker off.',
+    notifBody: 'When the blocker stops a betting site, we can tell you with a short notification; tapping it opens crisis mode.',
+    notifBtn: 'Allow notifications',
     consentNote: 'Android will ask you to allow a “VPN connection”. The filter needs this to run inside your phone; your traffic never leaves it.',
     enable: 'Turn on blocker',
     reenable: 'Turn blocker back on',

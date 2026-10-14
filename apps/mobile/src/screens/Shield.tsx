@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Pressable, Alert, PermissionsAndroid, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Pressable, Alert, PermissionsAndroid, Platform, Linking, AppState } from 'react-native';
 import { Screen, Body, Back, ActionBar, NumRow, T, Kicker, Hair, Field } from '../components/ui';
 import { Rise } from '../components/motion';
 import { c } from '../theme';
@@ -8,6 +8,8 @@ import { useApp } from '../store';
 import { Shield } from '../../modules/shield';
 import { useShield } from '../useShield';
 import type { Go } from '../nav';
+
+const NOTIF = 'android.permission.POST_NOTIFICATIONS' as any;
 
 /** Bahis engeli: telefon içi DNS filtresi (Android). Açma, durum, "her zaman açık" önerisi, adres deneme. */
 export default function ShieldScreen({ go }: { go: Go }) {
@@ -18,6 +20,21 @@ export default function ShieldScreen({ go }: { go: Go }) {
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [probe, setProbe] = useState('');
   const [probeRes, setProbeRes] = useState<string | null>(null);
+  // "Bahis sitesi engellendi" bildirimi için izin (Android 13+). Engel başka yoldan açıldıysa (güncelleme, "her zaman açık") hiç sorulmamış olabilir.
+  const needsNotifPerm = Platform.OS === 'android' && Number(Platform.Version) >= 33;
+  const [notifOk, setNotifOk] = useState(true);
+  useEffect(() => {
+    if (!needsNotifPerm) return;
+    const check = () => PermissionsAndroid.check(NOTIF).then(setNotifOk).catch(() => {});
+    check();
+    const sub = AppState.addEventListener('change', st => { if (st === 'active') check(); });
+    return () => sub.remove();
+  }, []);
+  const askNotif = async () => {
+    const r = await PermissionsAndroid.request(NOTIF).catch(() => null);
+    if (r === PermissionsAndroid.RESULTS.GRANTED) setNotifOk(true);
+    else if (r === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) Linking.openSettings();
+  };
 
   if (!Shield || !s) {
     return (
@@ -36,7 +53,7 @@ export default function ShieldScreen({ go }: { go: Go }) {
       if (!Shield!.start()) { setMsg({ text: L.shield.denied, ok: false }); return; }
       Shield!.refresh().catch(() => {}); // listeyi arka planda indir
       // "Bahis sitesi engellendi" bildirimi için (Android 13+ izin ister; vermezse engel yine çalışır)
-      if (Platform.OS === 'android' && Number(Platform.Version) >= 33) PermissionsAndroid.request('android.permission.POST_NOTIFICATIONS' as any).catch(() => {});
+      if (needsNotifPerm) PermissionsAndroid.request(NOTIF).then(r => setNotifOk(r === PermissionsAndroid.RESULTS.GRANTED)).catch(() => {});
     } finally { setBusy(false); }
   };
   const disable = () => {
@@ -68,6 +85,12 @@ export default function ShieldScreen({ go }: { go: Go }) {
           {s.wanted && !s.running && <T w="r" size={12.5} lh={18} color={c.dim} style={{ marginTop: 6 }}>{a.pactStatus === 'active' ? L.shield.offNotified : L.shield.offPlain}</T>}
           {s.privateDnsBypass && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ marginTop: 8 }}>{L.shield.privateDns}</T>}
         </View>
+        {on && !notifOk && (
+          <Pressable onPress={askNotif} style={{ marginHorizontal: 16, marginBottom: 14, paddingVertical: 10 }}>
+            <T w="r" size={12.5} lh={18} color={c.dim}>{L.shield.notifBody}</T>
+            <T w="s" size={13} color={c.acc2} style={{ marginTop: 6 }}>{L.shield.notifBtn} →</T>
+          </Pressable>
+        )}
 
         <Hair />
         <NumRow no="01">{L.shield.how1}</NumRow>
