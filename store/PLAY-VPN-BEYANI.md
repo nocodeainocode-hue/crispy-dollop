@@ -27,3 +27,8 @@ Kısa ekran kaydı: Profil → Bahis engeli → "Engeli aç" → sistem VPN izin
 ```
 • Bahis engeli (Android): Telefonundaki bahis ve casino sitelerine girişi kapatır. Telefonunun içinde çalışır; internet trafiğin hiçbir yere gönderilmez. Engeli kapatırsan şahitlerine haber gider.
 ```
+
+## Açık konular (2. sürüm)
+
+- **Bildirime dokununca kriz modu açılmıyor.** Bildirim geliyor; dokununca görünmez ara ekran (ShieldOpenActivity) isteği kaydediyor ve uygulamayı öne getiriyor, ancak uygulama öne geldiğinde JS tarafı kaydı okumuyor (App.tsx'teki AppState "active" dinleyicisi tetiklenmiyor gibi). Emülatörde JS kayıtları logcat'e düşmediği için ayıklanamadı; React Native DevTools ile bakılacak. Şu an bildirime dokununca uygulama son kaldığı ekranda açılıyor.
+- Ayarlar'dan VPN'i kapatma, telefonu yeniden başlatma ve başka VPN açma senaryoları gerçek telefonda denenmeli.

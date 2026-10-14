@@ -36,7 +36,7 @@ function Root() {
     if (!Shield) return;
     const take = () => { if (Shield!.takeOpenRequest() === 'crisis') setScr('crisis'); };
     take();
-    const sub = Shield.addListener('onOpen', e => { if (e.screen === 'crisis') setScr('crisis'); });
+    const sub = Shield.addListener('onOpen', () => take()); // take() saklanan isteği de temizler
     const st = AppState.addEventListener('change', s => { if (s === 'active') take(); });
     return () => { sub.remove(); st.remove(); };
   }, []);

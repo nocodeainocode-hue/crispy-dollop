@@ -31,6 +31,17 @@ object ShieldStore {
   fun apiUrl(ctx: Context): String? = prefs(ctx).getString("apiUrl", null)
   fun setLocale(ctx: Context, lang: String) = prefs(ctx).edit().putString("locale", lang).apply()
   fun locale(ctx: Context): String = prefs(ctx).getString("locale", "tr") ?: "tr"
+
+  /** Bildirimden gelen açılış isteği: 2 dakika geçerli, bir kez okunur. */
+  fun setOpenRequest(ctx: Context, screen: String) =
+    prefs(ctx).edit().putString("openRequest", screen).putLong("openRequestAt", System.currentTimeMillis()).apply()
+  fun takeOpenRequest(ctx: Context): String? {
+    val p = prefs(ctx)
+    val v = p.getString("openRequest", null) ?: return null
+    val fresh = System.currentTimeMillis() - p.getLong("openRequestAt", 0) < 2 * 60 * 1000L
+    p.edit().remove("openRequest").remove("openRequestAt").apply()
+    return if (fresh) v else null
+  }
   fun token(ctx: Context): String? = prefs(ctx).getString("token", null)
 
   private fun today() = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())

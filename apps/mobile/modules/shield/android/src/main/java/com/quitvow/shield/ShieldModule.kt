@@ -16,6 +16,7 @@ class ShieldModule : Module() {
   private val ctx: Context get() = appContext.reactContext ?: throw Exceptions.ReactContextLost()
   private var pendingConsent: Promise? = null
   private var matcher: Matcher? = null // yalnızca "dene" için; liste yenilenince sıfırlanır
+  @Volatile private var pendingOpen: String? = null // bildirimden gelen açılış isteği (JS alana kadar saklanır)
 
   private fun status(): Map<String, Any?> {
     val c = ctx
@@ -77,6 +78,9 @@ class ShieldModule : Module() {
 
     /** Uygulama engel bildiriminden açıldıysa hangi ekranı istediğini bir kez verir ("crisis"), sonra siler. */
     Function("takeOpenRequest") {
+      pendingOpen?.let { pendingOpen = null; return@Function it }
+      ShieldStore.takeOpenRequest(ctx)?.let { return@Function it }
+      // Uygulama kapalıyken bildirimden açıldıysa istek, açılış isteğinin içindedir
       val intent = appContext.currentActivity?.intent
       val v = intent?.getStringExtra(ShieldNotifier.EXTRA_OPEN)
       if (v != null) intent.removeExtra(ShieldNotifier.EXTRA_OPEN)
@@ -85,6 +89,7 @@ class ShieldModule : Module() {
     OnNewIntent { intent ->
       val v = intent.getStringExtra(ShieldNotifier.EXTRA_OPEN) ?: return@OnNewIntent
       intent.removeExtra(ShieldNotifier.EXTRA_OPEN)
+      pendingOpen = v
       runCatching { sendEvent("onOpen", mapOf("screen" to v)) }
     }
 

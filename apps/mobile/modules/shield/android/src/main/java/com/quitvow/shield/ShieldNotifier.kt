@@ -20,6 +20,7 @@ object ShieldNotifier {
   private const val ID = 7175
   private const val MIN_GAP_MS = 2 * 60 * 1000L
   const val EXTRA_OPEN = "quitvow.open"
+  const val ACTION_OPEN = "com.quitvow.shield.OPEN"
 
   private fun texts(ctx: Context): Triple<String, String, String> =
     if (ShieldStore.locale(ctx) == "en") Triple("Betting blocker", "A betting site was blocked.", "If an urge is rising, open crisis mode →")
@@ -37,10 +38,12 @@ object ShieldNotifier {
       val nm = ctx.getSystemService(NotificationManager::class.java)
       if (nm.getNotificationChannel(CHANNEL) == null) nm.createNotificationChannel(NotificationChannel(CHANNEL, channelName, NotificationManager.IMPORTANCE_DEFAULT))
     }
-    val launch = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)?.apply {
+    // Uygulama arka plandayken Android isteği ana ekrana iletmeyebiliyor: ara ekran isteği kaydedip uygulamayı öne getirir
+    val launch = Intent(ctx, ShieldOpenActivity::class.java).apply {
+      action = ACTION_OPEN
       putExtra(EXTRA_OPEN, "crisis")
-      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-    } ?: return
+      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
     val pi = PendingIntent.getActivity(ctx, ID, launch, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     val n = NotificationCompat.Builder(ctx, CHANNEL)
       .setSmallIcon(R.drawable.quitvow_shield_notification)

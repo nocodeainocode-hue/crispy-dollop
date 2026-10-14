@@ -16,6 +16,15 @@
       <meta-data android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON" android:value="true" />
     </service>
 
+    <!-- Bildirime dokununca: isteği kaydedip uygulamayı öne getiren görünmez ara ekran -->
+    <activity
+      android:name="com.quitvow.shield.ShieldOpenActivity"
+      android:exported="false"
+      android:excludeFromRecents="true"
+      android:noHistory="true"
+      android:taskAffinity=""
+      android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
     <receiver android:name="com.quitvow.shield.BootReceiver" android:exported="false">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />
