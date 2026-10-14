@@ -119,8 +119,8 @@ PAKETLER
 ## Kategori ve etiketler
 
 - Kategori: **Sağlık ve Fitness** (alternatif: Yaşam Tarzı)
-- Etiketler: Bağımlılık, Zihinsel sağlık, Öz bakım (Console'daki listeden en yakınları)
-- İletişim e-postası ve **gizlilik politikası URL'si** zorunludur (henüz yok, yazılması gerekiyor).
+- Etiketler: Sağlık ve fitness, Kişisel gelişim (Console listesinde bağımlılık etiketi yok)
+- İletişim e-postası: destek@quitvow.com.tr · Gizlilik politikası: quitvow.com.tr/gizlilik/ (SSL gelene kadar Play'de netlify.app adresi)
 
 ## Görseller (`store/play/`)
 
@@ -137,3 +137,48 @@ Ekran görüntüleri gerçek uygulamadan, ayrı bir demo veritabanıyla alındı
 ```
 İlk sürüm: şahitler, iki anahtarlı çıkış, kriz modu, sakinleşme oyunları ve günlük takip.
 ```
+
+## ASO güncellemesi (1. sürüm onaylandıktan sonra girilecek)
+
+İnceleme sürerken mağaza girişini değiştirme; her değişiklik yeniden incelemeye gider. Onay gelince aşağıdakileri gir.
+
+Neden: Türkiye'de insanlar Play'de "kumar" kadar "bahis" de arıyor ("bahis bağımlılığı", "bahis bırakma", "bahis borcu"). Şu anki ad ve kısa açıklamada "bahis" kelimesi hiç yok. Play'de en çok ağırlığı ad, sonra kısa açıklama, sonra tam açıklamanın ilk satırları taşıyor. Türkçe ekleri de iyi çözemiyor; "bahis", "bahsi" ve "bahisi" ayrı kelime gibi davranıyor, bu yüzden aranan biçimi aynen kullanıyoruz.
+
+### Uygulama adı (30/30)
+
+```
+QuitVow: Bahis ve Kumarı Bırak
+```
+
+### Kısa açıklama (≤80)
+
+```
+Bahis ve kumar bağımlılığını bırak: şahitler, kriz modu ve günlük takip.
+```
+
+### Tam açıklama: ilk iki paragrafı bununla değiştir
+
+Mağazada "devamını oku"ya basmadan görünen kısım ilk 2–3 satır; anahtar kelimeler orada olmalı.
+
+```
+Bahis ve kumar bağımlılığını bırakmak irade değil, sistem ister.
+
+QuitVow; spor bahisi, canlı bahis, bahis kuponu, slot, casino, poker ve diğer kumar türlerini bırakmak isteyenler için bir taahhüt uygulamasıdır. Yalnız başına verilen sözler kriz anında kolay bozulur. QuitVow sözünü güvendiğin insanlara, önceden yazılmış kurallara ve her gün dolan bir takvime bağlar.
+
+KİMLER İÇİN
+
+• Bahsi ya da kumarı defalarca bırakmaya çalışıp yeniden başlayanlar
+• Bahis veya kumar borcu büyüdüğü için artık durmak isteyenler
+• Kumar bağımlılığıyla terapiye giden ve aradaki günlerde destek arayanlar
+• Bir yakınının bırakmasına yardım etmek isteyenler: şahit olarak katılırsın
+```
+
+### Mağaza girişi deneyleri (ücretsiz A/B testi)
+
+Play Console → Büyüme → Mağaza girişi deneyleri. Ayda birkaç yüz ziyaret olunca kısa açıklama, simge ve ilk ekran görüntüsü için A/B testi aç. Her seferinde tek şey değiştir.
+
+### Yapma
+
+- Rakip uygulama ya da bahis sitesi adı yazma; Play meta veri politikasına aykırı.
+- Aynı kelimeyi art arda sıralama (anahtar kelime doldurma ret sebebidir).
+- v2 yayınlanmadan "bahis sitelerini engeller" yazma; uygulamada olmayan özellik ret sebebidir. Engel çıktığında ad ve kısa açıklamaya "bahis engelleme" ekleriz.
