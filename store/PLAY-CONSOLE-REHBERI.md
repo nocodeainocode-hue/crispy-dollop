@@ -83,7 +83,7 @@ Kategori: "Sağlık ve fitness". Özelliklerde **Ruh ve davranış sağlığı /
 
 **Mağaza ayarları:**
 - Kategori: **Sağlık ve Fitness**
-- Etiketler: Bağımlılık, Zihinsel sağlık
+- Etiketler: **Sağlık ve fitness**, **Kişisel gelişim** (listede bağımlılık/zihinsel sağlık etiketi yok; alakasız etiket seçme)
 - E-posta: `destek@quitvow.com.tr`
 - Web sitesi: `https://quitvow.com.tr`
 
