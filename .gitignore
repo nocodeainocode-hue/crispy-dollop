@@ -25,3 +25,4 @@ google-services*.json
 apps/mobile/modules/*/android/build/
 .cxx/
 .gradle/
+pazarlama/video/
