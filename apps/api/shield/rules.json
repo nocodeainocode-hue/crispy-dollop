@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "about": "QuitVow engel kuralları. Liste (gambling.txt.gz) adres adres engeller; bu kurallar listede olmayan yeni adresleri yakalar. Kurallar alan adının kayıt edilebilir etiketine (örn. jojobet1045.com → jojobet1045) uygulanır. Değişince version artır ve apps/mobile/modules/shield/android/src/main/assets/shield-rules.json kopyasını güncelle (testi bunu denetler).",
+  "roots": [
+    "jojobet", "tipobet", "sekabet", "bets10", "betist", "matbet", "holiganbet", "marsbahis", "imajbet", "mobilbahis",
+    "superbetin", "youwin", "betboo", "rexbet", "onwin", "casibom", "grandpashabet", "meritking", "kingroyal", "betturkey",
+    "hilbet", "piabet", "vdcasino", "sahabet", "celtabet", "betpark", "artemisbet", "pusulabet", "betmatik", "tempobet",
+    "asyabahis", "bahsegel", "betvole", "restbet", "kralbet", "betgaranti", "limanbet", "klasbahis", "betebet", "maltcasino",
+    "bahiscom", "ngsbahis", "padisahbet", "betkanyon", "vegabet", "mariobet", "betnano", "dumanbet", "perabet", "romabet",
+    "tarafbet", "wonodds", "betkolik", "interbahis", "nakitbahis", "lunabet", "milosbet", "betsat", "betticket", "ultrabet",
+    "savoybetting", "trendbet", "betmoon", "baywin", "zbahis", "bettilt", "vevobahis", "betwoon", "lordbahis", "cratosslot",
+    "cratosroyalbet", "rinabet", "galabet", "goldenbahis", "portobet", "betsmove", "betorspin", "truvabet", "hititbet",
+    "kavbet", "mersobahis", "betdoksan", "nerobet", "palacebet", "hepbahis", "anadolucasino", "betexper", "bethand",
+    "1xbet", "melbet", "mostbet", "pinup", "pinupcasino", "1win", "betwinner", "parimatch", "megapari", "22bet", "linebet"
+  ],
+  "rootSuffix": "(?:[0-9]{0,6}|-?(?:giris|guncel|yeni|tv|vip|mobil|app|bonus|com|net)[0-9]{0,4})",
+  "patterns": [
+    "^[a-z]{2,}(?:bet|bahis|bahsi|casino|kasino|slot)[0-9]{2,}$",
+    "(?:^|-)canli-?(?:bahis|casino)",
+    "bahis",
+    "casino"
+  ],
+  "allow": [],
+  "doh": [
+    "dns.google", "dns.google.com", "dns64.dns.google",
+    "cloudflare-dns.com", "one.one.one.one", "1dot1dot1dot1.cloudflare-dns.com", "mozilla.cloudflare-dns.com", "chrome.cloudflare-dns.com", "security.cloudflare-dns.com", "family.cloudflare-dns.com",
+    "dns.quad9.net", "dns9.quad9.net", "dns10.quad9.net", "dns11.quad9.net",
+    "doh.opendns.com", "dns.opendns.com", "doh.familyshield.opendns.com",
+    "dns.nextdns.io", "dns.adguard.com", "dns.adguard-dns.com", "unfiltered.adguard-dns.com", "family.adguard-dns.com",
+    "doh.cleanbrowsing.org", "dns.controld.com", "freedns.controld.com", "doh.mullvad.net", "dns.mullvad.net",
+    "doh.dns.sb", "doh.xfinity.com", "dns.alidns.com", "doh.pub", "common.dot.dns.yandex.net", "dns.yandex.ru"
+  ]
+}

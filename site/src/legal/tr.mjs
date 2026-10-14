@@ -18,12 +18,13 @@ export default (co) => ({
 <li>imza videon (yalnızca sen istersen, cihazının paylaşım menüsüyle kendin paylaşırsın),</li>
 <li>günlük kayıtların (dürtü notları, tetikler, o gün sana kimin yardım ettiği), seçtiğin tetikleyici saatler ve görünüm/dil tercihlerin.</li>
 </ul>
+<p><b>Bahis engeli (Android, isteğe bağlı):</b> Engeli açarsan uygulama, Android'in VPN altyapısını kullanarak telefonunun içinde bir adres filtresi çalıştırır. İnternet trafiğin hiçbir sunucuya yönlendirilmez. Girmeye çalıştığın adresler yalnızca telefonunda, kumar listesiyle karşılaştırılır; bu adresler kaydedilmez ve bize gönderilmez. Engellenmeyen adres sorguları telefonunun kendi DNS sunucusuna iletilir. Telefonunda yalnızca "bugün kaç kez engellendi" sayısı tutulur. Engel listesi ve kuralları sunucumuzdan indirilir.</p>
 
 <h2>3. Sunucumuzda işlenen veriler</h2>
 <ul>
 <li><b>Hesap:</b> e-posta adresin, adın (isteğe bağlı), dil tercihin. Giriş, e-postana gönderilen 6 haneli kodla yapılır; şifre tutmayız.</li>
 <li><b>Pakt bilgileri:</b> bıraktığın alışkanlığın türü (örn. "spor bahisi"), paket süresi, başlangıç ve temiz gün tarihleri, şahitsiz başlama ve "ne bıraktığımı şahitlerime gösterme" tercihlerin.</li>
-<li><b>Kullanım olayları:</b> günlük kontrolün yapıldığı an ve isteğe bağlı dürtü puanın (0–10), kriz butonuna basılma anı, kendi bildirdiğin tekrar oynama tarihleri, erken çıkış talepleri ve şahit onayları, uygulamanın açık olduğunu gösteren son sinyal zamanı ve cihaz platformu (Android/iOS).</li>
+<li><b>Kullanım olayları:</b> günlük kontrolün yapıldığı an ve isteğe bağlı dürtü puanın (0–10), kriz butonuna basılma anı, kendi bildirdiğin tekrar oynama tarihleri, erken çıkış talepleri ve şahit onayları, uygulamanın açık olduğunu gösteren son sinyal zamanı, cihaz platformu (Android/iOS) ve (açtıysan) bahis engelinin açık mı kapalı mı olduğu.</li>
 <li><b>Şahitlerin bilgileri:</b> eklediğin şahitlerin adı ve e-posta adresi, davetin durumu.</li>
 <li><b>Gönderilen e-postaların kaydı:</b> sana ve şahitlerine giden e-postaların alıcısı, konusu ve metni (destek ve hataları izlemek için).</li>
 <li><b>Satın almalar</b> (paket satışı açıldığında): satın alınan paket ve Google Play sipariş/doğrulama bilgisi. Kart bilgin Google'da kalır, bize gelmez.</li>
@@ -34,7 +35,7 @@ export default (co) => ({
 <h2>4. Amaçlar ve hukuki sebepler</h2>
 <ul>
 <li>Hesabını açmak, pakt takvimini ve iki anahtarlı çıkışı çalıştırmak (KVKK m.5/2-c: sözleşmenin kurulması ve ifası),</li>
-<li>seçtiğin şahitlere davet, tekrar oynama, çıkış talebi, uzun süre sinyal gelmemesi ve (seçersen) haftalık iyi haber e-postaları göndermek (açık rıza ve sözleşmenin ifası),</li>
+<li>seçtiğin şahitlere davet, tekrar oynama, çıkış talebi, uzun süre sinyal gelmemesi, bahis engelinin kapatılması ve (seçersen) haftalık iyi haber e-postaları göndermek (açık rıza ve sözleşmenin ifası),</li>
 <li>sağlıkla ilişkilendirilebilecek veriler için: açık rıza (KVKK m.6),</li>
 <li>güvenlik, kötüye kullanımın önlenmesi ve yasal yükümlülükler (KVKK m.5/2-ç, f).</li>
 </ul>

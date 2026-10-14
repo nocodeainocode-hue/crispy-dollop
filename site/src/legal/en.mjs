@@ -18,12 +18,13 @@ export default (co) => ({
 <li>your vow video (you share it yourself through your device's share menu, only if you choose to),</li>
 <li>your journal entries (urge notes, triggers, who helped you that day), your risky times, and your theme and language preferences.</li>
 </ul>
+<p><b>Betting blocker (Android, optional):</b> If you turn on the blocker, the app uses Android's VPN framework to run an address filter inside your phone. Your internet traffic is not routed to any server. The addresses you try to open are compared with the gambling list only on your phone; they are not stored or sent to us. Address lookups that are not blocked go to your phone's own DNS server. Only the number of blocks today is kept on your phone. The block list and rules are downloaded from our server.</p>
 
 <h2>3. Data processed on our servers</h2>
 <ul>
 <li><b>Account:</b> your email address, your name (optional) and your language. You sign in with a 6-digit code sent to your email; we keep no passwords.</li>
 <li><b>Pact details:</b> the kind of habit you are quitting (e.g. "sports betting"), the pack length, start and clean-streak dates, and your choices to start without a witness or to hide what you are quitting from your witnesses.</li>
-<li><b>Usage events:</b> when you check in and your optional urge score (0–10), when you press the crisis button, relapse dates you report yourself, early-exit requests and witness approvals, the time of the last signal showing the app is still installed, and your device platform (Android/iOS).</li>
+<li><b>Usage events:</b> when you check in and your optional urge score (0–10), when you press the crisis button, relapse dates you report yourself, early-exit requests and witness approvals, the time of the last signal showing the app is still installed, your device platform (Android/iOS) and, if you use it, whether the betting blocker is on or off.</li>
 <li><b>Your witnesses:</b> the name and email address of each witness you add, and the status of their invite.</li>
 <li><b>Record of emails sent:</b> recipient, subject and text of emails sent to you and your witnesses (for support and troubleshooting).</li>
 <li><b>Purchases</b> (once packs go on sale): the pack bought and the Google Play order/verification details. Your card details stay with Google and never reach us.</li>
@@ -34,7 +35,7 @@ export default (co) => ({
 <h2>4. Purposes and legal bases</h2>
 <ul>
 <li>creating your account and running your pact calendar and two-key exit (performance of a contract),</li>
-<li>emailing the witnesses you choose about invites, relapses, exit requests, a missing signal and, if you opt in, weekly good news (consent and performance of a contract),</li>
+<li>emailing the witnesses you choose about invites, relapses, exit requests, a missing signal, the betting blocker being turned off and, if you opt in, weekly good news (consent and performance of a contract),</li>
 <li>health-related data: explicit consent,</li>
 <li>security, abuse prevention and legal obligations (legitimate interests and legal obligation).</li>
 </ul>

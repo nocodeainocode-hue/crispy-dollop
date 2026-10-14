@@ -5,6 +5,7 @@ import { Screen, Body, ActionBar, T, Kicker, Hair, TopChips } from '../component
 import { useL, useH, money } from '../i18n';
 import { c } from '../theme';
 import type { Go } from '../nav';
+import { useShield } from '../useShield';
 import { Rise, useCountUp, useIntro, usePulse } from '../components/motion';
 
 export function useNow(step = 30000) {
@@ -108,7 +109,26 @@ export default function Home({ go }: { go: Go }) {
         {!completed && <Link label={H.relapseLink} onPress={() => go('relapse')} />}
         {!completed && <Link label={need ? L.home.exitLink(need) : L.home.exitLinkSolo} onPress={() => go('exit')} />}
       </Body>
+      {!completed && <ShieldCard go={go} />}
       <ActionBar label={L.home.crisis} kind="red" height={84} size={30} glow hoverRed={false} onPress={() => go('crisis')} />
     </Screen>
+  );
+}
+
+/** Bahis engeli şeridi (yalnızca Android uygulamasında): açıkken sakin bir bilgi, kapandıysa kırmızı uyarı, hiç açılmadıysa davet. */
+function ShieldCard({ go }: { go: Go }) {
+  const L = useL();
+  const s = useShield();
+  if (!s) return null;
+  const on = s.running && !s.privateDnsBypass;
+  const off = s.wanted && !on;
+  return (
+    <Pressable onPress={() => go('shield')} style={{ paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderColor: off ? 'rgba(236,48,19,0.45)' : c.line, backgroundColor: off ? 'rgba(236,48,19,0.07)' : 'transparent', flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ flex: 1 }}>
+        <Kicker color={off ? c.acc2 : on ? c.dim : c.fg}>{on ? L.shield.homeOn(s.blockedToday) : off ? L.shield.homeOff : L.shield.homeCta}</Kicker>
+        {!on && <T w="r" size={12} lh={17} color={c.dim} style={{ marginTop: 3 }}>{off ? L.shield.homeOffSub : L.shield.homeCtaSub}</T>}
+      </View>
+      <T w="s" size={14} color={off ? c.acc2 : c.dim}>→</T>
+    </Pressable>
   );
 }

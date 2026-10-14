@@ -10,6 +10,7 @@ import Setup from './src/screens/Setup';
 import Guardians, { Completed, VowScreen } from './src/screens/Pending';
 import Plan from './src/screens/Plan';
 import Profile from './src/screens/Profile';
+import ShieldScreen from './src/screens/Shield';
 import Home from './src/screens/Home';
 import Verify from './src/screens/Verify';
 import Crisis from './src/screens/Crisis';
@@ -55,6 +56,7 @@ function Root() {
       case 'guardians': el = <Guardians go={setScr} />; break;
       case 'plan': el = <Plan go={setScr} />; break;
       case 'profile': el = <Profile go={setScr} />; break;
+      case 'shield': el = <ShieldScreen go={setScr} />; break;
       default: key = 'home'; el = <Home go={setScr} />;
     }
   }

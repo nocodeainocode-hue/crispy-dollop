@@ -6,6 +6,7 @@ import { createMailer } from './mail.js';
 import { HttpError } from './security.js';
 import { reqLocale, translateError } from './i18n.js';
 import { buildRouter, seedAdmin } from './routes.js';
+import { shieldRouter } from './shield.js';
 import { createPlayClient, type PlayClient } from './play.js';
 import type { Ctx } from './service.js';
 
@@ -26,6 +27,7 @@ export async function createApp(opts: { cfg?: Partial<Config>; now?: () => numbe
   app.use(cors({ origin: cfg.prod ? cfg.corsOrigins : true }));
   app.use(express.json({ limit: '100kb' }));
   app.get('/health', (_req, res) => res.json({ ok: true, db: db.kind, play: !!ctx.play, demo: cfg.demoPurchases, billing: cfg.demoPurchases || !!ctx.play }));
+  app.use(shieldRouter());
   app.use(buildRouter(ctx));
   app.use((req, res) => res.status(404).json({ error: translateError('Bulunamadı', reqLocale(req)) }));
   app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
