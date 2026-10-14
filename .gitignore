@@ -19,3 +19,4 @@ google-services*.json
 # yerel araç ayarları
 .claude/
 *.tsbuildinfo
+!apps/web/.env.canli
