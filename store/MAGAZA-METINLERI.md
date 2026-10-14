@@ -18,6 +18,47 @@ QuitVow: Quit Gambling
 Quit gambling with witnesses, crisis mode and daily check-ins.
 ```
 
+İngilizce tam açıklama (Play Console'a girildi, 14 Ekim 2026):
+
+```
+Quitting gambling takes a system, not willpower.
+
+QuitVow is a commitment app for people who want to stop sports betting, live betting, slots and casino games, poker and other forms of gambling. A promise made alone breaks easily in a crisis. QuitVow ties your promise to people you trust, to rules written in advance, and to a calendar that fills up every day.
+
+HOW IT WORKS
+
+• Contract: You write down what kind of gambling you're quitting, what triggers you and why you're quitting. You choose your length and sign your contract. If you like, you record your promise in a 60-second video.
+• Witnesses: You add 1–3 people you trust as witnesses. They get an email invite, download QuitVow and join as witnesses. If you prefer, you invite them to a "personal goal" without showing what you're quitting.
+• Not ready? Start without a witness: You start without telling anyone; leaving the pact is tied to a 7-day time lock. You can add a witness whenever you want.
+• Two keys: Leaving the contract early needs your witnesses' approval and a 72-hour waiting period. You can't give up with one tap in the moment of an urge.
+• One cell a day: Your quitting period fills up cell by cell on the home screen. You mark each day with a daily check-in.
+• Honesty: If you gamble again, you report it yourself. The consequences are set in advance; your witnesses are told. Reporting it yourself halves the points you lose.
+
+IN A CRISIS
+
+• "I'm in crisis" button: Opens crisis mode, which shows how an urge rises and fades like a wave.
+• Your own "why I'm quitting" note and your letter to your future self appear in front of you.
+• Your witnesses are notified by email; you can call them with one tap.
+• Calm down: Pop balloons, sudoku (4 levels, hints), memory cards, tic-tac-toe, a 5-4-3-2-1 senses exercise and counting back by sevens. These games have no random rewards, no point chasing and no "one more round" loop.
+• Free helplines for your region are always one tap away.
+
+THE SCIENCE
+
+Every step of setup is based on a research finding and shows its source: precommitment, "if–then" plans, social support, motivational interviewing and urge surfing.
+
+PRIVACY
+
+• No bank or account connection; we don't track your spending.
+• No real-money transactions; QuitVow holds no money or deposits.
+• Your "why" note, your letter and your vow video stay only on your phone; they are never uploaded to our servers.
+• You can watch your own promise again in a crisis; if you want, you share the video with your witnesses yourself.
+• You can permanently delete your account and all your data inside the app.
+
+IMPORTANT
+
+QuitVow is not a treatment and does not guarantee success. The best-supported approach for gambling disorder is cognitive behavioural therapy; we recommend getting professional support. If you are thinking about harming yourself or someone else, contact your local emergency number immediately.
+```
+
 ## Kısa açıklama (≤80)
 
 ```
