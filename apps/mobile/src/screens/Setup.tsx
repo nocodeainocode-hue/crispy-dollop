@@ -4,6 +4,7 @@ import { useApp } from '../store';
 import { useServer } from '../server';
 import { API_URL } from '../api';
 import { useBilling } from '../billing';
+import { withPack } from '../purchase';
 import VowRecorder, { type Vow } from '../components/VowRecorder';
 import { Screen, Body, Back, ActionBar, HoldBar, NumRow, Field, Opt, Science, T, Kicker, Hair, TopChips, StepProgress } from '../components/ui';
 import { useL, useH, currencySymbol, joinNames } from '../i18n';
@@ -106,7 +107,8 @@ export default function Setup() {
     try {
       const label = types.length ? types.map(id => H.types[id] ?? id).join(', ') : H.label;
       app.set({ name: (sign.trim() || acctName).split(' ')[0], habit: app.habit, habitLabel: label, gamblingTypes: types, triggerTimes: when, monthlyLoss: Number(loss) || 0, plan, reason, letter, penalties: [], nextVerifyAt: Date.now() + 4 * 3600000, points: 100, role: 'user' });
-      await srv.createPact({ habitLabel: label, goalDays: goal, guardians: filled.map(g => ({ name: g.name.trim(), email: g.email.trim().toLowerCase(), phone: g.phone.trim() || undefined })), hideHabit: !solo && hideHabit });
+      const created = await withPack(srv, goal, () => srv.createPact({ habitLabel: label, goalDays: goal, guardians: filled.map(g => ({ name: g.name.trim(), email: g.email.trim().toLowerCase(), phone: g.phone.trim() || undefined })), hideHabit: !solo && hideHabit }));
+      if (!created) { setHold(0); setBusy(false); return; } // ödemeden vazgeçti: pakt kurulmadı, imza ekranında kalır
       if (vow) await srv.saveVow(vow.uri, vow.seconds, vow.mime); // isteğe bağlı; yalnızca telefonda saklanır
     } catch (e: any) { setErr(e.message ?? L.common.somethingWrong); setHold(0); }
     setBusy(false);
@@ -225,7 +227,7 @@ export default function Setup() {
             const soon = !canBuy && x.d !== 7;
             return <Opt delay={120 + i * 60} key={x.d} label={x.l} sub={soon ? L.packs.soon : x.sub} on={goal === x.d} onPress={() => { if (!soon) setGoal(x.d); }} />;
           })}
-          {discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
+          {bill?.demo && discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
           {(bill?.demo || !canBuy) && <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{bill?.demo ? L.setup.demoNote : L.setup.soonNote}</T>}
           <Science src={L.setup.packSrc}>{L.setup.packScience}</Science>
         </>}

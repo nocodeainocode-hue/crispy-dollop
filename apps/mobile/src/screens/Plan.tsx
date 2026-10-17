@@ -4,6 +4,7 @@ import { useApp } from '../store';
 import { useServer } from '../server';
 import { Screen, Body, Back, ActionBar, Opt, NumRow, T, Kicker, Hair } from '../components/ui';
 import { Rise } from '../components/motion';
+import { packPrices, recoverPurchases, withPack } from '../purchase';
 import { c } from '../theme';
 import type { Go } from '../nav';
 
@@ -26,12 +27,18 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null); // ok: bilgi (beyaz), değilse hata (kırmızı)
 
   const [discount, setDiscount] = useState(0);
-  useEffect(() => { srv.me().then(m => { setDemo(m.demoPurchases); setCanBuy(m.demoPurchases || !!m.playEnabled); setDiscount(m.nextPackDiscount ?? 0); }).catch(() => {}); }, []);
+  const [prices, setPrices] = useState<Record<number, string>>({});
+  useEffect(() => {
+    srv.me().then(m => {
+      setDemo(m.demoPurchases); setCanBuy(m.demoPurchases || !!m.playEnabled); setDiscount(m.nextPackDiscount ?? 0);
+      if (!m.demoPurchases && m.playEnabled) { packPrices().then(setPrices); recoverPurchases(srv); }
+    }).catch(() => {});
+  }, []);
 
   const upgrade = async () => {
     if (!pick) return;
     setBusy(true); setMsg(null);
-    try { await srv.upgrade(pick); setMsg({ text: L.plan.upgraded(pick), ok: true }); setPick(0); }
+    try { if (await withPack(srv, pick, () => srv.upgrade(pick))) { setMsg({ text: L.plan.upgraded(pick), ok: true }); setPick(0); } }
     catch (e: any) { setMsg({ text: e.message, ok: false }); }
     setBusy(false);
   };
@@ -81,8 +88,8 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
         {!pack && canBuy && <>
           <Kicker color={c.dim} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.plan.upgradeKicker}</Kicker>
           <Hair />
-          {UP.map((x, i) => <Opt key={x.d} delay={80 + i * 60} label={x.l} sub={x.sub} on={pick === x.d} onPress={() => setPick(x.d)} />)}
-          {discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
+          {UP.map((x, i) => <Opt key={x.d} delay={80 + i * 60} label={x.l} sub={prices[x.d] ? `${prices[x.d]} · ${x.sub}` : x.sub} on={pick === x.d} onPress={() => setPick(x.d)} />)}
+          {demo && discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
           <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>
             {demo === false ? L.plan.billingPending : L.plan.demo}
           </T>

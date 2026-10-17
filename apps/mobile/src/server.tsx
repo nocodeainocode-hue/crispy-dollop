@@ -24,7 +24,8 @@ type SrvCtx = {
   setLocale: (l: Lang) => Promise<void>;
   setHideHabit: (hide: boolean) => Promise<void>;
   setWeeklyDigest: (on: boolean) => Promise<void>;
-  me: () => Promise<{ email: string; name: string; trialUsed: boolean; demoPurchases: boolean; playEnabled?: boolean; nextPackDiscount?: number }>;
+  me: () => Promise<{ email: string; name: string; trialUsed: boolean; demoPurchases: boolean; playEnabled?: boolean; billingRef?: string; nextPackDiscount?: number }>;
+  playPurchase: (productId: string, purchaseToken: string) => Promise<void>;
   upgrade: (goalDays: number) => Promise<void>;
   report: () => Promise<any>;
   requestUnlock: () => Promise<void>;
@@ -103,6 +104,7 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
     setHideHabit: async hideHabit => { apply(await call('/pacts/current', { hideHabit }, 'PATCH')); },
     setLocale: async locale => { if (tokenRef.current) await call('/me', { locale }, 'PATCH'); },
     me: () => call('/me'),
+    playPurchase: async (productId, purchaseToken) => { await call('/purchases/play', { productId, purchaseToken }); },
     upgrade: async n => { apply(await call('/pacts/current/upgrade', { goalDays: n })); },
     report: () => call('/pacts/current/report'),
     requestUnlock: async () => { await call('/pacts/current/unlock', {}); await sync(); },
