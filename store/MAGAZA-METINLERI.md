@@ -138,9 +138,9 @@ Ekran görüntüleri gerçek uygulamadan, ayrı bir demo veritabanıyla alındı
 İlk sürüm: şahitler, iki anahtarlı çıkış, kriz modu, sakinleşme oyunları ve günlük takip.
 ```
 
-## ASO güncellemesi (1. sürüm onaylandıktan sonra girilecek)
+## ASO güncellemesi (17 Ekim 2026'da Play Console'a girildi ve incelemeye gönderildi)
 
-İnceleme sürerken mağaza girişini değiştirme; her değişiklik yeniden incelemeye gider. Onay gelince aşağıdakileri gir.
+Türkçe giriş güncellendi (ad, kısa açıklama, tam açıklama). İngilizce giriş değişmedi.
 
 Neden: Türkiye'de insanlar Play'de "kumar" kadar "bahis" de arıyor ("bahis bağımlılığı", "bahis bırakma", "bahis borcu"). Şu anki ad ve kısa açıklamada "bahis" kelimesi hiç yok. Play'de en çok ağırlığı ad, sonra kısa açıklama, sonra tam açıklamanın ilk satırları taşıyor. Türkçe ekleri de iyi çözemiyor; "bahis", "bahsi" ve "bahisi" ayrı kelime gibi davranıyor, bu yüzden aranan biçimi aynen kullanıyoruz.
 
