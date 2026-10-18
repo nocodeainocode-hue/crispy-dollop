@@ -128,7 +128,7 @@ export default {
 <p>Dürtü anında kararlarımız zayıflar: uzun vadeli hedefler yerini anlık ihtiyaca bırakır. Bu yüzden başarılı bırakma planlarının ortak noktası, kararın <b>önceden</b> verilmesi ve kriz anında pazarlığa açık olmamasıdır. Ekonomi ve davranış bilimi buna <i>precommitment</i> (önceden taahhüt) der. Kurallar sakinken yazılır, dürtü geldiğinde yalnızca uygulanır.</p>
 
 <h2 id="quitvow">QuitVow nasıl yardım eder?</h2>
-<p><b>QuitVow</b>, kumarı bırakmak isteyenler için geliştirilmiş bir <b>taahhüt uygulamasıdır</b> (Android, Google Play'de yakında). Yukarıdaki adımların çoğunu tek bir sistemde toplar: sözünü güvendiğin insanlara, önceden yazılmış kurallara ve her gün dolan bir takvime bağlar. Adı gibi: <b>irade değil, sistem.</b></p>
+<p><b>QuitVow</b>, kumarı bırakmak isteyenler için geliştirilmiş bir <b>taahhüt uygulamasıdır</b> (<a href="https://play.google.com/store/apps/details?id=com.quitvow.app" rel="noopener">Android için Google Play'de</a>). Yukarıdaki adımların çoğunu tek bir sistemde toplar: sözünü güvendiğin insanlara, önceden yazılmış kurallara ve her gün dolan bir takvime bağlar. Adı gibi: <b>irade değil, sistem.</b></p>
 
 <h3>Sözleşme ve imza videosu</h3>
 <p>Hangi tür kumarı bıraktığını, seni neyin tetiklediğini ve neden bıraktığını yazar, süreni seçip sözleşmeni imzalarsın. İstersen sözünü 60 saniyelik bir videoyla kaydedersin; kriz anında kendi sesinden kendi sözünü izlersin. Notların ve videon <b>yalnızca telefonunda kalır</b>, sunucuya gönderilmez.</p>
@@ -163,7 +163,7 @@ export default {
   <b>Dürüst bir not:</b> QuitVow bir tedavi değildir ve başarı garantisi vermez. Bir bahis engelleyici de değildir; sosyal taahhüt ve kriz anı desteği sağlar. Kumar bağımlılığında en iyi desteklenen yöntem bilişsel davranışçı terapidir. QuitVow'u bir uzmanla birlikte kullanmak en sağlam yoldur.
 </div>
 
-<p class="cta"><a class="btn" href="../">QuitVow'u tanı</a> <span>Android · Google Play'de yakında</span></p>
+<p class="cta"><a class="btn" href="https://play.google.com/store/apps/details?id=com.quitvow.app" rel="noopener">Google Play'den indir</a> <a href="../">QuitVow'u tanı</a> <span>Android · Google Play'den indir</span></p>
 
 <h2 id="sss">Sık sorulan sorular</h2>
 {{faq}}

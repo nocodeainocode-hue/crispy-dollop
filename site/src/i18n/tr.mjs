@@ -4,17 +4,17 @@ export default {
   hint: 'Bu sayfanın Türkçesi var',
   meta: {
     title: 'QuitVow · Kumarı bırakmak için irade değil, sistem',
-    description: "QuitVow; şahitler, kriz modu ve günlük takiple kumarı ve bahsi bırakmana yardım eden bir taahhüt uygulaması. Android için yakında Google Play'de.",
+    description: "QuitVow; şahitler, kriz modu ve günlük takiple kumarı ve bahsi bırakmana yardım eden bir taahhüt uygulaması. Android için Google Play'de.",
     ogTitle: 'QuitVow · İrade değil, sistem.',
     ogDescription: 'Şahitler, iki anahtarlı çıkış, kriz modu ve her gün dolan bir hücre. Kumarı bırakmak için bir taahhüt uygulaması.',
     ogLocale: 'tr_TR',
   },
-  nav: { chip: 'Android · yakında', language: 'Dil' },
+  nav: { chip: 'Android · Google Play', language: 'Dil' },
   hero: {
     kicker: 'Kumarı bırakma sistemi',
     title: 'İrade değil,<br>sistem.',
     lead: 'Yalnız verilen söz kriz anında kolay bozulur. QuitVow sözünü güvendiğin insanlara, önceden yazılmış kurallara ve her gün dolan bir takvime bağlar.',
-    soonSmall: 'Android', soon: "Google Play'de yakında",
+    soonSmall: 'Android', soon: "Google Play'den indir",
     note: 'İlk 7 gün ücretsiz. Gerçek parayla işlem yok, banka bağlantısı yok.',
   },
   img: {

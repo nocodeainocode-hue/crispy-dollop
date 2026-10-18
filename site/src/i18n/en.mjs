@@ -4,17 +4,17 @@ export default {
   hint: 'This page is available in English',
   meta: {
     title: 'QuitVow · Quit gambling with a system, not willpower',
-    description: 'QuitVow is a commitment app that helps you quit gambling and betting with witnesses, a crisis mode and daily check-ins. Coming soon to Google Play for Android.',
+    description: 'QuitVow is a commitment app that helps you quit gambling and betting with witnesses, a crisis mode and daily check-ins. Available on Google Play for Android.',
     ogTitle: 'QuitVow · A system, not willpower.',
     ogDescription: 'Witnesses, a two-key exit, crisis mode and one cell filled every day. A commitment app for quitting gambling.',
     ogLocale: 'en_US',
   },
-  nav: { chip: 'Android · coming soon', language: 'Language' },
+  nav: { chip: 'Android · Google Play', language: 'Language' },
   hero: {
     kicker: 'A system for quitting gambling',
     title: 'A system,<br>not willpower.',
     lead: 'A promise made alone breaks easily in a crisis. QuitVow ties your promise to people you trust, to rules written in advance, and to a calendar that fills up every day.',
-    soonSmall: 'Android', soon: 'Coming soon to Google Play',
+    soonSmall: 'Android', soon: 'Get it on Google Play',
     note: 'First 7 days free. No real-money transactions, no bank connection.',
   },
   img: {
