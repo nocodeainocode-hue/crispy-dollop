@@ -170,7 +170,7 @@ for (const post of posts) {
   ].map(jsonLd).join('\n');
   const html = pageHead(root, post.lang, post.metaTitle, post.description, url, `<meta property="og:type" content="article">\n${ld}`) + `<body>
 <div class="wrap legal blog">
-  <nav><a class="brand" href="${home}">QuitVow</a><a href="${home}">${u.home}</a></nav>
+  <nav><a class="brand" href="${home}">QuitVow</a><div class="navright"><a class="navlink" href="${root}blog/">Blog</a><a class="navlink" href="${home}">${u.home}</a></div></nav>
   <article>
     <div class="kicker">${u.guide} · ${post.readMinutes} ${u.read} · ${u.upd}: ${post.updated.split('-').reverse().join('.')}</div>
     <h1>${esc(post.title)}</h1>
@@ -194,7 +194,7 @@ for (const post of posts) {
   const items = posts.map(p => `<li><a href="${root}${p.path}/"><b>${esc(p.title)}</b></a><p>${esc(p.description)}</p>${p.lang === 'en' ? '<span class="tag">English</span>' : ''}</li>`).join('\n');
   const html = pageHead(root, 'tr', 'QuitVow Blog · Kumar ve bahis bırakma yazıları', 'Kumar ve bahis isteğini yenme, borçtan çıkış, bir yakının kumarıyla başa çıkma ve bırakma sürecine dair yazılar.', `${SITE_URL}/blog/`) + `<body>
 <div class="wrap legal blog">
-  <nav><a class="brand" href="${root}">QuitVow</a><a href="${root}">${u.home}</a></nav>
+  <nav><a class="brand" href="${root}">QuitVow</a><div class="navright"><a class="navlink" href="${root}blog/">Blog</a><a class="navlink" href="${root}">${u.home}</a></div></nav>
   <article>
     <div class="kicker">Blog</div>
     <h1>Kumarı ve bahsi bırakmaya dair yazılar</h1>
