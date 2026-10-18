@@ -110,6 +110,67 @@ ${canon}
     console.log('✓', path.relative(HERE, path.join(dir, 'index.html')));
   }
 }
+// Blog: src/blog/*.mjs → dist/<path>/index.html (Article + FAQPage JSON-LD, canonical, OG), ardından sitemap.xml ve robots.txt
+const POSTS = ['kumari-birakmak'];
+const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const jsonLd = o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\u003c')}</script>`;
+const sitemapUrls = [`${SITE_URL}/`, `${SITE_URL}/en/`];
+for (const slug of POSTS) {
+  const post = (await import(pathToFileURL(path.join(SRC, 'blog', `${slug}.mjs`)).href)).default;
+  const url = `${SITE_URL}/${post.path}/`;
+  const faqHtml = post.faq.map(f => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('\n');
+  const body = post.body.replace('{{faq}}', faqHtml);
+  const ld = [
+    { '@context': 'https://schema.org', '@type': 'Article', headline: post.title, description: post.description, inLanguage: 'tr',
+      datePublished: post.published, dateModified: post.updated,
+      author: { '@type': 'Organization', name: 'QuitVow' }, publisher: { '@type': 'Organization', name: 'QuitVow' },
+      ...(SITE_URL ? { mainEntityOfPage: url } : {}) },
+    { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: post.faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
+  ].map(jsonLd).join('\n');
+  const html = `<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(post.metaTitle)}</title>
+<meta name="description" content="${attr(post.description)}">
+<meta name="theme-color" content="#0A0A0C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="${attr(post.metaTitle)}">
+<meta property="og:description" content="${attr(post.description)}">
+<meta property="og:locale" content="tr_TR">
+${SITE_URL ? `<link rel="canonical" href="${url}">\n<meta property="og:url" content="${url}">` : ''}
+<link rel="icon" href="../img/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+${ld}
+</head>
+<body>
+<div class="wrap legal blog">
+  <nav><a class="brand" href="../">QuitVow</a><a href="../">Ana sayfa</a></nav>
+  <article>
+    <div class="kicker">Rehber · ${post.readMinutes} dk okuma · Güncelleme: ${post.updated.split('-').reverse().join('.')}</div>
+    <h1>${esc(post.title)}</h1>
+    <p class="lead">${esc(post.intro)}</p>
+    ${body}
+  </article>
+  <p class="footlinks"><a href="../gizlilik/">Gizlilik ve KVKK</a><a href="../kosullar/">Kullanım koşulları</a><a href="mailto:${company.email}">${company.email}</a></p>
+</div>
+</body>
+</html>
+`;
+  fs.mkdirSync(path.join(OUT, post.path), { recursive: true });
+  fs.writeFileSync(path.join(OUT, post.path, 'index.html'), html);
+  sitemapUrls.push(url);
+  console.log('✓', `dist/${post.path}/index.html`);
+}
+if (SITE_URL) {
+  fs.writeFileSync(path.join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls.map(u => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`);
+  fs.writeFileSync(path.join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+  console.log('✓ dist/sitemap.xml, dist/robots.txt');
+}
 fs.copyFileSync(path.join(SRC, 'style.css'), path.join(OUT, 'style.css'));
 fs.cpSync(path.join(SRC, 'img'), path.join(OUT, 'img'), { recursive: true });
 console.log('✓ dist/style.css, dist/img/');
