@@ -25,9 +25,9 @@ Para kazanma → Ürünler → Tek seferlik ürünler → Ürün oluştur. Üç 
 
 | Ürün kimliği | Ad | Fiyat |
 |---|---|---|
-| `pack_30` | 30 günlük paket | [₺] |
-| `pack_60` | 60 günlük paket | [₺] |
-| `pack_90` | 90 günlük paket | [₺] |
+| `pack_30` | 30 günlük paket | 349 ₺ |
+| `pack_60` | 60 günlük paket | 549 ₺ |
+| `pack_90` | 90 günlük paket | 749 ₺ |
 
 Ürün kimlikleri **birebir** böyle olmalı, sunucu bunları bekliyor. Ürünler **tüketilebilir** tek seferlik ürünlerdir; sunucu satın almayı doğruladıktan sonra Google'da tüketir, böylece aynı paket yeniden alınabilir. Oluşturduktan sonra **etkinleştir**.
 
