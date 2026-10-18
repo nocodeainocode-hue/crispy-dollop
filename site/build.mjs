@@ -110,15 +110,17 @@ ${canon}
     console.log('✓', path.relative(HERE, path.join(dir, 'index.html')));
   }
 }
-// Blog: src/blog/*.mjs → dist/<path>/index.html (Article + FAQPage JSON-LD, canonical, OG, ilgili yazılar), /blog/ dizini, sitemap.xml, robots.txt
+// Blog: src/blog/*.mjs → dist/<path>/index.html (Article + FAQPage JSON-LD, canonical, OG, otomatik içindekiler, ilgili yazılar), /blog/ dizini, sitemap.xml, robots.txt
 // Yazı eklemek: src/blog/<ad>.mjs yaz (kumari-birakmak-istiyorum.mjs şekli: lang, path, title, metaTitle, description, intro, faq, body), POSTS listesine adını ekle.
+// Menü ve alt bilgi ana sayfayla aynı parçalardan üretilir (navHtml / footerHtml): iki yerde ayrı ayrı bakım gerekmez.
 const POSTS = ['kumari-birakmak-istiyorum', 'bahis-oynama-istegi-nasil-gecer', 'kumar-borcu-nasil-kapanir', 'esim-kumar-oynuyor-ne-yapmaliyim', 'kumar-bagimliligi-belirtileri-test', 'how-to-stop-sports-betting'];
 const PLAY = 'https://play.google.com/store/apps/details?id=com.quitvow.app';
+const LOGO = template.match(/<svg viewBox="0 0 512 512"[\s\S]*?<\/svg>/)[0];
 const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const jsonLd = o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
 const UI = {
-  tr: { guide: 'Yazı', read: 'dk okuma', upd: 'Güncelleme', home: 'Ana sayfa', priv: 'Gizlilik ve KVKK', privPath: 'gizlilik/', terms: 'Kullanım koşulları', termsPath: 'kosullar/', related: 'İlgili yazılar', all: 'Tüm yazılar', faq: 'Sık sorulan sorular', og: 'tr_TR', homeDir: '' },
-  en: { guide: 'Guide', read: 'min read', upd: 'Updated', home: 'Home', priv: 'Privacy', privPath: 'en/privacy/', terms: 'Terms', termsPath: 'en/terms/', related: 'Related articles', all: 'All articles', faq: 'Frequently asked questions', og: 'en_US', homeDir: 'en/' },
+  tr: { post: 'Yazı', read: 'dk okuma', upd: 'Güncelleme', toc: 'Bu yazıda', related: 'İlgili yazılar', all: 'Tüm yazılar', faq: 'Sık sorulan sorular', og: 'tr_TR', homeDir: '' },
+  en: { post: 'Article', read: 'min read', upd: 'Updated', toc: 'In this article', related: 'Related articles', all: 'All articles', faq: 'Frequently asked questions', og: 'en_US', homeDir: 'en/' },
 };
 const BOX = {
   tr: `<div class="qv-box"><b>QuitVow ile bırakmayı bir sisteme bağla</b>
@@ -132,6 +134,35 @@ const BOX = {
 };
 const posts = await Promise.all(POSTS.map(async slug => (await import(pathToFileURL(path.join(SRC, 'blog', `${slug}.mjs`)).href)).default));
 const sitemapUrls = [`${SITE_URL}/`, `${SITE_URL}/en/`, `${SITE_URL}/blog/`];
+
+// Ana sayfadaki menünün aynısı: logo · Blog · Android çipi · dil seçici
+const navHtml = (root, l) => {
+  const d = dicts[l], home = `${root}${UI[l].homeDir}`;
+  const langs = LANGS.map(x => (x === l ? `<span>${x}</span>` : `<a href="${root}${dirOf(x)}" hreflang="${x}" lang="${x}">${x}</a>`)).join('');
+  return `<nav>
+    <a class="brand" href="${home}">${LOGO}QuitVow</a>
+    <div class="navright">
+      <a class="navlink" href="${root}${d.footer.blogHref}" aria-current="page">${d.footer.blog}</a>
+      <span class="chip">${d.nav.chip}</span>
+      <div class="langs" aria-label="${d.nav.language}">${langs}</div>
+    </div>
+  </nav>`;
+};
+// Ana sayfadaki alt bilginin aynısı: yardım hatları, uyarı, bağlantılar
+const footerHtml = (root, l) => {
+  const f = dicts[l].footer;
+  return `<footer>
+  <div class="wrap">
+    <div class="kicker">${f.kicker}</div>
+    <div class="help">
+      ${f.lines.map(x => `<a href="tel:${x.tel}" class="${x.cls}"><b>${x.name}</b>${x.sub}</a>`).join('\n      ')}
+    </div>
+    <p>${f.disclaimer}</p>
+    <p class="footlinks"><a href="${root}${f.privacyHref}">${f.privacy}</a><a href="${root}${f.termsHref}">${f.terms}</a><a href="${root}${f.blogHref}">${f.blog}</a><a href="mailto:${company.email}">${company.email}</a></p>
+    <p style="margin-top:18px;color:var(--mute)">© 2026 QuitVow</p>
+  </div>
+</footer>`;
+};
 const pageHead = (root, l, title, desc, canon, extra = '') => `<!doctype html>
 <html lang="${l}">
 <head>
@@ -142,9 +173,11 @@ const pageHead = (root, l, title, desc, canon, extra = '') => `<!doctype html>
 <meta name="theme-color" content="#0A0A0C">
 <meta property="og:title" content="${attr(title)}">
 <meta property="og:description" content="${attr(desc)}">
+<meta property="og:image" content="${SITE_URL}/img/ikon-180.png">
 <meta property="og:locale" content="${UI[l].og}">
 ${SITE_URL ? `<link rel="canonical" href="${canon}">\n<meta property="og:url" content="${canon}">` : ''}
 <link rel="icon" href="${root}img/favicon-32.png">
+<link rel="apple-touch-icon" href="${root}img/ikon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
@@ -152,35 +185,44 @@ ${SITE_URL ? `<link rel="canonical" href="${canon}">\n<meta property="og:url" co
 ${extra}
 </head>
 `;
-const foot = (root, u) => `<p class="footlinks"><a href="${root}${u.privPath}">${u.priv}</a><a href="${root}${u.termsPath}">${u.terms}</a><a href="mailto:${company.email}">${company.email}</a></p>`;
 for (const post of posts) {
-  const u = UI[post.lang], root = '../'.repeat(post.path.split('/').length), url = `${SITE_URL}/${post.path}/`;
-  const home = `${root}${u.homeDir}`;
+  const l = post.lang, u = UI[l], root = '../'.repeat(post.path.split('/').length), url = `${SITE_URL}/${post.path}/`;
   const faqHtml = post.faq.map(f => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('\n');
-  const related = posts.filter(x => x !== post && x.lang === post.lang);
-  const relHtml = related.length ? `<h2>${u.related}</h2>\n<ul class="related">${related.map(x => `<li><a href="${root}${x.path}/">${esc(x.title)}</a></li>`).join('')}</ul>` : '';
-  const body = post.body.replace('{{faq}}', `<h2 id="faq">${u.faq}</h2>\n${faqHtml}`).replace('{{quitvow}}', BOX[post.lang]);
+  let n = 0;
+  const body = post.body.replace('{{faq}}', `<h2 id="faq">${u.faq}</h2>\n${faqHtml}`).replace('{{quitvow}}', BOX[l])
+    .replace(/<h2>/g, () => `<h2 id="b${++n}">`);
   if (/\{\{/.test(body)) throw new Error(`${post.path}: doldurulmamış yer tutucu`);
+  const heads = [...body.matchAll(/<h2 id="([^"]+)">([\s\S]*?)<\/h2>/g)];
+  const toc = `<details class="toc" open><summary class="kicker">${u.toc}</summary><ol>${heads.map(h => `<li><a href="#${h[1]}">${h[2].replace(/^\d+\.\s*/, '')}</a></li>`).join('')}</ol></details>`;
+  const related = posts.filter(x => x !== post && x.lang === l);
+  const relHtml = related.length ? `<h2 id="related">${u.related}</h2>\n<ul class="related">${related.map(x => `<li><a href="${root}${x.path}/">${esc(x.title)}</a></li>`).join('')}</ul>` : '';
   const ld = [
-    { '@context': 'https://schema.org', '@type': 'Article', headline: post.title, description: post.description, inLanguage: post.lang,
+    { '@context': 'https://schema.org', '@type': 'Article', headline: post.title, description: post.description, inLanguage: l,
       datePublished: post.published, dateModified: post.updated,
       author: { '@type': 'Organization', name: 'QuitVow' }, publisher: { '@type': 'Organization', name: 'QuitVow' },
       ...(SITE_URL ? { mainEntityOfPage: url } : {}) },
     { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: post.faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
   ].map(jsonLd).join('\n');
-  const html = pageHead(root, post.lang, post.metaTitle, post.description, url, `<meta property="og:type" content="article">\n${ld}`) + `<body>
-<div class="wrap legal blog">
-  <nav><a class="brand" href="${home}">QuitVow</a><div class="navright"><a class="navlink" href="${root}blog/">Blog</a><a class="navlink" href="${home}">${u.home}</a></div></nav>
-  <article>
-    <div class="kicker">${u.guide} · ${post.readMinutes} ${u.read} · ${u.upd}: ${post.updated.split('-').reverse().join('.')}</div>
+  const html = pageHead(root, l, post.metaTitle, post.description, url, `<meta property="og:type" content="article">\n${ld}`) + `<body>
+<div class="wrap">
+  ${navHtml(root, l)}
+  <header class="bloghead">
+    <div class="kicker">${u.post}</div>
     <h1>${esc(post.title)}</h1>
     <p class="lead">${esc(post.intro)}</p>
-    ${body}
-    ${relHtml}
-    <p><a href="${root}blog/">${u.all} →</a></p>
-  </article>
-  ${foot(root, u)}
+    <div class="postmeta"><span>${post.readMinutes} ${u.read}</span><span>${u.upd}: ${post.updated.split('-').reverse().join('.')}</span></div>
+  </header>
+  <div class="postwrap">
+    ${toc}
+    <article class="prose">
+${body}
+${relHtml}
+<p class="back"><a href="${root}blog/">← ${u.all}</a></p>
+    </article>
+  </div>
 </div>
+${footerHtml(root, l)}
+<script>if (matchMedia('(max-width: 860px)').matches) document.querySelector('.toc').open = false;</script>
 </body>
 </html>
 `;
@@ -189,19 +231,26 @@ for (const post of posts) {
   sitemapUrls.push(url);
   console.log('✓', `dist/${post.path}/index.html`);
 }
-{ // /blog/ dizini: tüm yazılara tarayıcıların ve okurların ulaşacağı tek sayfa
-  const u = UI.tr, root = '../';
-  const items = posts.map(p => `<li><a href="${root}${p.path}/"><b>${esc(p.title)}</b></a><p>${esc(p.description)}</p>${p.lang === 'en' ? '<span class="tag">English</span>' : ''}</li>`).join('\n');
-  const html = pageHead(root, 'tr', 'QuitVow Blog · Kumar ve bahis bırakma yazıları', 'Kumar ve bahis isteğini yenme, borçtan çıkış, bir yakının kumarıyla başa çıkma ve bırakma sürecine dair yazılar.', `${SITE_URL}/blog/`) + `<body>
-<div class="wrap legal blog">
-  <nav><a class="brand" href="${root}">QuitVow</a><div class="navright"><a class="navlink" href="${root}blog/">Blog</a><a class="navlink" href="${root}">${u.home}</a></div></nav>
-  <article>
+{ // /blog/ dizini: ana sayfadaki numaralı satır düzeniyle tüm yazılar
+  const l = 'tr', root = '../';
+  const items = posts.map((p, i) => `<a class="postrow" href="${root}${p.path}/">
+      <span class="no">${String(i + 1).padStart(2, '0')}</span>
+      <div><h2>${esc(p.title)}</h2><p>${esc(p.description)}</p><span class="tags"><span>${p.readMinutes} ${UI[p.lang].read}</span><span>${p.lang === 'en' ? 'English' : 'Türkçe'}</span></span></div>
+      <span class="arrow" aria-hidden="true">→</span>
+    </a>`).join('\n    ');
+  const html = pageHead(root, l, 'QuitVow Blog · Kumar ve bahis bırakma yazıları', 'Kumar ve bahis isteğini yenme, borçtan çıkış, bir yakının kumarıyla başa çıkma ve bırakma sürecine dair yazılar.', `${SITE_URL}/blog/`) + `<body>
+<div class="wrap">
+  ${navHtml(root, l)}
+  <header class="bloghead">
     <div class="kicker">Blog</div>
-    <h1>Kumarı ve bahsi bırakmaya dair yazılar</h1>
-    <ul class="postlist">${items}</ul>
-  </article>
-  ${foot(root, u)}
+    <h1>Bırakmaya dair<br>somut yazılar.</h1>
+    <p class="lead">Dürtüyü yenmek, borçtan çıkmak, bir yakınına yaklaşmak ve nüksü aşmak. Genel bilgi içerir; tedavi ya da kişisel tavsiye yerine geçmez.</p>
+  </header>
+  <div class="postlist">
+    ${items}
+  </div>
 </div>
+${footerHtml(root, l)}
 </body>
 </html>
 `;

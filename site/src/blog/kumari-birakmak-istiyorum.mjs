@@ -5,7 +5,7 @@ export default {
   path: 'kumari-birakmak-istiyorum',
   title: 'Kumarı Bırakmak İstiyorum: Kumarı Bırakmanın 10 Etkili Yolu',
   metaTitle: 'Kumarı Bırakmak İstiyorum: Kumarı Bırakmanın 10 Yolu (2026)',
-  description: 'Kumarı ve bahsi bırakmak istiyorsan nereden başlayacağını adım adım anlatan rehber: tetikleri bul, paraya erişimi kısıtla, şahit edin, dürtüyü yönet, nüksü aş. Ayrıca QuitVow nasıl yardım eder?',
+  description: 'Kumarı ve bahsi bırakmak istiyorsan nereden başlayacağını adım adım anlatır: tetikleri bul, paraya erişimi kısıtla, şahit edin, dürtüyü yönet, nüksü aş. Ayrıca QuitVow nasıl yardım eder?',
   published: '2026-10-18',
   updated: '2026-10-18',
   readMinutes: 9,
@@ -20,24 +20,6 @@ export default {
   ],
   body: `
 <p>Kumar, çoğu zaman <b>gizlilik, utanç ve "bir tur daha" düşüncesi</b> içinde büyür. İyi haber şu: bırakmak irade gücüyle ilgili bir "karakter testi" değil, doğru sistemi kurma işidir. Aşağıdaki 10 adım, kumarı bırakma sürecinde en sık işe yarayan yaklaşımları sıraya koyar.</p>
-
-<div class="toc" role="navigation" aria-label="İçindekiler">
-  <b>Bu rehberde</b>
-  <ol>
-    <li><a href="#sorunu-kabul">Sorunu kendine açıkça söyle</a></li>
-    <li><a href="#neden">"Neden bırakıyorum?" sorusunu yaz</a></li>
-    <li><a href="#tetikler">Tetiklerini bul</a></li>
-    <li><a href="#para">Paraya ve hesaplara erişimi kısıtla</a></li>
-    <li><a href="#engel">Kumara erişimi zorlaştır</a></li>
-    <li><a href="#sahit">Güvendiğin birine anlat: şahit et</a></li>
-    <li><a href="#durtu">Dürtüyü oynamadan geçirmeyi öğren</a></li>
-    <li><a href="#uzman">Profesyonel destek al</a></li>
-    <li><a href="#rutin">Boşalan zamanı ve duyguyu doldur</a></li>
-    <li><a href="#nuks">Tekrar oynarsan felaketleştirme</a></li>
-    <li><a href="#quitvow">QuitVow nasıl yardım eder?</a></li>
-    <li><a href="#faq">Sık sorulan sorular</a></li>
-  </ol>
-</div>
 
 <h2 id="sorunu-kabul">1. Sorunu kendine açıkça söyle</h2>
 <p>Kumarı bırakmak istiyorsan ilk iş, durumu olduğu gibi adlandırmak. Kendine şu soruları dürüstçe sor:</p>
