@@ -110,53 +110,76 @@ ${canon}
     console.log('✓', path.relative(HERE, path.join(dir, 'index.html')));
   }
 }
-// Blog: src/blog/*.mjs → dist/<path>/index.html (Article + FAQPage JSON-LD, canonical, OG), ardından sitemap.xml ve robots.txt
-const POSTS = ['kumari-birakmak'];
+// Blog: src/blog/*.mjs → dist/<path>/index.html (Article + FAQPage JSON-LD, canonical, OG, ilgili yazılar), /blog/ dizini, sitemap.xml, robots.txt
+// Yazı eklemek: src/blog/<ad>.mjs yaz (kumari-birakmak-istiyorum.mjs şekli: lang, path, title, metaTitle, description, intro, faq, body), POSTS listesine adını ekle.
+const POSTS = ['kumari-birakmak-istiyorum', 'bahis-oynama-istegi-nasil-gecer', 'kumar-borcu-nasil-kapanir', 'esim-kumar-oynuyor-ne-yapmaliyim', 'kumar-bagimliligi-belirtileri-test', 'how-to-stop-sports-betting'];
+const PLAY = 'https://play.google.com/store/apps/details?id=com.quitvow.app';
 const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-const jsonLd = o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\u003c')}</script>`;
-const sitemapUrls = [`${SITE_URL}/`, `${SITE_URL}/en/`];
-for (const slug of POSTS) {
-  const post = (await import(pathToFileURL(path.join(SRC, 'blog', `${slug}.mjs`)).href)).default;
-  const url = `${SITE_URL}/${post.path}/`;
+const jsonLd = o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
+const UI = {
+  tr: { guide: 'Yazı', read: 'dk okuma', upd: 'Güncelleme', home: 'Ana sayfa', priv: 'Gizlilik ve KVKK', privPath: 'gizlilik/', terms: 'Kullanım koşulları', termsPath: 'kosullar/', related: 'İlgili yazılar', all: 'Tüm yazılar', faq: 'Sık sorulan sorular', og: 'tr_TR', homeDir: '' },
+  en: { guide: 'Guide', read: 'min read', upd: 'Updated', home: 'Home', priv: 'Privacy', privPath: 'en/privacy/', terms: 'Terms', termsPath: 'en/terms/', related: 'Related articles', all: 'All articles', faq: 'Frequently asked questions', og: 'en_US', homeDir: 'en/' },
+};
+const BOX = {
+  tr: `<div class="qv-box"><b>QuitVow ile bırakmayı bir sisteme bağla</b>
+<p>QuitVow, kumarı ve bahsi bırakmak isteyenler için bir taahhüt uygulamasıdır: sözünü güvendiğin şahitlere, önceden yazılmış kurallara ve her gün dolan bir takvime bağlar. Dürtü geldiğinde tek dokunuşla <b>Krizdeyim</b> modunu açarsın; "neden" notun ve gelecekteki sana mektubun karşına çıkar, şahitlerine haber gider, sakinleşme oyunları ve yardım hatları (ALO 182, Yeşilay 115) bir dokunuş uzaktadır. İlk 7 gün ücretsiz; kriz modu ve şahit bildirimleri her zaman ücretsiz.</p>
+<p><a class="btn" href="${PLAY}" rel="noopener">Google Play'den indir</a></p>
+<p class="fine">QuitVow bir tedavi değildir ve başarı garantisi vermez; bahis engelleyici de değildir. Profesyonel desteğin yanında bir araç olarak kullanılır.</p></div>`,
+  en: `<div class="qv-box"><b>Turn quitting into a system with QuitVow</b>
+<p>QuitVow is a commitment app for people who want to stop gambling and betting. It ties your promise to witnesses you trust, to rules written in advance, and to a calendar that fills up every day. When an urge hits, one tap opens <b>crisis mode</b>: your own "why" note and a letter to your future self appear, your witnesses are notified, and calming games and helplines are one tap away. The first 7 days are free; crisis mode and witness alerts are always free.</p>
+<p><a class="btn" href="${PLAY}" rel="noopener">Get it on Google Play</a></p>
+<p class="fine">QuitVow is not a treatment, does not guarantee results, and is not a betting blocker. It works best alongside professional support. Android only for now; the app is currently in Turkish and English.</p></div>`,
+};
+const posts = await Promise.all(POSTS.map(async slug => (await import(pathToFileURL(path.join(SRC, 'blog', `${slug}.mjs`)).href)).default));
+const sitemapUrls = [`${SITE_URL}/`, `${SITE_URL}/en/`, `${SITE_URL}/blog/`];
+const pageHead = (root, l, title, desc, canon, extra = '') => `<!doctype html>
+<html lang="${l}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${attr(desc)}">
+<meta name="theme-color" content="#0A0A0C">
+<meta property="og:title" content="${attr(title)}">
+<meta property="og:description" content="${attr(desc)}">
+<meta property="og:locale" content="${UI[l].og}">
+${SITE_URL ? `<link rel="canonical" href="${canon}">\n<meta property="og:url" content="${canon}">` : ''}
+<link rel="icon" href="${root}img/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="${root}style.css">
+${extra}
+</head>
+`;
+const foot = (root, u) => `<p class="footlinks"><a href="${root}${u.privPath}">${u.priv}</a><a href="${root}${u.termsPath}">${u.terms}</a><a href="mailto:${company.email}">${company.email}</a></p>`;
+for (const post of posts) {
+  const u = UI[post.lang], root = '../'.repeat(post.path.split('/').length), url = `${SITE_URL}/${post.path}/`;
+  const home = `${root}${u.homeDir}`;
   const faqHtml = post.faq.map(f => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('\n');
-  const body = post.body.replace('{{faq}}', faqHtml);
+  const related = posts.filter(x => x !== post && x.lang === post.lang);
+  const relHtml = related.length ? `<h2>${u.related}</h2>\n<ul class="related">${related.map(x => `<li><a href="${root}${x.path}/">${esc(x.title)}</a></li>`).join('')}</ul>` : '';
+  const body = post.body.replace('{{faq}}', `<h2 id="faq">${u.faq}</h2>\n${faqHtml}`).replace('{{quitvow}}', BOX[post.lang]);
+  if (/\{\{/.test(body)) throw new Error(`${post.path}: doldurulmamış yer tutucu`);
   const ld = [
-    { '@context': 'https://schema.org', '@type': 'Article', headline: post.title, description: post.description, inLanguage: 'tr',
+    { '@context': 'https://schema.org', '@type': 'Article', headline: post.title, description: post.description, inLanguage: post.lang,
       datePublished: post.published, dateModified: post.updated,
       author: { '@type': 'Organization', name: 'QuitVow' }, publisher: { '@type': 'Organization', name: 'QuitVow' },
       ...(SITE_URL ? { mainEntityOfPage: url } : {}) },
     { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: post.faq.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
   ].map(jsonLd).join('\n');
-  const html = `<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(post.metaTitle)}</title>
-<meta name="description" content="${attr(post.description)}">
-<meta name="theme-color" content="#0A0A0C">
-<meta property="og:type" content="article">
-<meta property="og:title" content="${attr(post.metaTitle)}">
-<meta property="og:description" content="${attr(post.description)}">
-<meta property="og:locale" content="tr_TR">
-${SITE_URL ? `<link rel="canonical" href="${url}">\n<meta property="og:url" content="${url}">` : ''}
-<link rel="icon" href="../img/favicon-32.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css">
-${ld}
-</head>
-<body>
+  const html = pageHead(root, post.lang, post.metaTitle, post.description, url, `<meta property="og:type" content="article">\n${ld}`) + `<body>
 <div class="wrap legal blog">
-  <nav><a class="brand" href="../">QuitVow</a><a href="../">Ana sayfa</a></nav>
+  <nav><a class="brand" href="${home}">QuitVow</a><a href="${home}">${u.home}</a></nav>
   <article>
-    <div class="kicker">Rehber · ${post.readMinutes} dk okuma · Güncelleme: ${post.updated.split('-').reverse().join('.')}</div>
+    <div class="kicker">${u.guide} · ${post.readMinutes} ${u.read} · ${u.upd}: ${post.updated.split('-').reverse().join('.')}</div>
     <h1>${esc(post.title)}</h1>
     <p class="lead">${esc(post.intro)}</p>
     ${body}
+    ${relHtml}
+    <p><a href="${root}blog/">${u.all} →</a></p>
   </article>
-  <p class="footlinks"><a href="../gizlilik/">Gizlilik ve KVKK</a><a href="../kosullar/">Kullanım koşulları</a><a href="mailto:${company.email}">${company.email}</a></p>
+  ${foot(root, u)}
 </div>
 </body>
 </html>
@@ -165,6 +188,26 @@ ${ld}
   fs.writeFileSync(path.join(OUT, post.path, 'index.html'), html);
   sitemapUrls.push(url);
   console.log('✓', `dist/${post.path}/index.html`);
+}
+{ // /blog/ dizini: tüm yazılara tarayıcıların ve okurların ulaşacağı tek sayfa
+  const u = UI.tr, root = '../';
+  const items = posts.map(p => `<li><a href="${root}${p.path}/"><b>${esc(p.title)}</b></a><p>${esc(p.description)}</p>${p.lang === 'en' ? '<span class="tag">English</span>' : ''}</li>`).join('\n');
+  const html = pageHead(root, 'tr', 'QuitVow Blog · Kumar ve bahis bırakma yazıları', 'Kumar ve bahis isteğini yenme, borçtan çıkış, bir yakının kumarıyla başa çıkma ve bırakma sürecine dair yazılar.', `${SITE_URL}/blog/`) + `<body>
+<div class="wrap legal blog">
+  <nav><a class="brand" href="${root}">QuitVow</a><a href="${root}">${u.home}</a></nav>
+  <article>
+    <div class="kicker">Blog</div>
+    <h1>Kumarı ve bahsi bırakmaya dair yazılar</h1>
+    <ul class="postlist">${items}</ul>
+  </article>
+  ${foot(root, u)}
+</div>
+</body>
+</html>
+`;
+  fs.mkdirSync(path.join(OUT, 'blog'), { recursive: true });
+  fs.writeFileSync(path.join(OUT, 'blog', 'index.html'), html);
+  console.log('✓ dist/blog/index.html');
 }
 if (SITE_URL) {
   fs.writeFileSync(path.join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls.map(u => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`);

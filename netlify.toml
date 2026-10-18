@@ -7,3 +7,10 @@
 [build.environment]
   NODE_VERSION = "22"
   SITE_URL = "https://quitvow.com.tr"
+
+# Blog yazısının eski adresi → yeni (SEO uyumlu) adres
+[[redirects]]
+  from = "/kumari-birakmak/"
+  to = "/kumari-birakmak-istiyorum/"
+  status = 301
+  force = true

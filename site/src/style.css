@@ -141,3 +141,19 @@ footer { border-top: 1px solid var(--line); padding: 48px 0 64px; color: var(--d
 .blog details p { margin-top: 8px; }
 .blog .footlinks { padding-bottom: 48px; display: flex; gap: 18px; flex-wrap: wrap; }
 .soon { text-decoration: none; }
+
+.blog .qv-box { border: 1px solid var(--acc2); border-radius: 12px; padding: 18px 20px; margin: 32px 0; }
+.blog .qv-box > b { font-size: 18px; }
+.blog .qv-box p { margin-top: 10px; }
+.blog .qv-box .fine { font-size: 13px; }
+.blog .related { list-style: none; padding: 0; }
+.blog .related li { margin-top: 8px; }
+.blog .postlist { list-style: none; padding: 0; }
+.blog .postlist li { padding: 18px 0; border-bottom: 1px solid var(--line, #2a2a30); }
+.blog .postlist b { font-size: 20px; }
+.blog .postlist .tag { display: inline-block; margin-top: 8px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); border: 1px solid var(--line, #2a2a30); padding: 2px 8px; }
+.blog .selftest { list-style: none; padding: 0; }
+.blog .selftest li { margin-top: 10px; }
+.blog .selftest label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; color: var(--fg); }
+.blog .selftest input { margin-top: 5px; flex: none; }
+.blog #testresult { border-left: 3px solid var(--acc2); padding: 12px 16px; margin: 16px 0; background: rgba(255,255,255,.03); color: var(--fg); }

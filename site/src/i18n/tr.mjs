@@ -90,7 +90,7 @@ export default {
   },
   footer: {
     kicker: 'Ücretsiz destek hatları',
-    privacy: 'Gizlilik ve KVKK', privacyHref: 'gizlilik/', terms: 'Kullanım koşulları', termsHref: 'kosullar/', blog: 'Kumarı bırakmak rehberi', blogHref: 'kumari-birakmak/',
+    privacy: 'Gizlilik ve KVKK', privacyHref: 'gizlilik/', terms: 'Kullanım koşulları', termsHref: 'kosullar/', blog: 'Blog', blogHref: 'blog/',
     lines: [
       { tel: '182', name: 'ALO 182', sub: 'Psikolojik destek', cls: '' },
       { tel: '115', name: 'Yeşilay · 115', sub: 'Bağımlılık danışmanlığı', cls: '' },
