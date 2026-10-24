@@ -28,10 +28,11 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
 
   const [discount, setDiscount] = useState(0);
   const [prices, setPrices] = useState<Record<number, string>>({});
+  const [priceErr, setPriceErr] = useState('');
   useEffect(() => {
     srv.me().then(m => {
       setDemo(m.demoPurchases); setCanBuy(m.demoPurchases || !!m.playEnabled); setDiscount(m.nextPackDiscount ?? 0);
-      if (!m.demoPurchases && m.playEnabled) { packPrices().then(setPrices); recoverPurchases(srv); }
+      if (!m.demoPurchases && m.playEnabled) { packPrices().then(r => { setPrices(r.prices); setPriceErr(r.error ?? ''); }); recoverPurchases(srv); }
     }).catch(() => {});
   }, []);
 
@@ -91,7 +92,7 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
           {UP.map((x, i) => <Opt key={x.d} delay={80 + i * 60} label={x.l} sub={prices[x.d] ? `${prices[x.d]} · ${x.sub}` : x.sub} on={pick === x.d} onPress={() => setPick(x.d)} />)}
           {demo && discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
           <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>
-            {demo === false ? L.plan.billingPending : L.plan.demo}
+            {demo ? L.plan.demo : priceErr ? `Fiyat alınamadı: ${priceErr}` : ''}
           </T>
         </>}
         {pack && <>

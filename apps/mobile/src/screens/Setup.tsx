@@ -4,7 +4,7 @@ import { useApp } from '../store';
 import { useServer } from '../server';
 import { API_URL } from '../api';
 import { useBilling } from '../billing';
-import { withPack } from '../purchase';
+import { packPrices, withPack } from '../purchase';
 import VowRecorder, { type Vow } from '../components/VowRecorder';
 import { Screen, Body, Back, ActionBar, HoldBar, NumRow, Field, Opt, Science, T, Kicker, Hair, TopChips, StepProgress } from '../components/ui';
 import { useL, useH, currencySymbol, joinNames } from '../i18n';
@@ -35,6 +35,8 @@ export default function Setup() {
   const [goal, setGoal] = useState(30);
   const bill = useBilling();
   const canBuy = bill?.billing !== false; // bilinmiyorken engelleme; sunucu zaten paketi doğrular
+  const [prices, setPrices] = useState<Record<number, string>>({});
+  useEffect(() => { if (bill && bill.billing && !bill.demo) packPrices().then(r => setPrices(r.prices)); }, [bill]);
   // Satış kapalıyken (Play ödemesi bağlanana kadar) yalnızca ücretsiz deneme seçilebilir
   useEffect(() => { if (!canBuy && goal !== 7) setGoal(7); }, [canBuy]);
   const [solo, setSolo] = useState(false); // vasisiz başla: zaman kilidi
@@ -225,7 +227,7 @@ export default function Setup() {
           <Hair />
           {PACKS.map((x, i) => {
             const soon = !canBuy && x.d !== 7;
-            return <Opt delay={120 + i * 60} key={x.d} label={x.l} sub={soon ? L.packs.soon : x.sub} on={goal === x.d} onPress={() => { if (!soon) setGoal(x.d); }} />;
+            return <Opt delay={120 + i * 60} key={x.d} label={x.l} sub={soon ? L.packs.soon : prices[x.d] ? `${prices[x.d]} · ${x.sub}` : x.sub} on={goal === x.d} onPress={() => { if (!soon) setGoal(x.d); }} />;
           })}
           {bill?.demo && discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
           {(bill?.demo || !canBuy) && <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{bill?.demo ? L.setup.demoNote : L.setup.soonNote}</T>}

@@ -19,14 +19,16 @@ let connected: Promise<boolean> | null = null;
 const connect = () => (connected ??= iap().initConnection().then(Boolean).catch(() => { connected = null; return false; }));
 
 /** Mağazadaki yerel fiyatlar (örn. { 30: '₺149,00' }). Ulaşılamazsa boş döner; ekran fiyatsız çalışır. */
-export async function packPrices(): Promise<Record<number, string>> {
-  if (Platform.OS !== 'android' || !(await connect())) return {};
+export type PackPrices = { prices: Record<number, string>; error?: string };
+export async function packPrices(): Promise<PackPrices> {
+  if (Platform.OS !== 'android') return { prices: {}, error: 'yalnızca Android' };
+  if (!(await connect())) return { prices: {}, error: 'Play Store bağlantısı kurulamadı' };
   try {
     const list: any = await iap().fetchProducts({ skus: PACK_DAYS.map(sku), type: 'in-app' });
-    const out: Record<number, string> = {};
-    for (const p of Array.isArray(list) ? list : []) { const d = PACK_DAYS.find(x => sku(x) === p.id); if (d && p.displayPrice) out[d] = p.displayPrice; }
-    return out;
-  } catch { return {}; }
+    const prices: Record<number, string> = {};
+    for (const p of Array.isArray(list) ? list : []) { const d = PACK_DAYS.find(x => sku(x) === p.id); if (d && p.displayPrice) prices[d] = p.displayPrice; }
+    return Object.keys(prices).length ? { prices } : { prices, error: 'Play ürünleri bulamadı (' + (Array.isArray(list) ? list.length : 0) + ' ürün döndü)' };
+  } catch (e: any) { return { prices: {}, error: String(e?.message ?? e).slice(0, 120) }; }
 }
 
 class Cancelled extends Error {}
