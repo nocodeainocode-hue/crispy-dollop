@@ -4,7 +4,7 @@ import { useApp } from '../store';
 import { useServer } from '../server';
 import VowRecorder, { type Vow } from '../components/VowRecorder';
 import { Screen, Body, Back, ActionBar, Field, Opt, T, Kicker } from '../components/ui';
-import { PaperCard, StatusMark, Stat, TextLink } from '../components/SetupParts';
+import { PaperCard, StatusMark, Stat, TextLink, TierPlant } from '../components/SetupParts';
 import type { Go } from '../nav';
 import { c, pebble } from '../theme';
 import { useL, useH } from '../i18n';
@@ -132,11 +132,18 @@ export function Completed({ onLater }: { onLater: () => void }) {
         </View>
         {/* Bahçe belgesi: paylaşılabilir; oyunlaştırma yok, yalnızca emeğin kaydı */}
         <PaperCard seed="garden-certificate" tilt={-0.9} pad={18}>
-          <Kicker color={c.acc2}>{L.completed.certKicker}</Kicker>
-          <T size={30} ls={-1} lh={36} style={{ marginTop: 10 }}>{a.name || '—'}</T>
-          <T w="s" size={16} style={{ marginTop: 10 }}>{L.completed.certPack(a.goalDays)}</T>
-          <T w="r" size={14} color={c.dim} style={{ marginTop: 2 }}>{L.completed.certDates(fmt(a.startedAt), fmt(end))}</T>
-          <T w="s" size={14} color={c.act} style={{ marginTop: 10 }}>{cleanLine}</T>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Kicker color={c.acc2}>{L.completed.certKicker}</Kicker>
+              <T size={30} ls={-1} lh={36} style={{ marginTop: 10 }}>{a.name || '—'}</T>
+              {/* Paket adı tek yerden (L.plan.tier); deneme için "Ücretsiz deneme" */}
+              <T w="s" size={16} style={{ marginTop: 10 }}>{L.completed.certPack(L.plan.tier[a.goalDays] ?? L.setup.packTrialKind, a.goalDays)}</T>
+              <T w="r" size={14} color={c.dim} style={{ marginTop: 2 }}>{L.completed.certDates(fmt(a.startedAt), fmt(end))}</T>
+              <T w="s" size={14} color={c.act} style={{ marginTop: 10 }}>{cleanLine}</T>
+            </View>
+            {/* Tamamlanan paketin saksı bitkisi (Filiz/Fidan/Ağaç); deneme için çizim yok */}
+            <View style={{ marginLeft: 8 }}><TierPlant d={a.goalDays} height={88} /></View>
+          </View>
           <T size={13} color={c.dim} style={{ marginTop: 14 }}>QuitVow</T>
         </PaperCard>
         <Pressable onPress={share} accessibilityRole="button" accessibilityLabel={L.completed.share} style={{ marginHorizontal: 16, minHeight: 48, justifyContent: 'center', alignItems: 'center' }}><T w="s" size={16} color={c.act}>{L.completed.share}</T></Pressable>
