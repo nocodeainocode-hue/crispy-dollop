@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { View, Pressable, Animated } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, Pressable, Animated, AppState, useWindowDimensions } from 'react-native';
 import { useApp } from '../store';
-import { Screen, Body, ActionBar, T, Kicker, Hair, TopChips } from '../components/ui';
-import { useL, useH, money } from '../i18n';
-import { c, alpha, BAHCE } from '../theme';
+import { Screen, Body, ActionBar, T } from '../components/ui';
+import { useL } from '../i18n';
+import { c, pebble } from '../theme';
 import type { Go } from '../nav';
-import { Rise, useCountUp, useIntro, usePulse } from '../components/motion';
+import { ND, EASE, dur } from '../components/motion';
+import { GardenScene, stageFor, gardenCounts } from '../garden';
+import { ChipBtn, DotsBtn, Dock, MoreSheet, type SheetRow } from '../garden/HomeParts';
 
+const DAY = 86400000;
+
+// Exit.tsx de kullanıyor: değişmeden kalır.
 export function useNow(step = 30000) {
   const [n, setN] = useState(Date.now());
   useEffect(() => { const t = setInterval(() => setN(Date.now()), step); return () => clearInterval(t); }, [step]);
@@ -14,101 +19,102 @@ export function useNow(step = 30000) {
 }
 const dayKey = (t: number) => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
 
+/**
+ * Bugünün paket günü ve takvim günü anahtarı. 15 sn'de bir yeniden çizmek yerine yalnızca gün DEĞİŞİNCE (ve uygulama öne gelince)
+ * durum güncellenir; boşta Home yeniden çizilmez. Gün hesabı eskisiyle aynı (geçen 24 sa dilimi).
+ */
+function useGardenDay(startedAt: number) {
+  const calc = () => { const n = Date.now(); return { n, day: Math.floor((n - startedAt) / DAY) + 1, key: dayKey(n) }; };
+  const [st, setSt] = useState(calc);
+  useEffect(() => {
+    const tick = () => setSt(p => { const q = calc(); return q.day === p.day && q.key === p.key ? p : q; });
+    tick();
+    const t = setInterval(tick, 30000);
+    const sub = AppState.addEventListener('change', s => { if (s === 'active') tick(); });
+    return () => { clearInterval(t); sub.remove(); };
+  }, [startedAt]);
+  return st;
+}
+
 export default function Home({ go }: { go: Go }) {
   const a = useApp();
-  const L = useL(), H = useH();
-  const intro = useIntro(1400, 300); // hücre ızgarasının dalga gibi dolması
-  const pulse = usePulse(700); // bugünün hücresinin nabzı
-  const now = useNow(15000);
+  const L = useL(), H = L.home;
+  const { height } = useWindowDimensions();
+  const [more, setMore] = useState(false);
+  const st = useGardenDay(a.startedAt);
   const goal = a.goalDays;
-  const shownDay = useCountUp(Math.min(goal, Math.floor((Date.now() - a.startedAt) / 86400000) + 1));
-  const day = Math.min(goal, Math.floor((now - a.startedAt) / 86400000) + 1);
-  // Tekrar oynanan günler silinmez, işaretlenir; paket süresi sabit, temiz seri ayrı
-  const relapseDays = new Set(a.relapses.map(t => Math.floor((t - a.startedAt) / 86400000) + 1));
-  const streak = Math.max(1, Math.min(day, Math.floor((now - (a.streakStartedAt || a.startedAt)) / 86400000) + 1));
+  const day = Math.max(1, Math.min(goal, st.day));
   const completed = a.pactStatus === 'completed'; // ücretsiz mod: pakt bitti, paket bekleniyor
-  const done = a.checkIns.some(t => dayKey(t) === dayKey(now)) || (a.lastCheckIn > 0 && dayKey(a.lastCheckIn) === dayKey(now));
-  const due = !done; // günlük kontrol günde bir kez
-  const accepted = a.guardians.filter(g => g.status === 'accepted').length;
-  const need = Math.min(2, accepted);
+  const done = completed || a.checkIns.some(t => dayKey(t) === st.key) || (a.lastCheckIn > 0 && dayKey(a.lastCheckIn) === st.key);
+  // Zor (tekrar oynama) günleri: yaprak silinmez, kenarı kıvrılır
+  const hard = useMemo(() => [...new Set(a.relapses.map(t => Math.floor((t - a.startedAt) / DAY) + 1).filter(d => d >= 1 && d <= goal))].sort((x, y) => x - y), [a.relapses, a.startedAt, goal]);
+  const counts = gardenCounts(goal, day, new Set(hard));
+  const trialLeft = !completed && goal <= 7 ? goal - day : 99;
 
-  const Link = ({ label, onPress, accent }: { label: string; onPress: () => void; accent?: boolean }) => (
-    <Pressable onPress={onPress} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 11, borderTopWidth: 1, borderColor: c.line }}>
-      <T w="s" size={12.5} color={accent ? c.acc2 : c.dim}>{label}</T><T w="s" size={12.5} color={accent ? c.acc2 : c.dim}>→</T>
-    </Pressable>
-  );
+  // Gün sayısı yerleşir (0'dan sayma yok): 600 ms ölçek .94 → 1
+  const pop = useRef(new Animated.Value(0)).current;
+  useEffect(() => { const t = Animated.timing(pop, { toValue: 1, duration: dur(600), easing: EASE, useNativeDriver: ND }); t.start(); return () => t.stop(); }, []);
+  const numSize = height < 680 ? 72 : height < 780 ? 88 : 112; // küçük ekranda 88 px; çok kısa ekranda 72
+
+  const nav = (s: Parameters<Go>[0]) => () => { setMore(false); go(s); };
+  const rows: SheetRow[] = [];
+  if (!completed) rows.push({ key: 'plan', label: H.myPack, onPress: nav('plan') });
+  if (!completed) rows.push({ key: 'relapse', label: H.relapse, onPress: nav('relapse') });
+  if (!completed) rows.push({ key: 'exit', label: H.exit, onPress: nav('exit') });
+  if (!a.vowUri) rows.push({ key: 'vow', label: H.vow, onPress: nav('vow') });
+  rows.push({ key: 'guardian', label: H.asGuardian, onPress: () => { setMore(false); a.set({ role: 'guardian' }); } });
+
+  const sentence = completed ? H.completed : done ? H.done : H.due;
 
   return (
     <Screen>
-      <TopChips onGuardian={() => a.set({ role: 'guardian' })} onProfile={() => go('profile')} />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 2 }}>
+        <ChipBtn label={H.me} a11y={L.chips.profile} onPress={() => go('profile')} />
+        <DotsBtn a11y={H.more} onPress={() => setMore(true)} />
+      </View>
       <Body>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12 }}>
-          <View>
-            <Kicker>{L.home.dayKicker(a.name)}</Kicker>
-            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-              <T size={92} ls={-5.5} lh={92} style={{ textShadowColor: BAHCE ? 'transparent' : 'rgba(236,48,19,.7)', textShadowRadius: BAHCE ? 0 : 28 }}>{shownDay}</T>
-              <T size={28} ls={-0.6} color={c.mute}> /{goal}</T>
+        <View style={{ flex: 1 }}>
+          <View style={{ paddingHorizontal: 26, flexDirection: 'row', alignItems: 'flex-end' }}>
+            <Animated.View style={{ opacity: pop.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }), transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] }) }] }}>
+              <T size={numSize} ls={-2} maxFontSizeMultiplier={1} style={{ lineHeight: Math.round(numSize * 1.02) }} accessibilityLabel={`${H.day} ${day} / ${goal}`}>{day}</T>
+            </Animated.View>
+            <View style={{ paddingBottom: 12, marginLeft: 12 }}>
+              <T w="s" size={17} color={c.dim}>{H.day}</T>
+              <T size={30} color={c.dim} maxFontSizeMultiplier={1.2}>/{goal}</T>
             </View>
           </View>
-          <View style={{ alignItems: 'flex-end' }}>
-            <T w="s" size={12} lh={16} style={{ textAlign: 'right' }}>{completed ? L.home.statusCompleted : done ? L.home.statusDone : L.home.statusNone}</T>
-            <T w="s" size={12} color={c.acc2} style={{ marginTop: 2 }}>{L.home.cellsLeft(goal - day)}</T>
-            {a.relapses.length > 0 && <T w="s" size={12} style={{ marginTop: 2 }}>{L.home.cleanStreak(streak)}</T>}
-          </View>
-        </View>
+          <T w="s" size={20} lh={26} color={c.dim} style={{ paddingHorizontal: 28, marginTop: 2 }}>{sentence}</T>
 
-        <View style={{ paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -1.5 }}>
-          {Array.from({ length: goal }, (_, i) => {
-            const d = i + 1, ms = d % 30 === 0, rel = relapseDays.has(d) && d <= day, past = d < day && !rel, cur = d === day;
-            const t0 = Math.min(0.72, (i / goal) * 0.72); // her hücre sırayla belirir
-            return (
-              <Animated.View key={d} style={{ width: '10%', padding: 1.5, opacity: intro.interpolate({ inputRange: [t0, t0 + 0.28], outputRange: [0, 1], extrapolate: 'clamp' }), transform: [{ scale: intro.interpolate({ inputRange: [t0, t0 + 0.28], outputRange: [0.6, 1], extrapolate: 'clamp' }) }] }}>
-                <View style={{ aspectRatio: 1, backgroundColor: past ? c.fg : cur ? c.acc : rel ? alpha(c.acc, 0.16) : 'transparent', borderWidth: 1.5, borderColor: cur || rel ? c.acc : past ? c.fg : ms ? c.fg : c.cell, justifyContent: 'flex-end', padding: 2 }}>
-                  {rel && <T size={13} color={cur ? c.ink : c.acc2} style={{ position: 'absolute', alignSelf: 'center', top: '18%' }}>✕</T>}
-                  {ms && !rel && <T size={8} color={past ? c.ink : c.fg}>{d}</T>}
-                  {cur && <Animated.View pointerEvents="none" style={{ position: 'absolute', left: -1.5, right: -1.5, top: -1.5, bottom: -1.5, borderWidth: 2, borderColor: c.acc2, opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0, 0.9] }), transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.35] }) }] }} />}
-                </View>
-              </Animated.View>
-            );
-          })}
-        </View>
+          <GardenScene
+            style={{ flex: 1, minHeight: 190, marginTop: 4 }}
+            goal={goal} day={day} doneToday={done} hard={hard}
+            note={done ? undefined : H.note} pulse={!done}
+            a11yLabel={H.a11y(day, goal, H.stage[stageFor(goal)], counts.tulips, counts.curled)}
+          />
 
-        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.line, marginTop: 14 }}>
-          <View style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 16, borderRightWidth: 1, borderColor: c.line }}>
-            <Kicker>{L.home.packKicker(goal)}</Kicker>
-            <T size={28} ls={-0.8}>{L.home.daysLeft(Math.max(0, goal - day))}</T>
-          </View>
-          <Pressable onPress={() => { if (completed) go('plan'); else if (!done) go('verify'); }} style={{ flex: 1 }}>
-            {({ hovered }: any) => (
-              <View style={{ paddingVertical: 10, paddingHorizontal: 16, flex: 1, backgroundColor: hovered ? c.fg : 'transparent' }}>
-                <Kicker color={hovered ? c.ink : due || completed ? c.acc2 : c.fg}>{completed ? L.home.packWaiting : due ? L.home.checkDue : L.home.checkTitle}</Kicker>
-                <T size={15} color={hovered ? c.ink : c.fg} style={{ marginTop: 4 }}>{completed ? L.home.myPack : done ? L.home.doneToday : L.home.doNow}</T>
-              </View>
-            )}
-          </Pressable>
-        </View>
+          {trialLeft <= 2 && (
+            <Pressable onPress={() => go('plan')} accessibilityRole="button" style={[pebble(60, 'trial'), { marginHorizontal: 16, marginTop: 8, minHeight: 56, paddingHorizontal: 20, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: c.edge, backgroundColor: c.surf }]}>
+              <T w="s" size={16} lh={21} style={{ flex: 1 }}>{trialLeft <= 0 ? H.trialLastDay : H.trialLeft(trialLeft)}</T>
+              <T w="b" size={16} color={c.act} style={{ marginLeft: 12 }}>{H.myPack}</T>
+            </Pressable>
+          )}
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10 }}>
-          <T w="s" size={12} color={c.dim}>{L.home.saved(a.monthlyLoss > 0 ? money(Math.round((a.monthlyLoss / 30) * Math.max(0, (now - a.startedAt) / 86400000)), L) : '—')}</T>
-          <T w="s" size={12} color={c.dim}>{L.home.points(a.points)}</T>
+          {completed
+            ? <ActionBar label={H.myPack} height={68} onPress={() => go('plan')} />
+            : done
+              ? <ActionBar label={H.checkDone} kind="ghost" height={68} right="" disabled onPress={() => {}} />
+              : <ActionBar label={H.check} height={68} onPress={() => go('verify')} />}
+
+          <Dock items={[
+            { key: 'calm', label: H.calm, glyph: 'calm', onPress: () => go('calm') },
+            { key: 'journal', label: H.journal, glyph: 'book', onPress: () => go('journal') },
+            { key: 'guardians', label: H.witnesses, glyph: 'pair', onPress: () => go('guardians') },
+          ]} />
         </View>
-        <View style={{ flex: 1, minHeight: 14 }} />
-        {!completed && a.goalDays <= 7 && goal - day <= 2 && (
-          <Pressable onPress={() => go('plan')} style={{ marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: alpha(c.acc, 0.45), backgroundColor: alpha(c.acc, 0.07), padding: 12 }}>
-            <Kicker color={c.acc2}>{goal - day <= 0 ? L.home.trialLastDay : L.home.trialLeft(goal - day)}</Kicker>
-            <T w="r" size={12.5} lh={18} color={c.dim} style={{ marginTop: 4 }}>{L.home.trialBody}</T>
-            <T w="s" size={12.5} color={c.acc2} style={{ marginTop: 6 }}>{L.home.myPack}</T>
-          </Pressable>
-        )}
-        <Link label={L.home.packLink(a.goalDays)} accent={a.goalDays <= 7} onPress={() => go('plan')} />
-        <Link label={a.guardians.length ? L.home.guardiansLink(accepted) : L.home.addGuardianLink} accent={accepted < 2} onPress={() => go('guardians')} />
-        {!a.vowUri && <Link label={L.home.vowLink} onPress={() => go('vow')} />}
-        <Link label={L.home.calmLink} onPress={() => go('calm')} />
-        <Link label={L.home.journalLink} onPress={() => go('journal')} />
-        {!completed && <Link label={H.relapseLink} onPress={() => go('relapse')} />}
-        {!completed && <Link label={need ? L.home.exitLink(need) : L.home.exitLinkSolo} onPress={() => go('exit')} />}
       </Body>
-      <ActionBar label={L.home.crisis} kind="red" height={84} size={30} glow hoverRed={false} onPress={() => go('crisis')} />
+      {/* Krizdeyim: kaydırma alanının DIŞINDA, tam genişlik, 84 dp, her zaman görünür */}
+      <ActionBar label={H.crisis} kind="red" height={84} size={30} glow hoverRed={false} onPress={() => go('crisis')} />
+      <MoreSheet visible={more} rows={rows} closeLabel={H.close} onClose={() => setMore(false)} />
     </Screen>
   );
 }

@@ -1,27 +1,59 @@
-import React, { useState } from 'react';
-import { View, Pressable } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Pressable, useWindowDimensions } from 'react-native';
 import { useApp, localDay } from '../store';
 import { useServer } from '../server';
-import { Screen, Back, ActionBar, T, Kicker, Hair } from '../components/ui';
-import { c } from '../theme';
+import { ApiError } from '../api';
+import { Screen, Back, ActionBar, StepProgress, T } from '../components/ui';
+import { c, pebble } from '../theme';
 import type { Go } from '../nav';
 import { useL, useH } from '../i18n';
 import DayDone from './DayDone';
 
-// Günlük kontrol: kendi beyanına dayanır (kamera/biyometri yok). Beyan vasilere iletilir, "Evet" nüks akışına gider.
+const withTimeout = <R,>(p: Promise<R>, ms: number) => new Promise<R>((res, rej) => {
+  const t = setTimeout(() => rej(new ApiError(0, 'timeout')), ms);
+  p.then(v => { clearTimeout(t); res(v); }, e => { clearTimeout(t); rej(e); });
+});
+
+const ROWS = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10]];
+
+// Günlük kontrol: kendi beyanına dayanır (kamera/biyometri yok). Beyan şahitlere iletilir, "Evet" tekrar oynama akışına gider.
+// Kayıt "Kaydet" anında yazılır (uygulama kapansa bile korunur); sunucu hatası yutulmaz, görünür bir mesaja düşer.
 export default function Verify({ go }: { go: Go }) {
   const a = useApp();
   const srv = useServer();
   const L = useL(), H = useH();
-  const [vs, setVs] = useState(0);
+  const { width } = useWindowDimensions();
+  const [vs, setVs] = useState(0); // 0 soru, 1 dürtü, 2 gün tamam
   const [urge, setUrge] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [already, setAlready] = useState(false);
+  const alive = useRef(true);
+  useEffect(() => () => { alive.current = false; }, []);
   const doneToday = a.lastCheckIn > 0 && localDay(a.lastCheckIn) === localDay();
 
-  const complete = (helper = '') => {
-    const nextIn = (4 + Math.random() * 6) * 3600000; // sonraki kontrol hatırlatması: rastgele 4–10 saat
-    srv.checkin(urge ?? undefined).catch(() => {}); // sunucuya bildir (çevrimdışıysa yerel kayıt yine de geçerli)
-    a.set({ checkIns: [...a.checkIns, Date.now()], lastCheckIn: Date.now(), points: a.points + 5, nextVerifyAt: Date.now() + nextIn });
-    if (urge !== null && urge >= 6) a.addEntry({ kind: 'tetik', mood: '', trigger: '', note: L.verify.entryNote(urge) });
+  const save = async () => {
+    if (busy || urge === null) return;
+    setBusy(true);
+    const at = Date.now();
+    let dup = false, fail = false;
+    try { await withTimeout(srv.checkin(urge), 10000); }
+    catch (e) { if (e instanceof ApiError && e.status === 409) dup = true; else fail = true; }
+    if (dup) {
+      // Sunucuda bugünün kontrolü zaten var: yerelde de işaretle, çiftleme yok
+      if (!doneToday) a.set({ checkIns: [...a.checkIns, at], lastCheckIn: at });
+      if (alive.current) { setAlready(true); setBusy(false); setVs(0); }
+      return;
+    }
+    // Sunucuya ulaşılamasa da yerel kayıt geçerli; hata ise gün tamam ekranında görünür bir uyarı olarak gösterilir
+    a.set({ checkIns: [...a.checkIns, at], lastCheckIn: at, points: a.points + 5, nextVerifyAt: at + 6 * 3600000 });
+    if (urge >= 6) a.addEntry({ kind: 'tetik', mood: '', trigger: '', note: L.verify.entryNote(urge) });
+    if (!alive.current) return;
+    setNotice(fail ? L.verify.syncFail : null);
+    setBusy(false);
+    setVs(2);
+  };
+  const finish = (helper: string) => {
     if (helper) a.addEntry({ kind: 'iyi', mood: '', trigger: '', note: '', helper }); // Günlük'e "dayandım" + ne işe yaradı
     go('home');
   };
@@ -31,53 +63,59 @@ export default function Verify({ go }: { go: Go }) {
     return (
       <Screen>
         <Back onPress={() => go('home')} />
-        <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 10 }}>
-          <Kicker color={c.acc2}>{L.verify.doneKicker}</Kicker>
-          <T size={36} ls={-1.1} lh={38} style={{ marginTop: 6 }}>{L.verify.doneTitle}</T>
-          <T w="r" size={13} lh={19} color={c.dim} style={{ marginTop: 10 }}>{L.verify.doneBody}</T>
+        <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 24 }}>
+          <T size={44} lh={50} maxFontSizeMultiplier={1.3}>{L.verify.doneTitle}</T>
+          {already && <T w="s" size={17} lh={24} style={{ marginTop: 12 }}>{L.verify.alreadySaved}</T>}
+          <T w="r" size={17} lh={25} color={c.dim} style={{ marginTop: 12 }}>{L.verify.doneBody}</T>
         </View>
         <ActionBar label={L.common.backToPanel} onPress={() => go('home')} />
       </Screen>
     );
   }
 
-  if (vs === 2) return <DayDone urge={urge} onDone={complete} />;
+  if (vs === 2) return <DayDone urge={urge} notice={notice} onDone={finish} />;
+
+  const chipW = Math.min(88, Math.floor((Math.min(width, 430) - 32 - 30) / 4));
 
   return (
     <Screen>
-      <View style={{ flexDirection: 'row', height: 8, backgroundColor: c.cell }}>
-        <View style={{ width: `${((vs + 1) / 3) * 100}%`, backgroundColor: c.acc }} />
-      </View>
-      <Back onPress={() => go('home')} />
-      <T size={36} ls={-1.1} lh={36} style={{ paddingHorizontal: 16 }}>{vs === 0 ? H.verifyQuestion : vs === 1 ? L.verify.urgeTitle : L.verify.cleanTitle}</T>
-      <T w="r" size={13} lh={19} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 10 }}>
-        {vs === 0 ? L.verify.askSmall : vs === 1 ? L.verify.urgeSmall : L.verify.cleanSmall}
-      </T>
+      <Back onPress={() => (vs === 1 ? setVs(0) : go('home'))} />
+      <StepProgress step={vs} total={2} />
+      <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 28 }}>
+        <T size={40} lh={46} maxFontSizeMultiplier={1.3}>{vs === 0 ? H.verifyQuestion : L.verify.urgeTitle}</T>
+        <T w="r" size={18} lh={25} color={c.dim} style={{ marginTop: 12 }}>{vs === 0 ? L.verify.askSmall : L.verify.urgeSmall}</T>
 
-      <View style={{ flex: 1 }}>
-        {vs === 0 && <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-          <ActionBar label={H.verifyYes} right="→" kind="ghost" height={84} size={20} onPress={() => go('relapse')} />
-        </View>}
-        {vs === 1 && <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 16 }}>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', borderLeftWidth: 1, borderTopWidth: 1, borderColor: c.line }}>
-            {Array.from({ length: 11 }, (_, i) => (
-              <Pressable key={i} onPress={() => setUrge(i)} style={{ width: '25%', height: 64, borderRightWidth: 1, borderBottomWidth: 1, borderColor: c.line, alignItems: 'center', justifyContent: 'center', backgroundColor: urge === i ? (i >= 6 ? c.acc : c.fg) : 'transparent' }}>
-                <T size={22} color={urge === i ? c.ink : c.fg}>{i}</T>
-              </Pressable>
+        {vs === 1 && (
+          <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 12 }}>
+            {ROWS.map((row, ri) => (
+              <View key={ri} style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 5 }}>
+                {row.map(i => {
+                  const on = urge === i;
+                  return (
+                    <Pressable key={i} onPress={() => setUrge(i)} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={`${i}`}
+                      style={[pebble(60, i), { width: chipW, height: 60, marginHorizontal: 5, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: on ? c.act : c.edge, backgroundColor: on ? c.act : c.surf }]}>
+                      <T size={26} color={on ? c.onAct : c.fg} maxFontSizeMultiplier={1.2}>{i}</T>
+                    </Pressable>
+                  );
+                })}
+              </View>
             ))}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 5, marginTop: 8 }}>
+              <T w="s" size={15} color={c.dim}>{L.verify.urgeLow}</T>
+              <T w="s" size={15} color={c.dim}>{L.verify.urgeHigh}</T>
+            </View>
           </View>
-        </View>}
+        )}
       </View>
 
-      <View style={{ flexDirection: 'row', borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.line }}>
-        {L.verify.steps.map((t, i) => (
-          <View key={t} style={{ flex: 1, paddingVertical: 8, paddingHorizontal: 16, borderLeftWidth: i ? 1 : 0, borderColor: c.line, backgroundColor: vs === i ? c.fg : 'transparent' }}>
-            <T size={11} color={vs === i ? c.ink : c.fg}>{t}</T>
-          </View>
-        ))}
-      </View>
-      {vs === 0 && <ActionBar label={H.verifyNo} onPress={() => setVs(1)} />}
-      {vs === 1 && <ActionBar label={L.common.continue} disabled={urge === null} onPress={() => setVs(2)} />}
+      {vs === 0 && (
+        <>
+          {/* Hayır / Evet eşit ağırlıkta: ikisi de aynı boy ve aynı stil */}
+          <ActionBar label={H.verifyNo} kind="ghost" height={72} onPress={() => setVs(1)} />
+          <ActionBar label={H.verifyYes} kind="ghost" height={72} onPress={() => go('relapse')} />
+        </>
+      )}
+      {vs === 1 && <ActionBar label={busy ? L.verify.saving : L.verify.save} disabled={urge === null || busy} onPress={save} />}
     </Screen>
   );
 }

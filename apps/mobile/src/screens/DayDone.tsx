@@ -1,56 +1,69 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Animated } from 'react-native';
+import { View, Pressable, Animated } from 'react-native';
 import { useApp } from '../store';
-import { Screen, Body, ActionBar, Opt, T, Kicker, Hair } from '../components/ui';
-import { ND, EASE, dur, Rise } from '../components/motion';
-import { useL, money } from '../i18n';
+import { Screen, Body, ActionBar, T } from '../components/ui';
+import { ND, EASE, dur } from '../components/motion';
+import { useL } from '../i18n';
 import { dayMessage } from '../dayMessage';
-import { c, alpha, BAHCE } from '../theme';
+import { c, pebble } from '../theme';
+import { GardenScene, tulipNo } from '../garden';
 
 const DAY = 86400000;
 
 /**
- * Günlük kontrol "oynamadım" ile bitince: bugünün hücresi dolar, kişiye özel tek cümle, korunan para
- * ve "bugün seni ne tuttu?" (cevap Günlük'e "dayandım" olarak düşer, analizde "sana iyi gelenler" çıkar).
+ * Günlük kontrol kaydedilince: sakin bir yaprak açılışı (her 7. günde lale). Gecikme, asma, halka, parıltı, konfeti yok.
+ * Kişiye özel tek cümle ve (isteğe bağlı) "bugün seni ne tuttu?" cevabı (Günlük'e "dayandım" olarak düşer).
+ * `notice`: sunucuya gönderilemediyse görünür uyarı.
  */
-export default function DayDone({ urge, onDone }: { urge: number | null; onDone: (helper: string) => void }) {
+export default function DayDone({ urge, onDone, notice }: { urge: number | null; onDone: (helper: string) => void; notice?: string | null }) {
   const a = useApp();
   const L = useL();
   const [helper, setHelper] = useState('');
   const now = Date.now();
-  const day = Math.min(a.goalDays, Math.floor((now - a.startedAt) / DAY) + 1);
+  const goal = a.goalDays;
+  const day = Math.max(1, Math.min(goal, Math.floor((now - a.startedAt) / DAY) + 1));
   const streak = Math.max(1, Math.min(day, Math.floor((now - (a.streakStartedAt || a.startedAt)) / DAY) + 1));
-  const msg = useMemo(() => dayMessage(L, { streak, day, goal: a.goalDays, urge, triggerTimes: a.triggerTimes, reason: a.reason, letter: a.letter, now: new Date(now) }), [L]);
-  const perDay = a.monthlyLoss > 0 ? a.monthlyLoss / 30 : 0;
+  const msg = useMemo(() => dayMessage(L, { streak, day, goal, urge, triggerTimes: a.triggerTimes, reason: a.reason, letter: a.letter, now: new Date(now) }), [L]);
+  const hard = useMemo(() => [...new Set(a.relapses.map(t => Math.floor((t - a.startedAt) / DAY) + 1).filter(d => d >= 1 && d <= goal))].sort((x, y) => x - y), [a.relapses, a.startedAt, goal]);
+  const tulip = tulipNo(day);
 
-  // Bugünün hücresi: küçükten büyüyüp kırmızıdan kemik rengine dolar
-  const fill = useRef(new Animated.Value(0)).current;
-  useEffect(() => { Animated.timing(fill, { toValue: 1, duration: dur(900), easing: EASE, useNativeDriver: false }).start(); }, []);
-  const scale = fill.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0.4, 1.12, 1] });
-  const bg = fill.interpolate({ inputRange: [0, 0.5, 1], outputRange: [alpha(c.acc, 0), c.acc, c.fg] });
+  // Bugünün yaprağı (7. günde lale): 1,6 sn, ölçek + opaklık, aşma yok. Hareketi azalt açıksa doğrudan açık.
+  const open = useRef(new Animated.Value(dur(1) ? 0 : 1)).current;
+  useEffect(() => {
+    const t = Animated.timing(open, { toValue: 1, duration: dur(1600), easing: EASE, useNativeDriver: ND });
+    t.start();
+    return () => t.stop();
+  }, []);
 
   return (
     <Screen>
       <Body>
-        <View style={{ paddingHorizontal: 16, paddingTop: 18 }}>
-          <Kicker color={c.acc2}>{L.done.kicker(day, a.goalDays)}</Kicker>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
-            <Animated.View style={{ width: 64, height: 64, borderWidth: 2, borderColor: c.fg, backgroundColor: bg, transform: [{ scale }] }} />
-            <T size={44} ls={-1.6} lh={44} style={{ marginLeft: 16, flex: 1 }}>{L.done.title(streak)}</T>
+        <View style={{ flex: 1 }}>
+          <GardenScene style={{ flex: 1, minHeight: 240 }} goal={goal} day={day} doneToday hard={hard} opening={open} pulse={false}
+            a11yLabel={tulip ? L.done.tulip(tulip) : L.done.leaf} />
+          <View style={{ paddingHorizontal: 24, paddingTop: 14 }}>
+            <T size={44} ls={-1} lh={50} maxFontSizeMultiplier={1.3}>{L.done.title(day)}</T>
+            {tulip > 0 && <T size={26} lh={32} style={{ marginTop: 2 }}>{L.done.tulip(tulip)}</T>}
+            <T w="s" size={18} lh={25} color={c.dim} style={{ marginTop: 8 }}>{msg}</T>
+            {!!notice && (
+              <View accessibilityRole="alert" style={[pebble(60, 'notice'), { marginTop: 14, paddingVertical: 12, paddingHorizontal: 20, backgroundColor: c.clayWash }]}>
+                <T w="s" size={15} lh={21}>{notice}</T>
+              </View>
+            )}
           </View>
-          <Rise delay={500} y={10}><T w="s" size={17} lh={24} style={{ marginTop: 22 }}>{msg}</T></Rise>
-          {perDay > 0 && <Rise delay={700} y={8}><T w="r" size={13} lh={19} color={c.dim} style={{ marginTop: 12 }}>
-            {L.done.money(money(Math.round(perDay), L), money(Math.round(perDay * day), L))}
-          </T></Rise>}
-          <T w="r" size={11.5} color={c.mute} style={{ marginTop: 10 }}>{L.done.points}</T>
+          <T w="b" size={16} color={c.dim} style={{ paddingHorizontal: 24, paddingTop: 22, paddingBottom: 6 }}>{L.done.helpQ}</T>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 20, paddingBottom: 14 }}>
+            {Object.entries(L.done.chips).map(([k, label]) => {
+              const on = helper === k;
+              return (
+                <Pressable key={k} onPress={() => setHelper(on ? '' : k)} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={L.done.helpers[k] ?? label}
+                  style={[pebble(48, k), { minHeight: 48, margin: 4, paddingHorizontal: 18, justifyContent: 'center', borderWidth: 2, borderColor: on ? c.act : c.line, backgroundColor: on ? c.sageWash : c.surf }]}>
+                  <T w="b" size={16} lh={20}>{label}</T>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
-        <Kicker color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 24 }}>{L.done.helpQ}</Kicker>
-        <T w="r" size={12} lh={17} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10 }}>{L.done.helpSub}</T>
-        <Hair />
-        {Object.entries(L.done.helpers).map(([k, label], i) => (
-          <Opt key={k} delay={900 + i * 40} label={label} on={helper === k} onPress={() => setHelper(helper === k ? '' : k)} />
-        ))}
-        <View style={{ height: 16 }} />
       </Body>
       <ActionBar label={L.common.backToPanel} onPress={() => onDone(helper)} />
     </Screen>
