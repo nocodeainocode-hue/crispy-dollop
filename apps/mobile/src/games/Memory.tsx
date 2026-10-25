@@ -2,17 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Pressable, Animated } from 'react-native';
 import { ND, EASE, dur } from '../components/motion';
 import { T, ActionBar } from '../components/ui';
-import { c, alpha, BAHCE, pebble } from '../theme';
+import { c, alpha, pebble } from '../theme';
 import { useL } from '../i18n';
 
-// Hafıza kartları: 8 çift, sayaç ve süre yok. Simgeler geometrik (iskambil takımı simgesi yok). Oyun renkleri palet dışı olabilir.
-const SYMS: [string, string][] = BAHCE
-  ? [['●', '#CF5F44'], ['▲', '#DCA83F'], ['■', '#6BA38A'], ['★', '#C97AA0'], ['✚', '#7A9CC6'], ['▼', '#B9714D'], ['☾', '#8E86C9'], ['▬', '#8FAA87']]
-  : [['●', '#EC3013'], ['▲', '#FFB703'], ['■', '#2EC4B6'], ['★', '#FF6FA3'], ['✚', '#4CC9F0'], ['▼', '#FF5A3D'], ['☾', '#8E7DFF'], ['▬', '#9BE564']];
+// Hafıza kartları: 8 çift, sayaç ve süre yok. Simgeler geometrik (iskambil takımı simgesi yok). Simge renkleri palet token'ları (dağıtımda okunur).
+const SYMS = (): [string, string][] => [['●', c.tulip], ['▲', c.mustard], ['■', c.sage], ['★', c.clay], ['✚', c.water], ['▼', c.pot], ['☾', c.act], ['▬', c.dim]];
+const PAIRS = 8;
 type Card = { id: number; sym: string; color: string };
 
 const deal = (): Card[] => {
-  const cards = SYMS.flatMap(([sym, color], k) => [{ id: k * 2, sym, color }, { id: k * 2 + 1, sym, color }]);
+  const cards = SYMS().flatMap(([sym, color], k) => [{ id: k * 2, sym, color }, { id: k * 2 + 1, sym, color }]);
   for (let i = cards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cards[i], cards[j]] = [cards[j], cards[i]]; }
   return cards;
 };
@@ -36,7 +35,7 @@ export default function Memory() {
   const [up, setUp] = useState<number[]>([]);
   const [matched, setMatched] = useState<string[]>([]);
   const [lock, setLock] = useState(false);
-  const done = matched.length === SYMS.length;
+  const done = matched.length === PAIRS;
 
   const flip = (i: number) => {
     if (lock || up.includes(i) || matched.includes(cards[i].sym)) return;

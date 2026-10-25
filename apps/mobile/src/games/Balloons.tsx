@@ -2,13 +2,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Pressable, Animated, Easing } from 'react-native';
 import { ND, EASE, dur } from '../components/motion';
 import { T } from '../components/ui';
-import { c, alpha, BAHCE, pebble } from '../theme';
+import { c, alpha, pebble } from '../theme';
 import { useL } from '../i18n';
 
 // Gerçek balonlar: aşağıdan yükselir, havada sallanır, dokununca solarak kaybolur. Puan yok, sayaç yok, süre yok.
-// Balonlar iki temada da görünür olmalı (nötr gri dahil). Bahçe: sakin, doygunluğu düşük tonlar (oyun renkleri palet dışı olabilir).
+// Balonlar iki temada da görünür olmalı. Renkler palet token'ları (gece/gündüz paleti kendiliğinden değişir); her balon oluşurken okunur.
 // Hareketi azalt açıkken balonlar yükselmez ve sallanmaz: sabit bir yerde durur, dokununca kaybolur.
-const COLORS = BAHCE ? ['#CF5F44', '#DCA83F', '#6BA38A', '#7A9CC6', '#C97AA0', '#A7A29C', '#8FAA87'] : ['#EC3013', '#FFB703', '#2EC4B6', '#8E7DFF', '#FF6FA3', '#A7A29C', '#4CC9F0'];
+const colors = () => [c.tulip, c.mustard, c.sage, c.water, c.clay, c.pot, c.act];
+const pick = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
 type B = { id: number; x: number; size: number; color: string; rise: number; sway: number; swayMs: number };
 
 function Balloon({ b, h, onGone }: { b: B; h: number; onGone: (id: number) => void }) {
@@ -73,7 +74,7 @@ export default function Balloons() {
 
   const make = useCallback((w: number): B => {
     const s = 54 + Math.random() * 36;
-    return { id: ++idRef.current, size: s, x: Math.random() * Math.max(10, w - s), color: COLORS[Math.floor(Math.random() * COLORS.length)], rise: 7500 + Math.random() * 6000, sway: 8 + Math.random() * 22, swayMs: 1600 + Math.random() * 1400 };
+    return { id: ++idRef.current, size: s, x: Math.random() * Math.max(10, w - s), color: pick(colors()), rise: 7500 + Math.random() * 6000, sway: 8 + Math.random() * 22, swayMs: 1600 + Math.random() * 1400 };
   }, []);
 
   useEffect(() => {
