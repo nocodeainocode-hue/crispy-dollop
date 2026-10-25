@@ -6,13 +6,12 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#0A0A0C",
+    "backgroundColor": "#F4ECDB",
     "android": {
       "package": "com.quitvow.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0A0A0C",
+        "backgroundColor": "#F4ECDB",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
@@ -44,10 +43,14 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0A0A0C",
+          "backgroundColor": "#F4ECDB",
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
-          "resizeMode": "contain"
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#1B2820",
+            "image": "./assets/splash-icon-dark.png"
+          }
         }
       ],
       "expo-iap",

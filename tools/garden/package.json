@@ -1,0 +1,13 @@
+{
+  "name": "quitvow-garden-assets",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QuitVow marka varlıkları (ikon, adaptif ikon, açılış ekranı, favicon, mağaza görselleri) SVG kaynaktan PNG üretir.",
+  "type": "module",
+  "scripts": {
+    "build": "node build-assets.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.34.0"
+  }
+}
