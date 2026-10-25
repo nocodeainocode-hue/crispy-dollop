@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, useColorScheme } from 'react-native';
+import { View, ActivityIndicator, useColorScheme, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Archivo_400Regular, Archivo_600SemiBold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo';
@@ -25,6 +25,8 @@ import Calm from './src/screens/Calm';
 import type { Scr } from './src/nav';
 import { c, applyTheme, BAHCE, type ThemeName } from './src/theme';
 import { StepTransition } from './src/components/motion';
+import PlantPreview from './src/art/plant/Preview';
+import MiscPreview from './src/art/misc/Preview';
 
 function Root() {
   const a = useApp();
@@ -80,5 +82,11 @@ export default function App() {
   const [late, setLate] = useState(false);
   useEffect(() => { const t = setTimeout(() => setLate(true), 3000); return () => clearTimeout(t); }, []);
   if (!loaded && !fontError && !late) return <View style={{ flex: 1, backgroundColor: c.bg }} />;
+  // Yalnız web geliştirme: ?onizleme=bitki | cizim çizim galerilerini açar (cihazda etkisiz; F10'da kaldırılır).
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    const q = new URLSearchParams(window.location.search).get('onizleme');
+    if (q === 'bitki') return <SafeAreaProvider><PlantPreview /></SafeAreaProvider>;
+    if (q === 'cizim') return <SafeAreaProvider><MiscPreview /></SafeAreaProvider>;
+  }
   return <SafeAreaProvider><Provider><ServerProvider><Root /></ServerProvider></Provider></SafeAreaProvider>;
 }
