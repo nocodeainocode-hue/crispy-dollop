@@ -303,6 +303,7 @@ const tr = {
     vow: 'İmza videosu', vowAdded: (s: number) => `${s} sn · telefonunda · paylaşmak için dokun`, vowNone: 'Eklenmedi · isteğe bağlı',
     journal: 'Günlük', calm: 'Sakinleş',
     app: 'UYGULAMA', version: 'Sürüm', language: 'Dil', appearance: 'Görünüm',
+    haptics: 'Titreşim', hapticsSub: 'Düğmelere dokununca hafif titreşim', hapticsOn: 'Açık', hapticsOff: 'Kapalı',
     themes: { dark: 'Gece', light: 'Gündüz', system: 'Sistem' } as Record<'dark' | 'light' | 'system', string>,
     logout: 'Çıkış yap', logoutSub: 'Bu cihazdan çıkar, paktın silinmez',
     logoutConfirm: 'Bu cihazdan çıkış yapılır. Paktın silinmez; aynı e-postayla tekrar girebilirsin.',

@@ -302,6 +302,7 @@ const en: Dict = {
     vow: 'Vow video', vowAdded: (s: number) => `${s} s · on your phone · tap to share`, vowNone: 'Not added · optional',
     journal: 'Journal', calm: 'Calm down',
     app: 'APP', version: 'Version', language: 'Language', appearance: 'Appearance',
+    haptics: 'Vibration', hapticsSub: 'A light buzz when you tap buttons', hapticsOn: 'On', hapticsOff: 'Off',
     themes: { dark: 'Night', light: 'Day', system: 'System' },
     logout: 'Sign out', logoutSub: "Signs out of this device; your pact isn't deleted",
     logoutConfirm: "You'll be signed out on this device. Your pact isn't deleted; you can sign back in with the same email.",

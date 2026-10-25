@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Pressable } from 'react-native';
 import { T, Kicker } from './ui';
 import { Rise } from './motion';
-import { Chev } from './PaperKit';
+import { GIcon } from '../art/misc';
 import { c, pebble } from '../theme';
 import type { Entry } from '../store';
 import type { Go } from '../nav';
@@ -90,7 +90,7 @@ export default function Analysis({ entries, pack, go }: { entries: Entry[]; pack
           {data.total > 0 && <T w="s" size={15} lh={21} color={c.dim} style={{ marginTop: 4 }}>{L.analysis.yourCount(data.total)}</T>}
           <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 48, marginTop: 4 }}>
             <T w="b" size={16} color={c.act}>{L.analysis.cta}</T>
-            <View style={{ marginLeft: 10 }}><Chev color={c.act} /></View>
+            <View style={{ marginLeft: 8 }}><GIcon name="arrowRight" size={20} color={c.act} /></View>
           </View>
         </View>
       </Pressable>
