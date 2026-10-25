@@ -1,50 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { View, Linking, Pressable, Animated } from 'react-native';
-import { usePulse } from '../components/motion';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Linking, Pressable, Text, useWindowDimensions } from 'react-native';
 import { useApp, CRISIS_MS } from '../store';
 import { useServer } from '../server';
-import { Screen, Body, ActionBar, T, Kicker } from '../components/ui';
+import { Screen, T } from '../components/ui';
 import Calm from './Calm';
-import { useVideoPlayer, VideoView } from 'expo-video';
-import { vowExists } from '../vowStore';
-import { useL, useH, useHelp } from '../i18n';
-import { c, alpha, BAHCE } from '../theme';
+import CrisisScene, { PROG_STEPS } from '../crisisart/Scene';
+import CrisisNote from '../crisisart/CrisisNote';
+import PebbleBtn from '../crisisart/PebbleBtn';
+import HelpRow from '../crisisart/HelpRow';
+import { useL, useH } from '../i18n';
+import { c, F, pebble } from '../theme';
 import type { Go } from '../nav';
 
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 const TOTAL = CRISIS_MS / 1000;
 
-/** Kriz anında en çok işe yarayan şey: dikkati başka yere vermek. Bu yüzden tüm ekranın en vurgulu bloğu. */
-function CalmBanner({ onPress }: { onPress: () => void }) {
-  const p = usePulse(900);
-  const L = useL();
-  return (
-    <Pressable onPress={onPress} style={{ borderTopWidth: 2, borderBottomWidth: 2, borderColor: c.acc, backgroundColor: alpha(c.acc, 0.14), paddingHorizontal: 16, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-      <View style={{ flex: 1 }}>
-        <T size={21} ls={-0.5}>{L.crisis.calmTitle}</T>
-        <T w="r" size={12} lh={17} color={c.dim} style={{ marginTop: 3 }}>{L.crisis.calmSub}</T>
-      </View>
-      <Animated.View style={{ transform: [{ translateX: p.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }) }] }}><T size={26}>→</T></Animated.View>
-    </Pressable>
-  );
-}
-
-/** Kriz anında kendi yüzünden, kendi sesinden verdiği sözü izler (video yalnızca telefonda). Otomatik oynamaz. */
-function VowPlayback({ uri }: { uri: string }) {
-  const player = useVideoPlayer({ uri }, p => { p.loop = false; p.play(); });
-  return <VideoView player={player} style={{ height: 300, backgroundColor: '#000', marginTop: 6 }} nativeControls contentFit="cover" />;
-}
-
+// Kriz: tek ekran, kaydırmasız. Üstte süre, ortada kesit sahnesi (gökyüzü, toprak, bitki ve kökler), altta sabit eylemler.
+// Kriz kilidi (crisisUntil), şahit bildirimi (srv.crisis) ve süre mantığı aynı; yalnızca görünüm ve metin değişti.
 export default function Crisis({ go }: { go: Go }) {
   const a = useApp();
   const srv = useServer();
-  const L = useL(), H = useH(), help = useHelp();
+  const L = useL(), H = useH();
+  const { height: winH } = useWindowDimensions();
   const [until] = useState(() => (a.crisisUntil > Date.now() ? a.crisisUntil : Date.now() + CRISIS_MS));
   const [now, setNow] = useState(Date.now());
   const [games, setGames] = useState(false);
-  const [watch, setWatch] = useState(false);
-  const hasVow = !!a.vowUri && vowExists(a.vowUri);
-  // Vasilere bildirimin GERÇEK sonucu: sending | ok (n vasiye e-posta gitti) | none (kabul eden yok) | failed | resumed (kriz daha önce başlamıştı)
+  const [note, setNote] = useState(false);
+  // Şahitlere bildirimin GERÇEK sonucu: sending | ok (n şahide e-posta gitti) | none (kabul eden yok) | failed | resumed (kriz daha önce başlamıştı)
   const [notify, setNotify] = useState<'sending' | 'ok' | 'none' | 'failed' | 'resumed'>(a.crisisUntil > Date.now() ? 'resumed' : 'sending');
   const [notified, setNotified] = useState(0);
 
@@ -59,75 +41,89 @@ export default function Crisis({ go }: { go: Go }) {
   }, []);
 
   const left = Math.max(0, Math.round((until - now) / 1000));
-  const el = TOTAL - left, prog = el / TOTAL;
-  const ph = left % 14;
-  const phase = left === 0 ? L.crisis.phaseOver : ph >= 10 ? L.crisis.phaseIn : ph >= 6 ? L.crisis.phaseHold : L.crisis.phaseOut;
-  const wave = Array.from({ length: 30 }, (_, i) => ({ h: Math.round(8 + Math.exp(-Math.pow((i - 9) / 7, 2)) * 88), on: i / 30 <= prog }));
-  // Genel bir model: senin dürtünün ölçümü değil. Dürtüler genelde dalga gibi yükselip alçalır.
-  const text = left === 0 ? L.crisis.textOver : prog < 0.3 ? L.crisis.text1 : prog < 0.6 ? L.crisis.text2 : L.crisis.text3;
+  const el = TOTAL - left;
+  // Nefes: 10 sn'lik devir, "al 4 · ver 6" (tutma yok). İlk komut her zaman "Nefes al".
+  const phase = left === 0 ? L.crisis.phaseOver : el % 10 < 4 ? L.crisis.phaseIn : L.crisis.phaseOut;
+  // Sahne her saniye yeniden çizilmesin: ilerleme 10 sn adımına yuvarlanır (React.memo)
+  const prog = Math.round((el / TOTAL) * PROG_STEPS) / PROG_STEPS;
+  const day = Math.max(1, Math.min(a.goalDays, Math.floor((now - a.startedAt) / 86400000) + 1));
 
   const gs = a.guardians.slice(0, 3);
-  const failedFor = (g: { status?: string }) => g.status === 'accepted' && notify === 'failed';
-  const status = (g: { status?: string }) =>
-    g.status === 'declined' ? L.crisis.stDeclined : g.status !== 'accepted' ? L.crisis.stNotAccepted
-      : notify === 'sending' ? L.crisis.stSending : notify === 'ok' ? L.crisis.stOk : notify === 'failed' ? L.crisis.stFailed : L.crisis.stCall;
   const summary = gs.length === 0 ? L.crisis.sumSolo
     : notify === 'failed' ? L.crisis.sumFailed
     : notify === 'none' ? L.crisis.sumNone
     : notify === 'ok' ? L.crisis.sumOk(notified)
     : notify === 'resumed' ? L.crisis.sumResumed : '';
+  // Ana ekranda tek kısa satır; tam (dürüst) metin "Nedenim" sayfasında
+  const status = gs.length === 0 ? '' : notify === 'sending' ? L.crisis.sending : notify === 'ok' ? L.crisis.told(notified)
+    : notify === 'none' ? L.crisis.toldNone : notify === 'failed' ? L.crisis.toldFail : '';
+
+  const steps = useMemo(() => H.crisisSteps, [H.crisisSteps]);
+  const wide = winH >= 700; // kısa ekranda gökyüzü el notları çıkar (3 adım "Nedenim" sayfasında da var)
+  const overText = left === 0 ? L.crisis.stillHard : L.crisis.breath;
 
   if (games) return <Calm onBack={() => setGames(false)} />;
+  if (note) return <CrisisNote clock={mmss(left)} summary={summary} onBack={() => setNote(false)} />;
 
   return (
     <Screen crisis>
-      <Body>
-        <View style={{ paddingHorizontal: 16, paddingTop: 6 }}>
-          <Kicker>{L.crisis.kicker}</Kicker>
-          <T size={104} ls={-6} lh={96} style={{ marginTop: 6, textShadowColor: BAHCE ? 'transparent' : 'rgba(236,48,19,.8)', textShadowRadius: BAHCE ? 0 : 32 }}>{mmss(left)}</T>
-          <T size={26} ls={-0.5} lh={28} style={{ marginTop: 8 }}>{phase}</T>
-          <Kicker style={{ marginTop: 16 }}>{L.crisis.waveKicker}</Kicker>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 96, borderBottomWidth: 1, borderColor: c.line, marginTop: 6 }}>
-            {wave.map((w, i) => <View key={i} style={{ flex: 1, height: w.h, backgroundColor: w.on ? c.fg : c.line }} />)}
+      <View style={{ flex: 1 }}>
+        {/* üst: el notu + Nedenim, süre, nefes */}
+        <View style={{ paddingHorizontal: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 48 }}>
+            <Text maxFontSizeMultiplier={1.2} style={{ fontFamily: F.hand, fontSize: 30, lineHeight: 34, color: c.clay, flexShrink: 1 }}>{L.crisis.wind}</Text>
+            <Pressable onPress={() => setNote(true)} accessibilityRole="button" accessibilityLabel={L.crisis.myWhy}
+              style={[pebble(48, 'nedenim'), { minHeight: 48, paddingHorizontal: 18, justifyContent: 'center', borderWidth: 2, borderColor: c.fg, backgroundColor: c.surf, transform: [{ rotate: '1.2deg' }] }]}>
+              <T w="b" size={17} maxFontSizeMultiplier={1.2}>{L.crisis.myWhy}</T>
+            </Pressable>
           </View>
-          <T w="s" size={12} lh={17} style={{ marginTop: 6 }}>{text}</T>
-
-          <Kicker color={c.acc2} style={{ marginTop: 18 }}>{L.crisis.why}</Kicker>
-          <T w="s" size={16} lh={22} style={{ marginTop: 4 }}>{a.reason}</T>
-          <Kicker color={c.acc2} style={{ marginTop: 14 }}>{L.crisis.future}</Kicker>
-          <T w="s" size={16} lh={22} style={{ marginTop: 4 }}>{a.letter}</T>
-          {hasVow && <>
-            <Kicker color={c.acc2} style={{ marginTop: 14 }}>{L.crisis.vowKicker}</Kicker>
-            {watch ? <VowPlayback uri={a.vowUri} /> : null}
-            <Pressable onPress={() => setWatch(!watch)} style={{ marginTop: 6, borderWidth: 1, borderColor: c.line, paddingVertical: 10, paddingHorizontal: 12, flexDirection: 'row', justifyContent: 'space-between' }}>
-              <T w="s" size={14}>{watch ? L.crisis.vowHide : L.crisis.vowWatch}</T><T size={14}>{watch ? '■' : '▶'}</T>
-            </Pressable>
-          </>}
-          {!!a.plan && <><Kicker color={c.acc2} style={{ marginTop: 14 }}>{L.crisis.plan}</Kicker><T w="s" size={16} lh={22} style={{ marginTop: 4 }}>{a.plan}</T></>}
-          <Kicker color={c.acc2} style={{ marginTop: 14 }}>{L.crisis.now}</Kicker>
-          <T w="s" size={14} lh={21} style={{ marginTop: 4 }}>{H.crisisSteps}</T>
+          <T size={72} lh={80} ls={-1} maxFontSizeMultiplier={1} style={{ fontVariant: ['tabular-nums'], marginTop: 2 }} accessibilityLabel={mmss(left)}>{mmss(left)}</T>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 2 }} accessibilityLiveRegion="polite">
+            <T size={28} lh={34} maxFontSizeMultiplier={1.2} style={{ flexShrink: 1 }}>{phase}</T>
+            <T w="s" size={15} color={c.dim} maxFontSizeMultiplier={1.2} style={{ marginLeft: 10, flexShrink: 1, textAlign: 'right' }}>{overText}</T>
+          </View>
         </View>
 
-        <View style={{ flex: 1, minHeight: 16 }} />
-        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: c.line, paddingHorizontal: 16 }}>
-          {gs.map((g, i) => (
-            <Pressable key={g.id} onPress={() => g.phone && Linking.openURL(`tel:${g.phone}`)} style={{ flex: 1, paddingVertical: 8, paddingRight: 8, paddingLeft: i ? 10 : 0, borderRightWidth: i < gs.length - 1 ? 1 : 0, borderColor: c.line }}>
-              <T size={15}>{g.name}</T>
-              <T size={10} ls={0.4} color={failedFor(g) ? c.acc2 : c.fg} style={{ marginTop: 1 }}>{status(g)}</T>
-            </Pressable>
-          ))}
+        {/* orta: kesit sahnesi (esner) */}
+        <View style={{ flex: 1, marginTop: 8 }}>
+          <CrisisScene day={day} goal={a.goalDays} prog={prog} rooting={L.crisis.rooting} steps={wide ? steps : undefined} />
         </View>
-        {!!summary && <T w="r" size={11.5} lh={16} color={c.dim} style={{ paddingHorizontal: 16, paddingVertical: 8, borderTopWidth: 1, borderColor: c.line }}>{summary}</T>}
-        <CalmBanner onPress={() => setGames(true)} />
-        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: c.line }}>
-          {!!help.lines[0] && <Pressable onPress={() => Linking.openURL(`tel:${help.lines[0].tel}`)} style={{ flex: 1, padding: 12, borderRightWidth: 1, borderColor: c.line }}><T w="s" size={12}>{`${help.lines[0].short} · ${L.help.support}`}</T></Pressable>}
-          <Pressable onPress={() => Linking.openURL(`tel:${help.emergency}`)} style={{ flex: 1, padding: 12 }}><T w="s" size={12} color={c.acc2}>{`${help.emergency} · ${L.help.emergencyShort}`}</T></Pressable>
-        </View>
-      </Body>
-      <View style={{ flexDirection: 'row' }}>
-        <View style={{ flex: 2 }}>
-          <ActionBar label={left > 0 ? L.crisis.left(mmss(left)) : L.crisis.overcome} right="" disabled={left > 0} height={68}
-            onPress={() => { a.set({ crisisUntil: 0, points: a.points + 10 }); go('home'); }} />
+
+        {/* alt: sabit eylemler (kaydırma yok) */}
+        <View style={{ paddingTop: 10 }}>
+          {gs.length > 0 && (
+            <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 16 }}>
+              {gs.map((g, i) => {
+                const ok = g.status === 'accepted';
+                const can = ok && !!g.phone;
+                const sub = g.status === 'declined' ? L.crisis.stDeclined : !ok ? L.crisis.stNotAccepted : !g.phone ? L.crisis.noPhone : L.crisis.call;
+                return (
+                  <PebbleBtn key={g.id} h={72} kind="soft" flex={1} label={`${g.name}, ${sub}`} seed={g.id} tilt={i % 2 ? 0.8 : -0.8}
+                    onPress={can ? () => { Linking.openURL(`tel:${g.phone}`).catch(() => {}); } : undefined} style={{ minWidth: 0 }}>
+                    <View style={{ flex: 1, opacity: can ? 1 : 0.65, alignItems: 'center' }}>
+                      <T w="b" size={gs.length > 2 ? 16 : 19} lh={22} maxFontSizeMultiplier={1.2} numberOfLines={1}>{g.name}</T>
+                      <T w="s" size={14} lh={18} color={can ? c.act : c.dim} maxFontSizeMultiplier={1.2} numberOfLines={1}>{sub}</T>
+                    </View>
+                  </PebbleBtn>
+                );
+              })}
+            </View>
+          )}
+          <View style={{ minHeight: 30, justifyContent: 'center', paddingHorizontal: 20 }}>
+            {gs.length === 0
+              ? <Text maxFontSizeMultiplier={1.2} style={{ fontFamily: F.hand, fontSize: 26, lineHeight: 30, color: c.clay }}>{L.crisis.alone}</Text>
+              : !!status && <T w="s" size={15} lh={20} color={notify === 'failed' ? c.clay : c.dim} maxFontSizeMultiplier={1.2}>{status}</T>}
+          </View>
+          <View style={{ flexDirection: 'row', gap: 12, paddingHorizontal: 16 }}>
+            <PebbleBtn h={64} kind="act" flex={1.15} label={L.crisis.calmBtn} onPress={() => setGames(true)}>
+              <T w="b" size={20} color={c.onAct} maxFontSizeMultiplier={1.2}>{L.crisis.calmBtn}</T>
+            </PebbleBtn>
+            <PebbleBtn h={64} kind="soft" flex={1} label={left > 0 ? L.crisis.left(mmss(left)) : L.crisis.overcome} disabled={left > 0}
+              onPress={() => { a.set({ crisisUntil: 0 }); go('home'); }}>
+              <T w="b" size={left > 0 ? 17 : 20} lh={20} maxFontSizeMultiplier={1.2} style={{ textAlign: 'center', flexShrink: 1 }} numberOfLines={2}>{left > 0 ? L.crisis.left(mmss(left)) : L.crisis.overcome}</T>
+            </PebbleBtn>
+          </View>
+          <HelpRow style={{ marginTop: 10, marginBottom: 6 }} />
         </View>
       </View>
     </Screen>
