@@ -3,13 +3,13 @@ import { View } from 'react-native';
 import { useApp } from '../store';
 import { useServer } from '../server';
 import { Screen, Body, Back, ActionBar, Opt, Field, T, Kicker } from '../components/ui';
-import LeafCurl from '../crisisart/LeafCurl';
+import CurlLeaf from '../crisisart/CurlLeaf';
 import HelpRow from '../crisisart/HelpRow';
 import { c, pebble } from '../theme';
 import type { Go } from '../nav';
 import { useL, useH } from '../i18n';
 
-// Tekrar oynadım: utandırmayan, sakin bir duraklama. Yaprak silinmez, kenarı kıvrılır. Puan, ceza ya da damga dili yok.
+// Tekrar oynadım: utandırmayan, sakin bir duraklama. Yaprak silinmez, kenarı kıvrılır (art/plant yaprak "curl", 900 ms bir kez). Puan, ceza ya da damga dili yok.
 // Kendini bildirme akışı ve sunucu çağrısı (srv.relapse) aynı; yalnızca görünüm ve metin değişti.
 export default function Relapse({ go }: { go: Go }) {
   const a = useApp();
@@ -65,7 +65,7 @@ export default function Relapse({ go }: { go: Go }) {
         <View style={{ paddingHorizontal: 16 }}>
           <Kicker color={c.dim}>{H.relapseResultKicker(new Date().toLocaleTimeString(L.locale, { hour: '2-digit', minute: '2-digit' }))}</Kicker>
           <T size={40} ls={-0.8} lh={46} style={{ marginTop: 6 }}>{L.relapse.resultTitle}</T>
-          <View style={{ alignItems: 'center', marginTop: 8 }}><LeafCurl size={112} /></View>
+          <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 12 }}><CurlLeaf width={200} /></View>
           <T size={56} ls={-1} lh={64} maxFontSizeMultiplier={1.1} style={{ textAlign: 'center' }}>{L.relapse.days(days)}</T>
           <T w="s" size={18} lh={26} style={{ textAlign: 'center', marginTop: 4 }}>{L.relapse.daysReal(days)}</T>
         </View>

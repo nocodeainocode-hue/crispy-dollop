@@ -4,14 +4,15 @@ import Balloons from '../games/Balloons';
 import Sudoku from '../games/Sudoku';
 import Memory from '../games/Memory';
 import TicTacToe from '../games/TicTacToe';
-import SeedPacket from '../crisisart/SeedPacket';
+import { SeedPacket, CalmIcon, type CalmIconName } from '../art/misc';
 import { Screen, Body, Back, ActionBar, T, Kicker } from '../components/ui';
 import { c } from '../theme';
 import { useL } from '../i18n';
+import { useHapticsScope } from '../haptics';
 
 // Stres düşürücü mini oyunlar. Bilinçli tasarım ilkesi: rastgele ödül, puan, seri, "bir tur daha" döngüsü YOK.
 // Amaç dikkat dağıtmak ve dürtü dalgasını geçirmek; kumar mekaniğine benzeyen hiçbir şey eklenmez.
-// Menü: "tohum paketi" kartları (hafif eğik kâğıt, zikzaklı üst kenar).
+// Menü: art/misc "tohum paketi" kartları (hafif eğik kâğıt, zikzaklı üst kenar) + CalmIcon simgeleri, iki sütun. Haptik: bu ekranda ve oyunlarda sessiz.
 type Game = 'menu' | 'balloons' | 'sudoku' | 'memory' | 'xox' | 'ground' | 'minus7';
 
 const COUNTS = [5, 4, 3, 2, 1];
@@ -68,23 +69,32 @@ function Minus7() {
   );
 }
 
-// Her paketin tohumu farklı bir yıkama tonunda (hepsi palet token'ı)
-const TONES = () => [c.sage, c.waterWash, c.clayWash, c.sageWash, c.cell, c.sage];
+// Menü simgeleri (tuvaldeki Sakinles.dc.html .pk kartları): oyun/egzersiz -> CalmIcon
+const ICONS: Record<string, CalmIconName> = { balloons: 'balloon', sudoku: 'sudoku', memory: 'memory', xox: 'xox', ground: 'senses', minus7: 'countdown' };
 
 export default function Calm({ onBack }: { onBack: () => void }) {
   const [g, setG] = useState<Game>('menu');
   const L = useL();
-  const items = (['balloons', 'sudoku', 'memory', 'xox', 'ground', 'minus7'] as Game[]).map(k => [k, ...L.calm.items[k]] as [Game, string, string]);
+  useHapticsScope('quiet');
+  const keys = ['balloons', 'sudoku', 'memory', 'xox', 'ground', 'minus7'] as Game[];
   const titles = L.calm.titles;
-  const tones = TONES();
   return (
     <Screen>
       <Back onPress={g === 'menu' ? onBack : () => setG('menu')} label={g === 'menu' ? L.common.back : L.calm.backToGames} />
       <T size={40} ls={-0.8} lh={46} style={{ paddingHorizontal: 16, paddingBottom: 4 }}>{titles[g]}</T>
       {g === 'menu' && <Body>
         <T w="s" size={16} lh={22} color={c.dim} style={{ paddingHorizontal: 16, paddingBottom: 2 }}>{L.calm.intro}</T>
-        <View style={{ paddingBottom: 24 }}>
-          {items.map(([k, t, s], i) => <SeedPacket key={k} index={i} title={t} sub={s} tone={tones[i]} onPress={() => setG(k)} />)}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 18, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 28 }}>
+          {keys.map((k, i) => {
+            const [t, s] = L.calm.items[k];
+            return (
+              <View key={k} style={{ width: '47%' }}>
+                <SeedPacket label={titles[k]} variant={i} accessibilityLabel={s ? `${t}. ${s}` : t} onPress={() => setG(k)}>
+                  <CalmIcon name={ICONS[k]} />
+                </SeedPacket>
+              </View>
+            );
+          })}
         </View>
       </Body>}
       {g === 'balloons' && <Balloons />}

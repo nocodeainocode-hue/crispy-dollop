@@ -5,6 +5,7 @@ import { useL, fmtDur, type Dict } from '../i18n';
 import { useServer } from '../server';
 import { Screen, Body, Back, ActionBar, T, Kicker } from '../components/ui';
 import HelpRow from '../crisisart/HelpRow';
+import { GIcon } from '../art/misc';
 import { c, pebble } from '../theme';
 import type { Go } from '../nav';
 
@@ -16,11 +17,6 @@ function useTick(step = 1000) {
   const [n, setN] = useState(Date.now());
   useEffect(() => { const t = setInterval(() => setN(Date.now()), step); return () => clearInterval(t); }, [step]);
   return n;
-}
-
-/** Çizilmiş onay işareti (yazı tipi glifi değil). */
-function Tick({ color }: { color: string }) {
-  return <View style={{ width: 14, height: 24, borderRightWidth: 4, borderBottomWidth: 4, borderColor: color, transform: [{ rotate: '45deg' }], marginTop: -6 }} />;
 }
 
 /**
@@ -80,7 +76,7 @@ export default function Exit({ go }: { go: Go }) {
                 <View key={g.id} style={[pebble(150, g.id), { flex: 1, minHeight: 150, padding: 14, justifyContent: 'space-between', backgroundColor: ok ? c.sageWash : c.surf, borderWidth: 2, borderColor: ok ? c.act : c.edge, transform: [{ rotate: `${i % 2 ? 1 : -1}deg` }] }]}>
                   <Kicker color={c.dim}>{L.exit.key(i + 1)}</Kicker>
                   <View style={{ height: 34, justifyContent: 'center' }}>
-                    {ok ? <Tick color={c.act} /> : <View style={{ width: 26, height: 20, borderWidth: 2.4, borderColor: c.edge, borderStyle: 'dashed', borderRadius: 10 }} />}
+                    {ok ? <GIcon name="check" size={32} color={c.act} strokeWidth={3} /> : <View style={{ width: 26, height: 20, borderWidth: 2.4, borderColor: c.edge, borderStyle: 'dashed', borderRadius: 10 }} />}
                   </View>
                   <View>
                     <T w="b" size={20} lh={24} numberOfLines={1}>{g.name}</T>
