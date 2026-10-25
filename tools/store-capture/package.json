@@ -1,0 +1,17 @@
+{
+  "name": "store-capture",
+  "private": true,
+  "type": "module",
+  "description": "Play mağaza ekran görüntüleri: uygulamayı web'de gerçek telefon oranında çeker, poster.html ile 1080x1920 kareleri basar.",
+  "scripts": {
+    "capture": "node capture.mjs",
+    "compose": "node compose.mjs",
+    "check": "node check.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.62.1"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

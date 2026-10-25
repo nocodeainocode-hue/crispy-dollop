@@ -1,0 +1,12 @@
+{
+  "tr": [
+    { "n": 1, "file": "01-ana-ekran",       "raw": "01-ana-ekran.png",       "title": "Bahsi bırak. Her gün bir yaprak.", "sub": "", "badge": "Rastgele ödül yok.", "dark": false },
+    { "n": 2, "file": "02-kriz",            "raw": "02-kriz.png",            "title": "Dürtü rüzgâr gibi geçer.", "sub": "Kriz modu her zaman ücretsiz.", "badge": "", "dark": false },
+    { "n": 3, "file": "03-deneme-paket",    "raw": "03-paket.png",           "title": "Önce 7 gün dene.", "sub": "Tek seferlik. Abonelik değil.", "badge": "", "dark": false },
+    { "n": 4, "file": "04-sahit",           "raw": "04-sahit.png",           "title": "Yanında güvendiğin biri olsun.", "sub": "Şahit yargılamaz, yanında durur.", "badge": "", "dark": false },
+    { "n": 5, "file": "05-imza",            "raw": "05-imza.png",            "title": "Sözünü imzayla ver.", "sub": "Basılı tut, bir fidan büyüsün.", "badge": "", "dark": false },
+    { "n": 6, "file": "06-gunluk-kontrol",  "raw": "06-gunluk-kontrol.png",  "title": "Her gün kısa bir kontrol.", "sub": "Dürüst cevap yeter.", "badge": "", "dark": false },
+    { "n": 7, "file": "07-gun-tamam",       "raw": "07-gun-tamam.png",       "title": "Bugün de tamam. Yarın yeni yaprak.", "sub": "Her yedinci gün bir lale.", "badge": "", "dark": true },
+    { "n": 8, "file": "08-sakinles",        "raw": "08-sakinles.png",        "title": "Dürtü geçene kadar oyna.", "sub": "Puan yok. Ödül yok.", "badge": "", "dark": false }
+  ]
+}
