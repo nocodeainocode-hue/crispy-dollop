@@ -72,6 +72,11 @@ const company = (await import(pathToFileURL(path.join(SRC, 'legal', 'company.mjs
 const todo = Object.entries(company).filter(([, v]) => typeof v === 'string' && /\[.+\]/.test(v)).map(([k]) => k);
 if (todo.length) console.warn(`⚠ src/legal/company.mjs içinde doldurulmamış alanlar: ${todo.join(', ')} (yayından önce doldur)`);
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const LEGAL_DESC = {
+  tr: { privacy: 'QuitVow gizlilik politikası ve KVKK aydınlatma metni: hangi veriler işlenir, telefonunda neler kalır, nasıl silinir.', terms: 'QuitVow kullanım koşulları: uygulamanın kapsamı, paketler, ödeme ve iade, sorumluluk sınırları.' },
+  en: { privacy: 'QuitVow privacy policy: what data we process, what stays on your phone, and how to delete your account.', terms: 'QuitVow terms of use: what the app does, packs, payment and refunds, and limits of liability.' },
+};
 for (const l of LANGS) {
   const legal = (await import(pathToFileURL(path.join(SRC, 'legal', `${l}.mjs`)).href)).default(company);
   for (const kind of ['privacy', 'terms']) {
@@ -84,6 +89,10 @@ for (const l of LANGS) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(pg.title)} · QuitVow</title>
+<meta name="description" content="${attr(LEGAL_DESC[l][kind])}">
+<meta property="og:title" content="${attr(pg.title)} · QuitVow">
+<meta property="og:description" content="${attr(LEGAL_DESC[l][kind])}">
+<meta property="og:image" content="${SITE_URL}/img/ikon-180.png">
 <meta name="theme-color" content="#0A0A0C">
 ${canon}
 <link rel="icon" href="${root}img/favicon-32.png">
@@ -116,7 +125,6 @@ ${canon}
 const POSTS = ['kumari-birakmak-istiyorum', 'bahis-oynama-istegi-nasil-gecer', 'kumar-borcu-nasil-kapanir', 'esim-kumar-oynuyor-ne-yapmaliyim', 'kumar-bagimliligi-belirtileri-test', 'how-to-stop-sports-betting'];
 const PLAY = 'https://play.google.com/store/apps/details?id=com.quitvow.app';
 const LOGO = template.match(/<svg viewBox="0 0 512 512"[\s\S]*?<\/svg>/)[0];
-const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const jsonLd = o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
 const UI = {
   tr: { post: 'Yazı', read: 'dk okuma', upd: 'Güncelleme', toc: 'Bu yazıda', related: 'İlgili yazılar', all: 'Tüm yazılar', faq: 'Sık sorulan sorular', og: 'tr_TR', homeDir: '' },
@@ -143,7 +151,7 @@ const navHtml = (root, l) => {
     <a class="brand" href="${home}">${LOGO}QuitVow</a>
     <div class="navright">
       <a class="navlink" href="${root}${d.footer.blogHref}" aria-current="page">${d.footer.blog}</a>
-      <span class="chip">${d.nav.chip}</span>
+      <a class="chip" href="${PLAY}" rel="noopener">${d.nav.chip}</a>
       <div class="langs" aria-label="${d.nav.language}">${langs}</div>
     </div>
   </nav>`;
@@ -259,6 +267,29 @@ ${footerHtml(root, l)}
   console.log('✓ dist/blog/index.html');
 }
 if (SITE_URL) {
+  // llms.txt: yapay zekâ arama/asistanları için site özeti ve sayfa listesi (llmstxt.org biçimi)
+  const llms = `# QuitVow
+
+> QuitVow, kumarı ve bahsi bırakmak isteyenler için bir taahhüt uygulamasıdır (Android, Google Play): sözü güvenilen şahitlere, önceden yazılmış kurallara ve her gün dolan bir takvime bağlar; dürtü anı için kriz modu içerir. Tedavi değildir, başarı garantisi vermez, bahis engelleyici değildir. QuitVow is a commitment app (Android) that helps people quit gambling and betting with witnesses, crisis mode and daily check-ins.
+
+## Uygulama / App
+- [Google Play](${PLAY}): QuitVow: Kumarı Bırak (Türkçe, English)
+- [Ana sayfa (TR)](${SITE_URL}/): ürün tanıtımı
+- [Home (EN)](${SITE_URL}/en/): product overview
+
+## Yazılar / Articles
+${posts.map(p => `- [${p.title}](${SITE_URL}/${p.path}/): ${p.description}`).join('\n')}
+
+## Yasal / Legal
+- [Gizlilik ve KVKK](${SITE_URL}/gizlilik/)
+- [Kullanım koşulları](${SITE_URL}/kosullar/)
+- [Privacy](${SITE_URL}/en/privacy/)
+- [Terms](${SITE_URL}/en/terms/)
+
+## Yardım hatları (Türkiye) / Helplines
+ALO 182 (psikolojik destek), Yeşilay 115 (bağımlılık danışmanlığı), 112 (acil).
+`;
+  fs.writeFileSync(path.join(OUT, 'llms.txt'), llms);
   fs.writeFileSync(path.join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls.map(u => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`);
   fs.writeFileSync(path.join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
   console.log('✓ dist/sitemap.xml, dist/robots.txt');

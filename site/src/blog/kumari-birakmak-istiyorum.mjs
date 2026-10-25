@@ -5,7 +5,7 @@ export default {
   path: 'kumari-birakmak-istiyorum',
   title: 'Kumarı Bırakmak İstiyorum: Kumarı Bırakmanın 10 Etkili Yolu',
   metaTitle: 'Kumarı Bırakmak İstiyorum: Kumarı Bırakmanın 10 Yolu (2026)',
-  description: 'Kumarı ve bahsi bırakmak istiyorsan nereden başlayacağını adım adım anlatır: tetikleri bul, paraya erişimi kısıtla, şahit edin, dürtüyü yönet, nüksü aş. Ayrıca QuitVow nasıl yardım eder?',
+  description: 'Kumarı ve bahsi bırakmak istiyorsan nereden başlayacağını anlatır: tetikleri bul, paraya erişimi kısıtla, şahit et, dürtüyü yönet, nüksü aş.',
   published: '2026-10-18',
   updated: '2026-10-18',
   readMinutes: 9,

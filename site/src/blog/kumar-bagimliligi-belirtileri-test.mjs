@@ -4,7 +4,7 @@ export default {
   path: 'kumar-bagimliligi-belirtileri-test',
   title: 'Kumar Bağımlılığı Belirtileri ve Testi: Ben Bağımlı mıyım? 9 Soruda Kendini Değerlendir',
   metaTitle: 'Kumar Bağımlılığı Belirtileri ve Testi: Ben Bağımlı mıyım?',
-  description: 'Kumar bağımlılığı belirtileri nelerdir? 9 soruluk kendini değerlendirme testiyle bahis ve kumar alışkanlığının hangi düzeyde olduğunu gör; sonuca göre ne yapacağını öğren.',
+  description: 'Kumar bağımlılığı belirtileri nelerdir? 9 soruluk testle bahis ve kumar alışkanlığının düzeyini gör, sonuca göre ne yapacağını öğren.',
   published: '2026-10-18',
   updated: '2026-10-18',
   readMinutes: 6,
