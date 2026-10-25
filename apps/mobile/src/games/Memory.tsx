@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Pressable, Animated } from 'react-native';
-import { ND } from '../components/motion';
+import { ND, EASE, dur } from '../components/motion';
 import { T, ActionBar } from '../components/ui';
-import { c, alpha, BAHCE } from '../theme';
+import { c, alpha, BAHCE, pebble } from '../theme';
 import { useL } from '../i18n';
 
-// Hafıza kartları: 8 çift, sayaç ve süre yok.
+// Hafıza kartları: 8 çift, sayaç ve süre yok. Simgeler geometrik (iskambil takımı simgesi yok). Oyun renkleri palet dışı olabilir.
 const SYMS: [string, string][] = BAHCE
-  ? [['●', '#CF5F44'], ['▲', '#DCA83F'], ['■', '#6BA38A'], ['★', '#C97AA0'], ['✚', '#7A9CC6'], ['♥', '#B9714D'], ['☾', '#8E86C9'], ['◆', '#8FAA87']]
-  : [['●', '#EC3013'], ['▲', '#FFB703'], ['■', '#2EC4B6'], ['★', '#FF6FA3'], ['✚', '#4CC9F0'], ['♥', '#FF5A3D'], ['☾', '#8E7DFF'], ['◆', '#9BE564']];
+  ? [['●', '#CF5F44'], ['▲', '#DCA83F'], ['■', '#6BA38A'], ['★', '#C97AA0'], ['✚', '#7A9CC6'], ['▼', '#B9714D'], ['☾', '#8E86C9'], ['▬', '#8FAA87']]
+  : [['●', '#EC3013'], ['▲', '#FFB703'], ['■', '#2EC4B6'], ['★', '#FF6FA3'], ['✚', '#4CC9F0'], ['▼', '#FF5A3D'], ['☾', '#8E7DFF'], ['▬', '#9BE564']];
 type Card = { id: number; sym: string; color: string };
 
 const deal = (): Card[] => {
@@ -19,11 +19,12 @@ const deal = (): Card[] => {
 
 function Face({ card, up, matched, onPress }: { card: Card; up: boolean; matched: boolean; onPress: () => void }) {
   const v = useRef(new Animated.Value(1)).current;
-  useEffect(() => { v.setValue(0.55); Animated.spring(v, { toValue: 1, friction: 5, tension: 140, useNativeDriver: ND }).start(); }, [up]);
+  // açılırken kısa, aşmasız bir ölçek geçişi (yay yok)
+  useEffect(() => { v.setValue(0.9); Animated.timing(v, { toValue: 1, duration: dur(180), easing: EASE, useNativeDriver: ND }).start(); }, [up]);
   return (
-    <Pressable onPress={onPress} style={{ width: '25%', padding: 4 }}>
-      <Animated.View style={{ aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: matched ? card.color : c.line, backgroundColor: up ? c.tint(0.1) : c.surf, opacity: matched ? 0.55 : 1, transform: [{ scale: v }] }}>
-        <T size={up ? 34 : 22} color={up ? card.color : c.mute}>{up ? card.sym : '?'}</T>
+    <Pressable onPress={onPress} style={{ width: '25%', padding: 4 }} accessibilityRole="button">
+      <Animated.View style={[pebble(80, card.id), { aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: matched ? card.color : c.edge, backgroundColor: up ? alpha(c.sage, 0.22) : c.surf, opacity: matched ? 0.6 : 1, transform: [{ scale: v }] }]}>
+        <T size={up ? 34 : 24} color={up ? card.color : c.dim}>{up ? card.sym : '?'}</T>
       </Animated.View>
     </Pressable>
   );
@@ -56,8 +57,8 @@ export default function Memory() {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: '100%', maxWidth: 400, alignSelf: 'center' }}>
         {cards.map((card, i) => <Face key={card.id} card={card} up={up.includes(i) || matched.includes(card.sym)} matched={matched.includes(card.sym)} onPress={() => flip(i)} />)}
       </View>
-      <T w="s" size={12.5} color={done ? c.fg : c.dim} style={{ marginTop: 12, textAlign: 'center' }}>{done ? L.games.memDone : L.games.memHow}</T>
-      <ActionBar label={done ? L.games.reshuffle : L.games.shuffle} right="" kind="ghost" height={52} size={14} onPress={again} />
+      <T w="s" size={16} color={done ? c.fg : c.dim} style={{ marginTop: 12, textAlign: 'center' }}>{done ? L.games.memDone : L.games.memHow}</T>
+      <ActionBar label={done ? L.games.reshuffle : L.games.shuffle} right="" kind="ghost" height={60} size={19} onPress={again} />
     </View>
   );
 }

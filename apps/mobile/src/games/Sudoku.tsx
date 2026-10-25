@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { T, ActionBar } from '../components/ui';
-import { c, alpha, BAHCE } from '../theme';
+import { c, alpha, pebble } from '../theme';
 import { useL } from '../i18n';
 
 import { LEVELS, fits, makePuzzle } from './sudokuLogic';
 
+// Mantık aynı (sudokuLogic). Görünüm: palet token'ları, çakıl köşeli kabuk ve düğmeler; dokunma hedefleri >= 48 dp.
 export default function Sudoku() {
   const L = useL();
   const [level, setLevel] = useState('easy');
@@ -45,18 +46,20 @@ export default function Sudoku() {
     setSel(target);
   };
 
+  const chip = (on: boolean, key: string) => [pebble(48, key), { minHeight: 48, justifyContent: 'center' as const, paddingHorizontal: 16, marginRight: 8, marginBottom: 8, borderWidth: 2, borderColor: on ? c.act : c.edge, backgroundColor: on ? c.sageWash : c.surf }];
+
   return (
     <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 6 }}>
         {Object.keys(LEVELS).map(l => (
-          <Pressable key={l} onPress={() => setLevel(l)} style={{ paddingVertical: 8, paddingHorizontal: 12, marginRight: 6, marginBottom: 6, borderWidth: 1, borderColor: level === l ? c.fg : c.line, backgroundColor: level === l ? c.fg : 'transparent' }}>
-            <T size={12.5} color={level === l ? c.ink : c.fg}>{L.games.levels[l]}</T>
+          <Pressable key={l} onPress={() => setLevel(l)} accessibilityRole="radio" accessibilityState={{ selected: level === l }} style={chip(level === l, l)}>
+            <T w="b" size={15}>{L.games.levels[l]}</T>
           </Pressable>
         ))}
-        <Pressable onPress={() => setSeed(s => s + 1)} style={{ paddingVertical: 8, paddingHorizontal: 12, marginBottom: 6, borderWidth: 1, borderColor: c.line }}><T size={12.5}>{L.games.newGame}</T></Pressable>
+        <Pressable onPress={() => setSeed(s => s + 1)} accessibilityRole="button" style={chip(false, 'new')}><T w="b" size={15}>{L.games.newGame}</T></Pressable>
       </View>
 
-      <View style={{ width: '100%', maxWidth: 380, alignSelf: 'center', borderWidth: 2, borderColor: c.fg, opacity: loading ? 0.25 : 1 }}>
+      <View style={[pebble(40, 'sudoku'), { width: '100%', maxWidth: 380, alignSelf: 'center', borderWidth: 3, borderColor: c.fg, overflow: 'hidden', opacity: loading ? 0.25 : 1 }]}>
         {Array.from({ length: 9 }, (_, r) => (
           <View key={r} style={{ flexDirection: 'row' }}>
             {Array.from({ length: 9 }, (_, col) => {
@@ -66,8 +69,8 @@ export default function Sudoku() {
               return (
                 <Pressable key={col} onPress={() => setSel(i)} style={{ flex: 1, aspectRatio: 1, alignItems: 'center', justifyContent: 'center',
                   borderRightWidth: col === 8 ? 0 : thickR ? 2 : 0.5, borderBottomWidth: r === 8 ? 0 : thickB ? 2 : 0.5, borderRightColor: thickR ? c.fg : c.line, borderBottomColor: thickB ? c.fg : c.line, // yalnızca blok sınırı kalın/koyu
-                  backgroundColor: sel === i ? alpha(c.acc, 0.45) : bad ? alpha(c.acc, 0.18) : v !== 0 && v === selVal ? c.tint(0.22) : peer ? c.tint(0.07) : 'transparent' }}>
-                  {v !== 0 && <T w={given || hintedCell ? 'b' : 'r'} size={20} color={bad ? c.acc2 : hintedCell ? c.amber : given ? c.fg : c.blue}>{v}</T>}
+                  backgroundColor: sel === i ? alpha(c.act, 0.4) : bad ? alpha(c.clay, 0.22) : v !== 0 && v === selVal ? alpha(c.sage, 0.4) : peer ? c.tint(0.07) : 'transparent' }}>
+                  {v !== 0 && <T w={given || hintedCell ? 'b' : 'r'} size={20} color={bad ? c.clay : hintedCell ? c.amber : given ? c.fg : c.blue}>{v}</T>}
                 </Pressable>
               );
             })}
@@ -77,18 +80,18 @@ export default function Sudoku() {
 
       <View style={{ flexDirection: 'row', marginTop: 12, maxWidth: 380, alignSelf: 'center', width: '100%' }}>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-          <Pressable key={n} onPress={() => put(n)} style={{ flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.line, marginRight: n === 9 ? 0 : -1 }}><T size={18}>{n}</T></Pressable>
+          <Pressable key={n} onPress={() => put(n)} accessibilityRole="button" style={[pebble(48, n), { flex: 1, height: 48, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: c.edge, backgroundColor: c.surf, marginRight: n === 9 ? 0 : 3 }]}><T size={19}>{n}</T></Pressable>
         ))}
       </View>
       <View style={{ flexDirection: 'row', marginTop: 8, maxWidth: 380, alignSelf: 'center', width: '100%' }}>
-        <Pressable onPress={() => put(0)} style={{ flex: 1, height: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.line, marginRight: 8 }}><T size={13}>{L.games.erase}</T></Pressable>
-        <Pressable onPress={hint} disabled={loading || solved} style={{ flex: 1, height: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.amber, opacity: loading || solved ? 0.4 : 1 }}><T size={13} color={c.amber}>{L.games.hint}{hinted.length ? ` · ${hinted.length}` : ''}</T></Pressable>
+        <Pressable onPress={() => put(0)} accessibilityRole="button" style={[pebble(48, 'erase'), { flex: 1, height: 48, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: c.edge, backgroundColor: c.surf, marginRight: 8 }]}><T w="b" size={15}>{L.games.erase}</T></Pressable>
+        <Pressable onPress={hint} disabled={loading || solved} accessibilityRole="button" style={[pebble(48, 'hint'), { flex: 1, height: 48, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: c.amber, opacity: loading || solved ? 0.4 : 1 }]}><T w="b" size={15} color={c.amber}>{L.games.hint}{hinted.length ? ` · ${hinted.length}` : ''}</T></Pressable>
       </View>
 
-      <T w="s" size={12.5} color={solved ? c.fg : c.dim} style={{ marginTop: 12, textAlign: 'center' }}>
+      <T w="s" size={15} color={solved ? c.fg : c.dim} style={{ marginTop: 12, textAlign: 'center' }}>
         {loading ? L.games.preparing : solved ? L.games.solved : L.games.sudokuStatus(L.games.levels[level], clues)}
       </T>
-      {solved && <ActionBar label={L.games.newGame} onPress={() => setSeed(s => s + 1)} height={56} size={15} />}
+      {solved && <ActionBar label={L.games.newGame} onPress={() => setSeed(s => s + 1)} height={60} size={19} />}
     </View>
   );
 }
