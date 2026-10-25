@@ -1,12 +1,22 @@
 import React, { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { View, PixelRatio } from 'react-native';
 import { useApp } from '../store';
-import { Screen, Body, Back, ActionBar, Field, Opt, T, Kicker, Hair } from '../components/ui';
-import { c } from '../theme';
+import { Screen, Body, Back, ActionBar, Field, T, Kicker } from '../components/ui';
+import { Rise } from '../components/motion';
+import { Chip } from '../components/PaperKit';
+import { c, F, pebble } from '../theme';
 import Analysis from '../components/Analysis';
 import type { Go } from '../nav';
 
 import { useL, useH, entryLabel, isTrigger } from '../i18n';
+
+/** Örüntü kutusu: hafif eğik kâğıt kart (yalnız dekoratif; içinde giriş alanı yok). */
+const Stat = ({ label, value, tilt }: { label: string; value: string; tilt: number }) => (
+  <View style={[pebble(104, label), { flex: 1, minHeight: 96, paddingVertical: 14, paddingHorizontal: 20, backgroundColor: c.surf, borderWidth: 2, borderColor: c.line, transform: [{ rotate: `${tilt}deg` }] }]}>
+    <Kicker color={c.dim}>{label}</Kicker>
+    <T size={21} lh={26} numberOfLines={2} style={{ marginTop: 6, fontFamily: F.d }}>{value}</T>
+  </View>
+);
 
 export default function Journal({ go }: { go: Go }) {
   const a = useApp();
@@ -24,48 +34,54 @@ export default function Journal({ go }: { go: Go }) {
     return { hour: th ? L.journal.hourAround(th[0]) : '—', trig: tt ? entryLabel(tt[0], H, L) : '—' };
   }, [a.entries, L, H]);
 
+  // Kayıt: yalnızca günlüğe yazılır. (Puan yazımı kaldırıldı: dayanmak ödül avı değildir.)
   const save = (kind: 'tetik' | 'iyi') => {
     a.addEntry({ kind, mood, trigger: trg, note: kind === 'iyi' ? note || L.journal.resistedNote : note });
-    if (kind === 'iyi') a.set({ points: a.points + 3 });
     setMood(''); setTrg(''); setNote('');
   };
+
+  // Büyük yazı ölçeğinde iki düğme yan yana sığmaz: alt alta.
+  const stack = PixelRatio.getFontScale() > 1.15;
 
   return (
     <Screen>
       <Back onPress={() => go('home')} />
       <Body>
-        <T size={36} ls={-1.1} lh={36} style={{ paddingHorizontal: 16 }}>{L.journal.title}</T>
-        <T w="r" size={13} lh={19} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 14 }}>{H.journalIntro}{a.triggerTimes.length ? L.journal.riskTimes(a.triggerTimes.map(id => H.when[id] ?? id).join(' · ')) : ''}</T>
-        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.line }}>
-          <View style={{ flex: 1, padding: 14, borderRightWidth: 1, borderColor: c.line }}><Kicker>{L.journal.riskiestHour}</Kicker><T size={18} style={{ marginTop: 4 }}>{pattern.hour}</T></View>
-          <View style={{ flex: 1, padding: 14 }}><Kicker>{L.journal.topTrigger}</Kicker><T size={18} style={{ marginTop: 4 }}>{pattern.trig}</T></View>
+        <Rise y={12}>
+          <T size={40} ls={-0.8} lh={46} style={{ paddingHorizontal: 24 }}>{L.journal.title}</T>
+          <T w="r" size={16} lh={23} color={c.dim} style={{ paddingHorizontal: 24, paddingTop: 6, paddingBottom: 16 }}>{H.journalIntro}{a.triggerTimes.length ? L.journal.riskTimes(a.triggerTimes.map(id => H.when[id] ?? id).join(' · ')) : ''}</T>
+        </Rise>
+        <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 12 }}>
+          <Stat label={L.journal.riskiestHour} value={pattern.hour} tilt={-1.2} />
+          <Stat label={L.journal.topTrigger} value={pattern.trig} tilt={1.2} />
         </View>
 
         <Analysis entries={a.entries} pack={a.goalDays > 7} go={go} />
 
-        <Kicker color={c.acc2} style={{ padding: 16, paddingBottom: 8 }}>{L.journal.feel}</Kicker>
-        <Hair />{Object.entries(H.moods).map(([m, label]) => <Opt key={m} label={label} on={mood === m} onPress={() => setMood(mood === m ? '' : m)} />)}
-        <Kicker color={c.acc2} style={{ padding: 16, paddingBottom: 8 }}>{L.journal.trigger}</Kicker>
-        <Hair />{Object.entries(H.triggers).map(([m, label]) => <Opt key={m} label={label} on={trg === m} onPress={() => setTrg(trg === m ? '' : m)} />)}
-        <View style={{ paddingTop: 14 }}><Field label={L.journal.note} value={note} onChangeText={setNote} placeholder="…" /></View>
+        <Kicker color={c.dim} style={{ paddingHorizontal: 24, paddingTop: 28, paddingBottom: 10 }}>{L.journal.feel}</Kicker>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16 }}>
+          {Object.entries(H.moods).map(([m, label]) => <Chip key={m} label={label} on={mood === m} onPress={() => setMood(mood === m ? '' : m)} />)}
+        </View>
+        <Kicker color={c.dim} style={{ paddingHorizontal: 24, paddingTop: 18, paddingBottom: 10 }}>{L.journal.trigger}</Kicker>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16 }}>
+          {Object.entries(H.triggers).map(([m, label]) => <Chip key={m} label={label} on={trg === m} onPress={() => setTrg(trg === m ? '' : m)} />)}
+        </View>
+        <View style={{ paddingTop: 18 }}><Field label={L.journal.note} value={note} onChangeText={setNote} placeholder="…" /></View>
 
-        <Kicker color={c.acc2} style={{ padding: 16, paddingBottom: 8 }}>{L.journal.history}</Kicker>
-        <Hair />
-        {a.entries.length === 0 && <T w="r" size={13} color={c.dim} style={{ padding: 16 }}>{L.journal.empty}</T>}
+        <Kicker color={c.dim} style={{ paddingHorizontal: 24, paddingTop: 22, paddingBottom: 10 }}>{L.journal.history}</Kicker>
+        {a.entries.length === 0 && <T w="r" size={15} lh={22} color={c.dim} style={{ paddingHorizontal: 24 }}>{L.journal.empty}</T>}
         {a.entries.map(e => (
-          <View key={e.id} style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: c.line }}>
-            <View style={{ width: 92, padding: 12, borderRightWidth: 1, borderColor: c.line }}><Kicker color={e.kind === 'nuks' ? c.acc2 : c.fg}>{KIND[e.kind]}</Kicker></View>
-            <View style={{ flex: 1, padding: 12 }}>
-              <T w="s" size={13}>{[e.mood, e.trigger].filter(Boolean).map(x => entryLabel(x, H, L)).concat(e.helper ? [L.done.helpers[e.helper] ?? e.helper] : [], e.note ? [e.note] : []).join(' · ') || '—'}</T>
-              <T w="r" size={11} color={c.mute} style={{ marginTop: 2 }}>{new Date(e.at).toLocaleString(L.locale)}</T>
-            </View>
+          <View key={e.id} style={[pebble(72, e.id), { marginHorizontal: 16, marginVertical: 4, minHeight: 64, paddingVertical: 12, paddingHorizontal: 22, backgroundColor: c.surf, borderWidth: 2, borderColor: c.line }]}>
+            <Kicker color={e.kind === 'nuks' ? c.clay : c.dim}>{KIND[e.kind]}</Kicker>
+            <T w="s" size={15} lh={21} style={{ marginTop: 3 }}>{[e.mood, e.trigger].filter(Boolean).map(x => entryLabel(x, H, L)).concat(e.helper ? [L.done.helpers[e.helper] ?? e.helper] : [], e.note ? [e.note] : []).join(' · ') || '—'}</T>
+            <T w="r" size={13} lh={18} color={c.dim} style={{ marginTop: 2 }}>{new Date(e.at).toLocaleString(L.locale)}</T>
           </View>
         ))}
         <View style={{ height: 14 }} />
       </Body>
-      <View style={{ flexDirection: 'row' }}>
-        <View style={{ flex: 1 }}><ActionBar label={L.journal.resisted} right="" kind="ghost" height={64} size={15} onPress={() => save('iyi')} /></View>
-        <View style={{ flex: 1 }}><ActionBar label={L.journal.save} right="" height={64} size={15} disabled={!mood && !trg} onPress={() => save('tetik')} /></View>
+      <View style={stack ? undefined : { flexDirection: 'row' }}>
+        <View style={stack ? undefined : { flex: 1 }}><ActionBar label={L.journal.resisted} right="" kind="ghost" height={64} size={19} onPress={() => save('iyi')} /></View>
+        <View style={stack ? undefined : { flex: 1 }}><ActionBar label={L.journal.save} right="" height={64} size={19} disabled={!mood && !trg} onPress={() => save('tetik')} /></View>
       </View>
     </Screen>
   );
