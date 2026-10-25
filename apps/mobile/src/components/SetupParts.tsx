@@ -10,28 +10,12 @@ import { useL } from '../i18n';
 // Kurulum, şahitler ve tamamlama ekranlarının ortak parçaları (ui.tsx'e dokunmadan). Küçük işaretler View ile çizilir;
 // paket kartı, damga, filiz ve imza art/misc kütüphanesinden gelir. Yeni bağımlılık, yazı tipi glifi ve sabit renk yok; renkler token'dan.
 
-/** Yan ok: View ile çizilen chevron (açıkken yukarı bakar). */
-function Chev({ open, color }: { open: boolean; color: string }) {
-  return <View style={{ width: 9, height: 9, marginLeft: 10, marginTop: open ? 4 : -3, borderRightWidth: 2.5, borderBottomWidth: 2.5, borderColor: color, transform: [{ rotate: open ? '-135deg' : '45deg' }] }} />;
-}
-
 /**
- * "Neden böyle?": bilimsel kutu ana akışta görünmez; bu düğmeyle açılır. Açılınca ui.tsx'teki Science kutusu belirir.
- * Düğme en az 48 dp yüksekliğindedir.
+ * Bilimsel not: her adımda AÇIK görünür (kullanıcı kararı: dokunarak açılan katlı alan değil). Eski sürümdeki
+ * "Neden böyle?" düğmesi kaldırıldı; ad (Why) Setup.tsx çağrıları değişmesin diye korunur.
  */
 export function Why({ children, src }: { children: string; src: string }) {
-  const L = useL();
-  const [open, setOpen] = useState(false);
-  return (
-    <View>
-      <Pressable onPress={() => setOpen(o => !o)} hitSlop={6} accessibilityRole="button" accessibilityState={{ expanded: open }} accessibilityLabel={L.setup.why}
-        style={{ minHeight: 48, flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', marginHorizontal: 16, marginTop: 10, paddingRight: 14 }}>
-        <T w="s" size={15} color={c.act}>{L.setup.why}</T>
-        <Chev open={open} color={c.act} />
-      </Pressable>
-      {open && <Science src={src}>{children}</Science>}
-    </View>
-  );
+  return <Science src={src}>{children}</Science>;
 }
 
 /**
