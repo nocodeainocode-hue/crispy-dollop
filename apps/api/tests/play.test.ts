@@ -102,6 +102,41 @@ describe('Google Play satın alma doğrulaması (/purchases/play)', () => {
     await buy(b.token).expect(409);
   });
 
+  // Yeni hesabın yolu: paketle doğrudan pakt kurmak (uygulama önce işlemi dener, 402 gelirse ödeme açar, sonra yeniden dener)
+  it('paketle pakt kurmak: hak yoksa 402 ve pakt oluşmaz; satın almadan sonra kurulur, hak tüketilir, rapor açılır', async () => {
+    const { token, id } = await login();
+    const body = { habitLabel: 'Kumar', goalDays: 30, guardians: [] as any[] };
+    await request(app).post('/pacts').set(auth(token)).send(body).expect(402);
+    expect((await all(ctx.db, 'SELECT id FROM pacts')).length).toBe(0); // para ödenmeden pakt yok
+    st.ref = billingRef(id);
+    await buy(token).expect(201);
+    const r = await request(app).post('/pacts').set(auth(token)).send(body).expect(201);
+    expect(r.body.goalDays).toBe(30);
+    expect(r.body.plan).toBe('pack');
+    const row = (await one(ctx.db, 'SELECT used_pact_id FROM purchases'))!;
+    expect(row.used_pact_id).toBe(r.body.id); // hak bu pakta bağlandı
+    await request(app).get('/pacts/current/report').set(auth(token)).expect(200); // paket özelliği açık
+  });
+
+  it('ödemeden sonra pakt kurulamazsa hak kaybolmaz; düzeltilince ikinci kez ödeme istemeden kurulur', async () => {
+    const { token, id } = await login();
+    st.ref = billingRef(id);
+    await buy(token).expect(201);
+    const me = (await request(app).get('/me').set(auth(token))).body;
+    // geçersiz istek (kendini şahit ekleme) hakkı tüketmeden reddedilir
+    await request(app).post('/pacts').set(auth(token)).send({ habitLabel: 'Kumar', goalDays: 30, guardians: [{ name: 'Ben', email: me.email }] }).expect(400);
+    expect((await one(ctx.db, 'SELECT used_pact_id FROM purchases'))!.used_pact_id).toBeNull();
+    await request(app).post('/pacts').set(auth(token)).send({ habitLabel: 'Kumar', goalDays: 30, guardians: [] }).expect(201); // ikinci ödeme gerekmedi
+    expect((await all(ctx.db, 'SELECT id FROM purchases')).length).toBe(1);
+  });
+
+  it('deneme paktında uzman raporu kapalı; paket hakkı olmadan pakete geçilemez', async () => {
+    const { token } = await login();
+    await request(app).post('/pacts').set(auth(token)).send({ habitLabel: 'Kumar', goalDays: 7, guardians: [] }).expect(201);
+    await request(app).get('/pacts/current/report').set(auth(token)).expect(402);
+    await request(app).post('/pacts/current/upgrade').set(auth(token)).send({ goalDays: 30 }).expect(402);
+  });
+
   it('Google\'da tüketme başarısız olsa da hak verilir; yeniden deneme tüketir', async () => {
     const { token, id } = await login();
     st.ref = billingRef(id);
