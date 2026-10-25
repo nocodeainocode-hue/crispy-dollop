@@ -76,7 +76,7 @@ Nasıl kabul edersin?
 Kod kişiye özeldir, paylaşma. Kabul etmek zorunda değilsin; reddedersen ${owner}'a başka biri aranması söylenir.`,
     };
   },
-  pactActive: (owner: string) => ({ subject: 'Paktın aktif', body: `${owner || 'Sen'}, paktın başladı. Her gün bir hücre. Şahitlerin davetini kabul ettikçe "iki anahtar" devreye girer: paktan çıkmak için o an kabul etmiş şahitlerin onayı ve 72 saat bekleme gerekir.` }),
+  pactActive: (owner: string) => ({ subject: 'Paktın aktif', body: `${owner || 'Sen'}, paktın başladı. Her gün bir yaprak. Şahitlerin davetini kabul ettikçe "iki anahtar" devreye girer: paktan çıkmak için o an kabul etmiş şahitlerin onayı ve 72 saat bekleme gerekir.` }),
   relapse: (owner: string, self: boolean, hidden = false) => ({
     subject: `${who(owner, 'tr')} bugün zorlandı`,
     body: `${who(owner, 'tr')} sözünü tutamadı ve bunu ${self ? 'kendisi bildirdi (dürüstlük önemli)' : 'senin/sizin fark etmenizle'} paylaştı.\n\nŞimdi yapılacak en iyi şey: yargılamadan arayıp "yanındayım" demek. ${hidden ? 'Utanç, toparlanmanın önündeki en büyük engeldir.' : 'Utanç, kumarın en büyük yakıtıdır.'}\nÖnerilen cümle: "Bugün zorlandığını biliyorum, yanındayım. Konuşmak ister misin?"`,
@@ -95,7 +95,7 @@ Kod kişiye özeldir, paylaşma. Kabul etmek zorunda değilsin; reddedersen ${ow
   heartbeatMissed: (owner: string) => ({ subject: `${who(owner, 'tr')}: 24 saattir sinyal yok`, body: `${who(owner, 'tr')} adlı kişinin QuitVow uygulamasından 24 saattir sinyal alınamıyor (uygulama silinmiş, telefon kapalı veya internet kesik olabilir). Mümkünse bir arayıp hal hatır sor.` }),
   closed: (owner: string) => ({ subject: `${who(owner, 'tr')} paktı sonlandırdı`, body: `${who(owner, 'tr')} paktı sona erdirdi. Şahitlik görevin bitti, teşekkürler.` }),
   completed: (owner: string, days: number, cleanDays: number | null, _hidden = false) => ({
-    subject: `${who(owner, 'tr')} ${days} günlük paketini tamamladı 🎉`,
+    subject: `${who(owner, 'tr')} ${days} günlük paketini tamamladı`,
     body: cleanDays === null
       ? `${who(owner, 'tr')} ${days} günlük paketini hiç bozmadan tamamladı. Senin desteğinle.\n\nBir tebrik mesajı ya da arama, bu emeği görmenin en güzel yolu.`
       : `${who(owner, 'tr')} ${days} günlük paketini sonuna kadar götürdü; son ${cleanDays} günü temiz. Arada zorlandığı günler oldu ama bırakmadı. Senin desteğinle.\n\nBir tebrik mesajı ya da arama, bu emeği görmenin en güzel yolu.`,
@@ -135,7 +135,7 @@ How to accept
 The code is personal, so don't share it. You don't have to accept; if you decline, ${owner} will be asked to choose someone else.`,
     };
   },
-  pactActive: (owner: string) => ({ subject: 'Your pact is active', body: `${owner || 'Hi'}, your pact has started. One cell a day. As your witnesses accept, the "two keys" come into play: leaving the pact needs approval from the witnesses who have accepted at that point and a 72-hour wait.` }),
+  pactActive: (owner: string) => ({ subject: 'Your pact is active', body: `${owner || 'Hi'}, your pact has started. One leaf a day. As your witnesses accept, the "two keys" come into play: leaving the pact needs approval from the witnesses who have accepted at that point and a 72-hour wait.` }),
   relapse: (owner: string, self: boolean, hidden = false) => ({
     subject: `${who(owner, 'en')} had a hard day`,
     body: `${who(owner, 'en')} couldn't keep their promise and ${self ? 'reported it themselves (honesty matters)' : 'it came to light because you noticed'}.\n\nThe best thing to do now: call without judgement and say "I'm here for you". ${hidden ? 'Shame is the biggest obstacle to getting back on track.' : 'Shame is what keeps gambling going.'}\nSuggested words: "I know today was hard. I'm here for you. Do you want to talk?"`,
@@ -154,7 +154,7 @@ The code is personal, so don't share it. You don't have to accept; if you declin
   heartbeatMissed: (owner: string) => ({ subject: `No signal from ${who(owner, 'en')} for 24 hours`, body: `We haven't received a signal from ${who(owner, 'en')}'s QuitVow app for 24 hours (the app may have been deleted, the phone may be off, or there may be no internet). If you can, give them a call and check in.` }),
   closed: (owner: string) => ({ subject: `${who(owner, 'en')} ended the pact`, body: `${who(owner, 'en')} has ended the pact. Your role as witness is over. Thank you.` }),
   completed: (owner: string, days: number, cleanDays: number | null, _hidden = false) => ({
-    subject: `${who(owner, 'en')} completed their ${days}-day pack 🎉`,
+    subject: `${who(owner, 'en')} completed their ${days}-day pack`,
     body: cleanDays === null
       ? `${who(owner, 'en')} completed their ${days}-day pack without a single slip. With your support.\n\nA congratulations message or a call is the best way to recognise the effort.`
       : `${who(owner, 'en')} saw their ${days}-day pack through to the end; the last ${cleanDays} days were clean. There were hard days along the way, but they didn't give up. With your support.\n\nA congratulations message or a call is the best way to recognise the effort.`,

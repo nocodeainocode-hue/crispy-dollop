@@ -69,7 +69,28 @@ describe('paket süresi sabit, temiz seri ayrı', () => {
     expect(mail.body).not.toContain('hiç bozmadan');
   });
 
-  it('paketi bitirene (arada bozmuş olsa da) tebrik e-postası ve sonraki pakette indirim hakkı; deneme hak vermez', async () => {
+  it('varsayılan ayarda indirim yok: tebrik e-postasında indirim cümlesi çıkmaz, /me nextPackDiscount 0 kalır', async () => {
+    const t = await login();
+    await pactWithWitness(t, 30);
+    clock += 5 * DAY;
+    await request(app).post('/pacts/current/relapse').set(auth(t)).send({ self: false }).expect(200);
+    clock += 25 * DAY + 1;
+    await request(app).get('/pacts/current').set(auth(t)).expect(200);
+    const own = (await outbox('pack_completed')).at(-1);
+    expect(own.to_addr).toBe('deniz@test.io');
+    expect(own.subject).toBe('Paketini tamamladın');
+    expect(own.body).toContain('Bu senin emeğin.');
+    expect(own.body).not.toMatch(/indirim|%/);
+    expect((await outbox('completed')).at(-1).subject).not.toContain('🎉'); // konfeti/kutlama emojisi yok
+    expect((await request(app).get('/me').set(auth(t))).body.nextPackDiscount).toBe(0);
+  });
+
+  it('indirim açıksa (completionDiscountPct > 0): paketi bitirene (arada bozmuş olsa da) sonraki pakette indirim hakkı; deneme hak vermez', async () => {
+    const r = await createApp({
+      memory: true, now: () => clock,
+      cfg: { prod: false, jwtSecret: 'test-secret', adminEmail: 'admin@test.io', adminPassword: 'pw-admin-123', webUrl: 'http://web.test', databaseUrl: undefined, completionDiscountPct: 40 },
+    });
+    app = r.app; ctx = r.ctx;
     const t = await login();
     await pactWithWitness(t, 30);
     expect((await request(app).get('/me').set(auth(t))).body.nextPackDiscount).toBe(0);
