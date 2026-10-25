@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { View, Pressable, Linking, Platform, Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Pressable, Linking, Platform, Alert, Animated } from 'react-native';
 import Constants from 'expo-constants';
 import { useApp } from '../store';
 import { useServer } from '../server';
 import { Screen, Body, Back, Field, T, Kicker } from '../components/ui';
-import { Rise } from '../components/motion';
-import { Pill, Chev, Tick } from '../components/PaperKit';
+import { Rise, ND, EASE, dur } from '../components/motion';
+import { Pill, Chev } from '../components/PaperKit';
+import { GIcon, type IconName } from '../art/misc';
+import { setHapticsEnabled, tick } from '../haptics';
 import { c, F, pebble } from '../theme';
 import type { Go } from '../nav';
 import { useL, useH, useHelp, currencySymbol, LANGS, dict, type Dict } from '../i18n';
@@ -22,9 +24,10 @@ const Row = ({ label, value, accent }: { label: string; value: string; accent?: 
     <T w="b" size={16} color={accent ? c.acc2 : c.fg} style={{ flexShrink: 1, textAlign: 'right', marginLeft: 12 }}>{value}</T>
   </View>
 );
-const LinkRow = ({ label, sub, onPress, danger }: { label: string; sub?: string; onPress: () => void; danger?: boolean }) => (
-  <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={sub ? `${label}. ${sub}` : label}>
+const LinkRow = ({ label, sub, onPress, danger, icon }: { label: string; sub?: string; onPress: () => void; danger?: boolean; icon?: IconName }) => (
+  <Pressable onPress={() => { tick(); onPress(); }} accessibilityRole="button" accessibilityLabel={sub ? `${label}. ${sub}` : label}>
     <View style={[pebble(64, label), { marginHorizontal: 16, marginVertical: 4, minHeight: 60, flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingLeft: 22, paddingRight: 20, backgroundColor: c.surf, borderWidth: 2, borderColor: danger ? c.clay : c.edge }]}>
+      {!!icon && <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ marginRight: 14 }}><GIcon name={icon} size={26} color={danger ? c.clay : c.fg} /></View>}
       <View style={{ flex: 1 }}>
         <T w="b" size={16} lh={22} color={danger ? c.clay : c.fg}>{label}</T>
         {!!sub && <T w="r" size={14} lh={19} color={c.dim} style={{ marginTop: 1 }}>{sub}</T>}
@@ -33,6 +36,27 @@ const LinkRow = ({ label, sub, onPress, danger }: { label: string; sub?: string;
     </View>
   </Pressable>
 );
+/** Açma/kapama satırı (Titreşim). switch rolü; durum yalnız renkle değil biçimle de belli: açıkken düğmede onay işareti ve "Açık" yazısı. Satır >= 60 dp. */
+function ToggleRow({ label, sub, on, onText, offText, onPress }: { label: string; sub?: string; on: boolean; onText: string; offText: string; onPress: () => void }) {
+  const x = useRef(new Animated.Value(on ? 1 : 0)).current;
+  useEffect(() => { Animated.timing(x, { toValue: on ? 1 : 0, duration: dur(160), easing: EASE, useNativeDriver: ND }).start(); }, [on]);
+  return (
+    <Pressable onPress={onPress} accessibilityRole="switch" accessibilityState={{ checked: on }} accessibilityLabel={`${label}${sub ? '. ' + sub : ''}. ${on ? onText : offText}`}>
+      <View style={[pebble(64, label), { marginHorizontal: 16, marginVertical: 4, minHeight: 64, flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingLeft: 22, paddingRight: 18, backgroundColor: c.surf, borderWidth: 2, borderColor: on ? c.act : c.edge }]}>
+        <View style={{ flex: 1 }}>
+          <T w="b" size={16} lh={22}>{label}</T>
+          {!!sub && <T w="r" size={14} lh={19} color={c.dim} style={{ marginTop: 1 }}>{sub}</T>}
+        </View>
+        <T w="b" size={14} color={on ? c.act : c.dim} style={{ marginRight: 10 }}>{on ? onText : offText}</T>
+        <View style={{ width: 56, height: 32, borderRadius: 16, justifyContent: 'center', backgroundColor: on ? c.act : c.sageWash, borderWidth: 2, borderColor: on ? c.act : c.edge }}>
+          <Animated.View style={{ width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.onAct : c.edge, transform: [{ translateX: x.interpolate({ inputRange: [0, 1], outputRange: [2, 24] }) }] }}>
+            {on && <GIcon name="check" size={16} color={c.act} strokeWidth={3.2} />}
+          </Animated.View>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
 const Section = ({ children }: { children: string }) => <Kicker color={c.dim} style={{ paddingHorizontal: 24, paddingTop: 28, paddingBottom: 10 }}>{children}</Kicker>;
 
 /** Yan yana seçenek hapı (Gece/Gündüz/Sistem, dil). Seçili: ada çayı kenar + sageWash + onay işareti. >= 48 dp. */
@@ -44,9 +68,9 @@ function Seg<K extends string>({ label, options, value, onPick }: { label: strin
         {options.map(o => {
           const on = value === o.key;
           return (
-            <Pressable key={o.key} onPress={() => onPick(o.key)} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={o.text} style={{ flex: 1 }}>
+            <Pressable key={o.key} onPress={() => { tick(); onPick(o.key); }} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={o.text} style={{ flex: 1 }}>
               <View style={[pebble(52, o.key), { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, borderWidth: 2, borderColor: on ? c.act : c.edge, backgroundColor: on ? c.sageWash : c.surf }]}>
-                {on && <View style={{ marginRight: 8 }}><Tick size={12} /></View>}
+                {on && <View style={{ marginRight: 6 }}><GIcon name="check" size={18} color={c.act} strokeWidth={3} /></View>}
                 <T w="b" size={15} color={c.fg} numberOfLines={1}>{o.text}</T>
               </View>
             </Pressable>
@@ -86,6 +110,9 @@ export default function Profile({ go }: { go: Go }) {
 
   const streak = Math.max(1, Math.min(day, Math.floor((Date.now() - (a.streakStartedAt || a.startedAt)) / DAY) + 1));
   const pct = Math.max(0, Math.min(100, (day / Math.max(1, a.goalDays)) * 100));
+  // Titreşim tercihi: store'a yazılır, haptics.ts bayrağı anında eşitlenir; açılırken tek hafif titreşimle onaylanır.
+  const hapticsOn = a.haptics !== false;
+  const toggleHaptics = () => { const next = !hapticsOn; setHapticsEnabled(next); a.set({ haptics: next }); if (next) tick(); };
 
   return (
     <Screen>
@@ -118,13 +145,13 @@ export default function Profile({ go }: { go: Go }) {
         <View style={{ height: 8 }} />
         <Row label={L.profile.streak} value={L.profile.streakDays(streak)} />
         <Row label={L.profile.start} value={new Date(a.startedAt).toLocaleDateString(L.locale)} />
-        <LinkRow label={pack && !completed ? L.profile.myPack : completed ? L.profile.pickContinue : L.profile.continueWithPack} sub={pack ? L.profile.subPack : L.profile.subNoPack} onPress={() => go('plan')} />
+        <LinkRow label={pack && !completed ? L.profile.myPack : completed ? L.profile.pickContinue : L.profile.continueWithPack} sub={pack ? L.profile.subPack : L.profile.subNoPack} onPress={() => go('plan')} icon="pack" />
 
         <Section>{L.profile.myPact}</Section>
-        <LinkRow label={L.profile.guardians} sub={a.guardians.length ? L.profile.guardiansSub(accepted) : L.profile.guardiansNone} onPress={() => go('guardians')} />
-        <LinkRow label={L.profile.vow} sub={a.vowSeconds && vowExists(a.vowUri) ? L.profile.vowAdded(a.vowSeconds) : L.profile.vowNone} onPress={() => { if (a.vowSeconds && vowExists(a.vowUri)) shareVow(a.vowUri, L.guardians.shareTitle).then(ok => { if (!ok) flash(L.guardians.shareUnavailable, false); }); else go('vow'); }} />
-        <LinkRow label={L.profile.journal} onPress={() => go('journal')} />
-        <LinkRow label={L.profile.calm} onPress={() => go('calm')} />
+        <LinkRow label={L.profile.guardians} sub={a.guardians.length ? L.profile.guardiansSub(accepted) : L.profile.guardiansNone} onPress={() => go('guardians')} icon="witness" />
+        <LinkRow label={L.profile.vow} sub={a.vowSeconds && vowExists(a.vowUri) ? L.profile.vowAdded(a.vowSeconds) : L.profile.vowNone} onPress={() => { if (a.vowSeconds && vowExists(a.vowUri)) shareVow(a.vowUri, L.guardians.shareTitle).then(ok => { if (!ok) flash(L.guardians.shareUnavailable, false); }); else go('vow'); }} icon="video" />
+        <LinkRow label={L.profile.journal} onPress={() => go('journal')} icon="journal" />
+        <LinkRow label={L.profile.calm} onPress={() => go('calm')} icon="calm" />
 
         <Section>{L.profile.account}</Section>
         <Field label={L.profile.nameLabel} placeholder={L.profile.namePh} value={name} onChangeText={setName} />
@@ -140,8 +167,8 @@ export default function Profile({ go }: { go: Go }) {
         </View>
 
         <Section>{L.help.title}</Section>
-        {help.lines.map(h => <LinkRow key={h.tel} label={h.name} sub={h.sub} onPress={() => Linking.openURL(`tel:${h.tel}`)} />)}
-        <LinkRow label={`${L.help.emergency} · ${help.emergency}`} sub={L.help.emergencyLong} onPress={() => Linking.openURL(`tel:${help.emergency}`)} />
+        {help.lines.map(h => <LinkRow key={h.tel} label={h.name} sub={h.sub} onPress={() => Linking.openURL(`tel:${h.tel}`)} icon="phone" />)}
+        <LinkRow label={`${L.help.emergency} · ${help.emergency}`} sub={L.help.emergencyLong} onPress={() => Linking.openURL(`tel:${help.emergency}`)} icon="phone" />
 
         <Section>{L.profile.app}</Section>
         <Row label={L.profile.version} value={Constants.expoConfig?.version ?? '—'} />
@@ -149,6 +176,7 @@ export default function Profile({ go }: { go: Go }) {
           options={(['system', 'light', 'dark'] as const).map(t => ({ key: t, text: L.profile.themes[t] }))} />
         <Seg label={L.profile.language} value={LANGS.find(l => L === dict(l)) ?? null} onPick={l => { a.set({ lang: l }); srv.setLocale(l).catch(() => {}); }}
           options={LANGS.map(l => ({ key: l, text: dict(l).langName }))} />
+        <ToggleRow label={L.profile.haptics} sub={L.profile.hapticsSub} on={hapticsOn} onText={L.profile.hapticsOn} offText={L.profile.hapticsOff} onPress={toggleHaptics} />
         <T w="r" size={13} lh={19} color={c.dim} style={{ paddingHorizontal: 24, paddingTop: 14, paddingBottom: 6 }}>{H.disclaimer}</T>
 
         <View style={{ height: 14 }} />

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Share, Platform, Pressable, Animated, useWindowDimensions, PixelRatio } from 'react-native';
+import { View, Share, Platform, Pressable, useWindowDimensions, PixelRatio } from 'react-native';
 import { useApp } from '../store';
 import { useServer } from '../server';
 import { Screen, Body, Back, ActionBar, T, Kicker } from '../components/ui';
-import { Rise, usePulse } from '../components/motion';
-import { Pill, Fold, LeafMark, Tick } from '../components/PaperKit';
+import { Rise } from '../components/motion';
+import { Pill, Fold } from '../components/PaperKit';
 import PackArt from '../components/PackArt';
+import { GIcon, Stamp } from '../art/misc';
 import { packPrices, recoverPurchases, withPack } from '../purchase';
 import { c, F, pebble } from '../theme';
 import type { Go } from '../nav';
@@ -14,14 +15,14 @@ import { useL, useH, entryLabel, isTrigger } from '../i18n';
 
 const DAY = 86400000;
 
-/** Paket kartı: Filiz/Fidan/Ağaç. Sütun (3 yan yana) ya da dar ekran / büyük yazıda satır düzeni. radio rolü, seçili durum biçimle de belli (kalın ada çayı kenar + onay). */
-function PackCard({ d, name, days, price, on, onPress, row, sway }: { d: number; name: string; days: string; price: string; on: boolean; onPress: () => void; row: boolean; sway: Animated.Value }) {
+/** Paket kartı: Filiz/Fidan/Ağaç. Sütun (3 yan yana) ya da dar ekran / büyük yazıda satır düzeni. radio rolü, seçili durum biçimle de belli (kalın ada çayı kenar + onay). Seçili kartın bitkisi sallanır (ekranda tek sonsuz hareket). */
+function PackCard({ d, name, days, price, on, onPress, row }: { d: number; name: string; days: string; price: string; on: boolean; onPress: () => void; row: boolean }) {
   const shape = pebble(row ? 96 : 200, `pack${d}`);
   const border = on ? 3 : 2;
-  const art = <PackArt d={d} s={row ? 0.62 : 0.78} sway={on ? sway : undefined} />;
+  const art = <PackArt d={d} height={row ? 72 : 92} swaying={on} />;
   const check = (
-    <View style={{ position: 'absolute', right: 10, top: 10, width: 26, height: 26, borderRadius: 13, backgroundColor: c.act, alignItems: 'center', justifyContent: 'center' }}>
-      <Tick color={c.onAct} size={12} />
+    <View style={{ position: 'absolute', right: 10, top: 10, width: 28, height: 28, borderRadius: 14, backgroundColor: c.act, alignItems: 'center', justifyContent: 'center' }}>
+      <GIcon name="check" size={18} color={c.onAct} strokeWidth={3} />
     </View>
   );
   return (
@@ -45,14 +46,13 @@ function PackCard({ d, name, days, price, on, onPress, row, sway }: { d: number;
   );
 }
 
-/** Kesik çizgili damga (tek seferlik güvencesi): kil kenar, asimetrik köşe, -1,2 derece. Fiyattan önce görünür. */
-function Stamp({ text }: { text: string }) {
+/** Tek seferlik damgası (art/misc Stamp: kesik çizgili kil kenar, -1,2 derece). Fiyattan önce görünür; ilk cümle başlık, kalanı metin. */
+function OneTime({ text }: { text: string }) {
   const i = text.indexOf('. ');
   const head = i > 0 ? text.slice(0, i + 1) : text, rest = i > 0 ? text.slice(i + 2) : '';
   return (
-    <View accessible accessibilityLabel={text} style={{ marginHorizontal: 24, marginTop: 14, marginBottom: 20, backgroundColor: c.surf, borderWidth: 2.4, borderStyle: 'dashed', borderColor: c.clay, borderTopLeftRadius: 26, borderTopRightRadius: 20, borderBottomRightRadius: 28, borderBottomLeftRadius: 22, paddingVertical: 12, paddingHorizontal: 18, transform: [{ rotate: '-1.2deg' }] }}>
-      <T size={22} lh={27} style={{ fontFamily: F.d }}>{head}</T>
-      {!!rest && <T w="s" size={16} lh={22} style={{ marginTop: 2 }}>{rest}</T>}
+    <View accessible accessibilityLabel={text} style={{ marginHorizontal: 24, marginTop: 14, marginBottom: 20 }}>
+      <Stamp title={head} text={rest} />
     </View>
   );
 }
@@ -64,7 +64,7 @@ function Includes({ on }: { on: boolean }) {
     <View style={{ paddingHorizontal: 24, marginTop: 6 }}>
       {[L.plan.inc1, L.plan.inc2, L.plan.inc3].map(t => (
         <View key={t} style={{ flexDirection: 'row', alignItems: 'center', minHeight: 36 }}>
-          <LeafMark fill={on ? c.sage : c.sageWash} />
+          <GIcon name="leaf" size={22} color={on ? c.act : c.edge} />
           <T w="s" size={16} lh={22} style={{ marginLeft: 12, flex: 1 }}>{t}</T>
         </View>
       ))}
@@ -129,8 +129,6 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
     setBusy(false);
   };
 
-  // Ekranda aynı anda tek sonsuz hareket: seçili paketin bitkisi (usePulse hareketi azalt açıkken çalışmaz).
-  const sway = usePulse(2600);
   // 3 yan yana kart dar ekranda (360 dp) ya da büyük yazı ölçeğinde kırpılır: liste düzenine düş.
   const { width } = useWindowDimensions();
   const row = width < 400 || PixelRatio.getFontScale() > 1.15;
@@ -151,13 +149,13 @@ export default function Plan({ go, paywall, onLater }: { go: Go; paywall?: boole
         </View>
 
         {pack && (
-          <Rise delay={80} y={10}><View style={{ alignItems: 'center', marginTop: 18, marginBottom: 6 }}><PackArt d={a.goalDays} s={1.15} sway={sway} /></View></Rise>
+          <Rise delay={80} y={10}><View style={{ alignItems: 'center', marginTop: 18, marginBottom: 6 }}><PackArt d={a.goalDays} height={130} swaying /></View></Rise>
         )}
 
         {!pack && canBuy && <>
-          <Stamp text={L.packs.oneTime} />
+          <OneTime text={L.packs.oneTime} />
           <View accessibilityRole="radiogroup" style={row ? { paddingHorizontal: 16 } : { flexDirection: 'row', paddingHorizontal: 16, gap: 12 }}>
-            {UP.map(d => <PackCard key={d} d={d} name={L.plan.tier[d]} days={L.plan.tierDays(d)} price={priceOf(d)} on={pick === d} onPress={() => setPick(d)} row={row} sway={sway} />)}
+            {UP.map(d => <PackCard key={d} d={d} name={L.plan.tier[d]} days={L.plan.tierDays(d)} price={priceOf(d)} on={pick === d} onPress={() => setPick(d)} row={row} />)}
           </View>
           {trialDone && <T w="r" size={15} lh={22} color={c.dim} style={{ paddingHorizontal: 24, marginTop: 18 }}>{L.plan.keepNote}</T>}
         </>}

@@ -4,6 +4,7 @@ import { useApp } from '../store';
 import { Screen, Body, Back, ActionBar, Field, T, Kicker } from '../components/ui';
 import { Rise } from '../components/motion';
 import { Chip } from '../components/PaperKit';
+import { GIcon, PaperGrain, type IconName } from '../art/misc';
 import { c, F, pebble } from '../theme';
 import Analysis from '../components/Analysis';
 import type { Go } from '../nav';
@@ -17,6 +18,10 @@ const Stat = ({ label, value, tilt }: { label: string; value: string; tilt: numb
     <T size={21} lh={26} numberOfLines={2} style={{ marginTop: 6, fontFamily: F.d }}>{value}</T>
   </View>
 );
+
+/** Kayıt türü simgeleri (art/misc): tür yalnız renkle değil biçimle de ayrılır. Dekoratif; tür adı yazıyla da var. */
+const KIND_ICON: Record<string, IconName> = { tetik: 'journal', kriz: 'crisis', nuks: 'replay', iyi: 'leaf' };
+const kindColor = (k: string) => (k === 'nuks' ? c.clay : k === 'iyi' ? c.act : c.dim);
 
 export default function Journal({ go }: { go: Go }) {
   const a = useApp();
@@ -71,10 +76,13 @@ export default function Journal({ go }: { go: Go }) {
         <Kicker color={c.dim} style={{ paddingHorizontal: 24, paddingTop: 22, paddingBottom: 10 }}>{L.journal.history}</Kicker>
         {a.entries.length === 0 && <T w="r" size={15} lh={22} color={c.dim} style={{ paddingHorizontal: 24 }}>{L.journal.empty}</T>}
         {a.entries.map(e => (
-          <View key={e.id} style={[pebble(72, e.id), { marginHorizontal: 16, marginVertical: 4, minHeight: 64, paddingVertical: 12, paddingHorizontal: 22, backgroundColor: c.surf, borderWidth: 2, borderColor: c.line }]}>
-            <Kicker color={e.kind === 'nuks' ? c.clay : c.dim}>{KIND[e.kind]}</Kicker>
-            <T w="s" size={15} lh={21} style={{ marginTop: 3 }}>{[e.mood, e.trigger].filter(Boolean).map(x => entryLabel(x, H, L)).concat(e.helper ? [L.done.helpers[e.helper] ?? e.helper] : [], e.note ? [e.note] : []).join(' · ') || '—'}</T>
-            <T w="r" size={13} lh={18} color={c.dim} style={{ marginTop: 2 }}>{new Date(e.at).toLocaleString(L.locale)}</T>
+          <View key={e.id} style={[pebble(72, e.id), { marginHorizontal: 16, marginVertical: 4, minHeight: 64, paddingVertical: 12, paddingLeft: 20, paddingRight: 22, flexDirection: 'row', alignItems: 'flex-start', backgroundColor: c.surf, borderWidth: 2, borderColor: c.line }]}>
+            <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ marginRight: 12, marginTop: 1 }}><GIcon name={KIND_ICON[e.kind] ?? 'journal'} size={24} color={kindColor(e.kind)} /></View>
+            <View style={{ flex: 1 }}>
+              <Kicker color={e.kind === 'nuks' ? c.clay : c.dim}>{KIND[e.kind]}</Kicker>
+              <T w="s" size={15} lh={21} style={{ marginTop: 3 }}>{[e.mood, e.trigger].filter(Boolean).map(x => entryLabel(x, H, L)).concat(e.helper ? [L.done.helpers[e.helper] ?? e.helper] : [], e.note ? [e.note] : []).join(' · ') || '—'}</T>
+              <T w="r" size={13} lh={18} color={c.dim} style={{ marginTop: 2 }}>{new Date(e.at).toLocaleString(L.locale)}</T>
+            </View>
           </View>
         ))}
         <View style={{ height: 14 }} />
@@ -83,6 +91,7 @@ export default function Journal({ go }: { go: Go }) {
         <View style={stack ? undefined : { flex: 1 }}><ActionBar label={L.journal.resisted} right="" kind="ghost" height={64} size={19} onPress={() => save('iyi')} /></View>
         <View style={stack ? undefined : { flex: 1 }}><ActionBar label={L.journal.save} right="" height={64} size={19} disabled={!mood && !trg} onPress={() => save('tetik')} /></View>
       </View>
+      <PaperGrain />
     </Screen>
   );
 }
