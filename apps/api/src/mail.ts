@@ -3,6 +3,7 @@ import type { Config } from './config.js';
 import { run, type Db } from './db.js';
 import { fmtCode, uid } from './security.js';
 import { asLocale, type Locale } from './i18n.js';
+import { renderMailHtml } from './mailHtml.js';
 
 export type Mail = { to: string; subject: string; body: string; kind: string };
 export type Mailer = (m: Mail) => Promise<void>;
@@ -15,13 +16,13 @@ export function createTransport(cfg: Pick<Config, 'resendApiKey' | 'smtpUrl' | '
     const r = await fetchFn('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${cfg.resendApiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: cfg.mailFrom, to: [m.to], subject: m.subject, text: m.body }),
+      body: JSON.stringify({ from: cfg.mailFrom, to: [m.to], subject: m.subject, text: m.body, html: renderMailHtml(m) }),
     });
     if (!r.ok) throw new Error(`Resend ${r.status}: ${(await r.text()).slice(0, 200)}`);
   };
   if (cfg.smtpUrl) {
     const t = nodemailer.createTransport(cfg.smtpUrl);
-    return (m) => t.sendMail({ from: cfg.mailFrom, to: m.to, subject: m.subject, text: m.body });
+    return (m) => t.sendMail({ from: cfg.mailFrom, to: m.to, subject: m.subject, text: m.body, html: renderMailHtml(m) });
   }
   return null;
 }
