@@ -1,10 +1,16 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { dict, currentLang } from './i18n';
 
 // Android emülatöründe host makine 10.0.2.2'dir. Gerçek telefonda .env içine EXPO_PUBLIC_API_URL=http://<bilgisayar-LAN-IP>:4000 yaz.
-export const API_URL: string = process.env.EXPO_PUBLIC_API_URL ?? (Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000');
+// Geliştirme modunda telefon Metro'ya hangi adresten bağlandıysa API de oradadır (bilgisayarın IP'si değişse bile çalışır).
+const metroHost = __DEV__ && Platform.OS !== 'web' ? Constants.expoConfig?.hostUri?.split(':')[0] : undefined;
+const devHost = metroHost && /^\d{1,3}(\.\d{1,3}){3}$/.test(metroHost) ? metroHost : undefined;
+export const API_URL: string = devHost
+  ? `http://${devHost}:4000`
+  : process.env.EXPO_PUBLIC_API_URL ?? (Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000');
 
 export class ApiError extends Error { constructor(public status: number, m: string) { super(m); } }
 
