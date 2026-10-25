@@ -3,7 +3,8 @@ import { View, Text, Pressable, ScrollView, StyleSheet, Platform, TextInput, Tex
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c, F, BAHCE, alpha, pebble } from '../theme';
-import { ND, EASE, dur, Rise, usePulse } from './motion';
+import { ND, EASE, dur, Rise, usePulse, usePress } from './motion';
+import { tick } from '../haptics';
 import { useL } from '../i18n';
 
 // Bu dosya iki görünümü taşır: klasik (Modernist) ve Bahçe (BAHCE sabiti derleme zamanında belli; render sırasında değişmez).
@@ -90,8 +91,7 @@ function ClassicActionBar({ label, right = '→', onPress, kind = 'light', heigh
  * red = kil (kriz/uyarı), water = şahit dünyası, ghost = yalnız kenar. Yükseklik 60-84 dp arasına sıkıştırılır (dokunma hedefi).
  */
 function PebbleActionBar({ label, right = '→', onPress, kind = 'light', height = 72, size = 18, disabled }: ABProps) {
-  const press = useRef(new Animated.Value(0)).current;
-  const to = (v: number) => Animated.timing(press, { toValue: v, duration: dur(v ? 80 : 160), easing: EASE, useNativeDriver: ND }).start();
+  const pr = usePress(3); // basınca 3 px gömülme (yerel sürücü)
   const h = Math.max(60, Math.min(height, 84));
   const shape = pebble(h, label);
   const ghost = kind === 'ghost';
@@ -99,10 +99,10 @@ function PebbleActionBar({ label, right = '→', onPress, kind = 'light', height
   const fg = kind === 'red' ? c.onClay : kind === 'water' ? c.onWater : ghost ? c.fg : c.onAct;
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: 10 }}>
-      <Pressable onPress={onPress} disabled={disabled} onPressIn={() => to(1)} onPressOut={() => to(0)} accessibilityRole="button" accessibilityLabel={label}>
+      <Pressable onPress={() => { tick(); onPress(); }} disabled={disabled} onPressIn={pr.onPressIn} onPressOut={pr.onPressOut} accessibilityRole="button" accessibilityLabel={label}>
         <View style={{ height: h + 4 }}>
           {!ghost && !disabled && <View style={[shape, { position: 'absolute', left: 0, right: 0, top: 4, height: h, backgroundColor: c.shadow }]} />}
-          <Animated.View style={[shape, { height: h, backgroundColor: bg, borderWidth: ghost ? 2 : 0, borderColor: c.edge, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, opacity: disabled ? 0.5 : 1, transform: [{ translateY: press.interpolate({ inputRange: [0, 1], outputRange: [0, 3] }) }] }]}>
+          <Animated.View style={[shape, { height: h, backgroundColor: bg, borderWidth: ghost ? 2 : 0, borderColor: c.edge, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, opacity: disabled ? 0.5 : 1 }, pr.style]}>
             <T w="b" size={Math.max(19, Math.min(size, 24))} color={fg} style={{ flexShrink: 1 }} numberOfLines={2}>{label}</T>
             {!!right && <Chevron color={fg} />}
           </Animated.View>
@@ -181,7 +181,7 @@ export function Opt({ label, on, onPress, sub, delay = 0 }: { label: string; on:
     const shape = pebble(64, label);
     return (
       <Rise delay={delay} y={10} ms={360}>
-        <Pressable onPress={onPress} onPressIn={() => to(1)} onPressOut={() => to(0)} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={label}>
+        <Pressable onPress={() => { tick(); onPress(); }} onPressIn={() => to(1)} onPressOut={() => to(0)} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={label}>
           <Animated.View style={[shape, { marginHorizontal: 16, marginVertical: 5, minHeight: 64, flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingLeft: 22, paddingRight: 18, borderWidth: 2, borderColor: on ? c.act : c.line, backgroundColor: on ? c.sageWash : c.surf, transform: [{ translateX: press.interpolate({ inputRange: [0, 1], outputRange: [0, 3] }) }] }]}>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: F.b, fontSize: 17, color: c.fg }}>{label}</Text>
