@@ -1,0 +1,39 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <!-- Ön plan servisi (Android 9+) ve Android 14+ için tür izni: sistem bunu VPN izni verilmiş uygulamalara tanır -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+
+  <application>
+    <!-- Telefon içi DNS filtresi. Yalnızca sistem bağlanabilir (BIND_VPN_SERVICE). Ön plan servisi: kalıcı sessiz bildirimle çalışır. -->
+    <service
+      android:name="com.quitvow.shield.ShieldVpnService"
+      android:permission="android.permission.BIND_VPN_SERVICE"
+      android:foregroundServiceType="systemExempted"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="android.net.VpnService" />
+      </intent-filter>
+      <meta-data android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON" android:value="true" />
+    </service>
+
+    <!-- Bildirime dokununca: isteği kaydedip uygulamayı öne getiren görünmez ara ekran -->
+    <activity
+      android:name="com.quitvow.shield.ShieldOpenActivity"
+      android:exported="false"
+      android:excludeFromRecents="true"
+      android:noHistory="true"
+      android:taskAffinity=""
+      android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+    <receiver android:name="com.quitvow.shield.BootReceiver" android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+      </intent-filter>
+    </receiver>
+  </application>
+</manifest>

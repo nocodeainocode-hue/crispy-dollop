@@ -139,6 +139,22 @@ Yeni görünüm: Büyüyen Bahçe. Her gün bir yaprak, her 7. günde bir lale. 
 New look: the Growing Garden. A leaf every day, a tulip every 7th day. Crisis mode now has a breathing guide and countdown. A free 7-day trial, then one-time 30, 60 and 90-day packs (not a subscription). A refreshed Calm screen and small improvements.
 ```
 
+## Sürüm notu (1.3.0, taslak; engelleyici canlıya alınınca)
+
+Türkçe (≤500):
+
+```
+Bahis engeli (Android): Telefonundaki bahis ve casino sitelerine girişi tek dokunuşla kapat. Telefonunun içinde çalışır; internet trafiğin hiçbir yere gönderilmez, hangi siteye girdiğini kimse görmez. Engeli kapatırsan şahitlerine haber gider. Engellenen sitelerde kısa bir bildirim: dokununca kriz modu açılır.
+```
+
+İngilizce (≤500):
+
+```
+Betting blocker (Android): close betting and casino sites on your phone with one tap. It runs inside your phone; your traffic is never sent anywhere and nobody sees which sites you visit. If you turn it off, your witnesses are told. A short notification on blocked sites opens crisis mode.
+```
+
+Yayın öncesi: Play Console'da `VpnService` ve ön plan servisi beyanları (`store/PLAY-VPN-BEYANI.md`); kısa açıklamaya "bahis engelleme" eklenir (ASO notu).
+
 ## Kategori ve etiketler
 
 - Kategori: **Sağlık ve Fitness** (alternatif: Yaşam Tarzı)
@@ -174,4 +190,4 @@ Play Console → Büyüme → Mağaza girişi deneyleri. Ayda birkaç yüz ziyar
 
 - Rakip uygulama ya da bahis sitesi adı yazma; Play meta veri politikasına aykırı.
 - Aynı kelimeyi art arda sıralama (anahtar kelime doldurma ret sebebidir).
-- "Bahis sitelerini engeller" yazma: engelleyici sonraki sürümde (1.3.0). Uygulamada olmayan özellik ret sebebidir. Engel çıktığında ad ve kısa açıklamaya "bahis engelleme" ekleriz, Play Console'da `VpnService` beyanı da gerekir (`engel` dalındaki `store/PLAY-VPN-BEYANI.md`).
+- "Bahis sitelerini engeller" 1.3.0'dan itibaren yazılabilir (engelleyici bu sürümde var; 1.2.0 ve öncesi için yazma, uygulamada olmayan özellik ret sebebidir). 1.3.0 yayınında ad ve kısa açıklamaya "bahis engelleme" eklenir; Play Console'da `VpnService` beyanı ve ön plan servisi beyanı gerekir (`store/PLAY-VPN-BEYANI.md`).

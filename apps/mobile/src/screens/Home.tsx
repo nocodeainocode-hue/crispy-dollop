@@ -9,6 +9,9 @@ import { ND, EASE, dur } from '../components/motion';
 import { stageFor } from '../art/plant';
 import { HomeScene, HOME_SCENE_MIN_H, claimIntro, gardenCounts, gardenStates, hardDays, whyLabel, DAY_MS } from '../garden';
 import { ChipBtn, DotsBtn, Dock, MoreSheet, type SheetRow } from '../garden/HomeParts';
+import { Chev } from '../components/PaperKit';
+import { useShield } from '../useShield';
+import { shieldOn } from '../../modules/shield';
 
 // Exit.tsx de kullanıyor: değişmeden kalır.
 export function useNow(step = 30000) {
@@ -40,6 +43,7 @@ export default function Home({ go }: { go: Go }) {
   const L = useL(), H = L.home;
   const { height } = useWindowDimensions();
   const [more, setMore] = useState(false);
+  const sh = useShield(); // bahis engeli (yalnız Android uygulaması)
   const st = useGardenDay(a.startedAt);
   const goal = a.goalDays;
   const day = Math.max(1, Math.min(goal, st.day));
@@ -67,6 +71,7 @@ export default function Home({ go }: { go: Go }) {
   if (!completed) rows.push({ key: 'plan', label: H.myPack, icon: 'pack', onPress: nav('plan') });
   if (!completed) rows.push({ key: 'relapse', label: H.relapse, onPress: nav('relapse') });
   if (!completed) rows.push({ key: 'exit', label: H.exit, onPress: nav('exit') });
+  if (sh) rows.push({ key: 'shield', label: L.shield.more, onPress: nav('shield') });
   if (!a.vowUri) rows.push({ key: 'vow', label: H.vow, onPress: nav('vow') });
   rows.push({ key: 'guardian', label: H.asGuardian, onPress: () => { setMore(false); a.set({ role: 'guardian' }); } });
 
@@ -97,6 +102,16 @@ export default function Home({ go }: { go: Go }) {
             accessibilityLabel={H.a11y(day, goal, H.stage[stageFor(goal)], counts.tulips, counts.curled)}
           />
 
+          {/* Bahis engeli: kullanıcı açmışken kapandıysa kil uyarı; hiç açılmadıysa ekran bir kez görülene dek davet */}
+          {!!sh && !completed && (sh.wanted ? !shieldOn(sh) : !a.shieldSeen) && (
+            <Pressable onPress={() => go('shield')} accessibilityRole="button" style={[pebble(60, 'shield'), { marginHorizontal: 16, marginTop: 8, minHeight: 56, paddingHorizontal: 20, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: sh.wanted ? c.clay : c.edge, backgroundColor: sh.wanted ? c.clayWash : c.surf }]}>
+              <View style={{ flex: 1 }}>
+                <T w="s" size={16} lh={21} color={sh.wanted ? c.clay : c.fg}>{sh.wanted ? L.shield.homeOff : L.shield.homeCta}</T>
+                <T w="r" size={14} lh={19} color={c.dim}>{sh.wanted ? L.shield.homeOffSub : L.shield.homeCtaSub}</T>
+              </View>
+              <Chev color={sh.wanted ? c.clay : c.dim} />
+            </Pressable>
+          )}
           {trialLeft <= 2 && (
             <Pressable onPress={() => go('plan')} accessibilityRole="button" style={[pebble(60, 'trial'), { marginHorizontal: 16, marginTop: 8, minHeight: 56, paddingHorizontal: 20, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: c.edge, backgroundColor: c.surf }]}>
               <T w="s" size={16} lh={21} style={{ flex: 1 }}>{trialLeft <= 0 ? H.trialLastDay : H.trialLeft(trialLeft)}</T>

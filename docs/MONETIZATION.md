@@ -26,7 +26,7 @@
 | **Detaylı tetik analizi** (saat dilimleri, tetik/duygu sıralaması, son 7 gün) | — | ✓ |
 | **Uzman/terapist raporu** (kullanıcı kendisi paylaşır) | — | ✓ |
 | Tamamlama ödülü (sonraki pakette indirim) | — | ✓ (henüz uygulanmadı) |
-| Bahis engeli (v2) | — | ✓ |
+| Bahis engeli (1.3.0, Android) | ✓ | ✓ |
 
 **Deneme bitince:** 7 gün dolunca pakt tamamlanır; devam için paket gerekir. Deneme hakkı yenilenmez. Denemedeyken pakete geçilirse mevcut pakt uzatılır, gün sayısı ve seri korunur.
 

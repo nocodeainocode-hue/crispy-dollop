@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
-import { api, tokenStore, ApiError } from './api';
+import { api, tokenStore, ApiError, API_URL } from './api';
+import { Shield, shieldReport } from '../modules/shield';
 import { saveVowLocally, deleteVowLocally } from './vowStore';
 import { useApp, localDay, type Guardian } from './store';
 import { currentLang, type Lang } from './i18n';
@@ -46,6 +47,8 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
   const setToken = (t: string | null) => { tokenRef.current = t; setTokenState(t); };
 
   useEffect(() => { tokenStore.get().then(t => { setToken(t); setAuthReady(true); }); }, []);
+  // Engel servisi uygulama kapalıyken de durum bildirir: sunucu adresi ve oturum anahtarı ona da verilir (çıkışta silinir)
+  useEffect(() => { if (authReady) Shield?.setAuth(API_URL, token); }, [token, authReady]);
 
   const call = useCallback(async <T,>(path: string, body?: unknown, method?: string) => {
     try { return await api<T>(path, { token: tokenRef.current, body, method }); }
@@ -77,8 +80,8 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
   }, [token]);
   useEffect(() => {
     if (!token || app.pactStatus !== 'active') return;
-    // shield: Android engel modülü (VPN/DNS) bağlanınca 'on'/'off' olarak güncellenecek; şimdilik 'unknown'
-    const beat = () => call('/pacts/current/heartbeat', { platform: Platform.OS === 'android' ? 'android' : Platform.OS === 'ios' ? 'ios' : 'web', shield: 'unknown' }).catch(() => {});
+    // shield: telefondaki bahis engelinin durumu (Android). Kullanıcı hiç açmadıysa 'unknown': şahitlere "kapandı" maili gitmez.
+    const beat = () => call('/pacts/current/heartbeat', { platform: Platform.OS === 'android' ? 'android' : Platform.OS === 'ios' ? 'ios' : 'web', shield: shieldReport(Shield?.getStatus() ?? null) }).catch(() => {});
     beat();
     const t = setInterval(beat, 15 * 60_000);
     return () => clearInterval(t);
@@ -112,7 +115,7 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
     completeUnlock: async () => { await call('/pacts/current/unlock/complete', {}); await sync(); },
     resendInvite: async id => { await call(`/pacts/current/guardians/${id}/resend`, {}); },
     addGuardian: async g => { await call('/pacts/current/guardians', g); await sync(); },
-    deleteAccount: async () => { await call('/me', undefined, 'DELETE'); deleteVowLocally(app.vowUri); await tokenStore.del(); setToken(null); app.reset(); },
+    deleteAccount: async () => { await call('/me', undefined, 'DELETE'); deleteVowLocally(app.vowUri); Shield?.setAuth(API_URL, null); Shield?.stop(); await tokenStore.del(); setToken(null); app.reset(); },
   };
   return <S.Provider value={value}>{children}</S.Provider>;
 }

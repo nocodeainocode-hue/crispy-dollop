@@ -49,12 +49,13 @@ export type State = {
   weeklyDigest: boolean;   // şahitlere haftalık iyi haber
   theme: 'dark' | 'light' | 'system'; // görünüm (varsayılan koyu: marka)
   haptics: boolean;        // dokunsal geri bildirim (varsayılan açık); haptics.ts bayrağıyla eşitlenir
+  shieldSeen: boolean;     // Bahis engeli ekranı bir kez açıldı: Ana ekrandaki davet şeridi kalkar
 };
 
 const init: State = {
   ready: false, onboarded: false, habit: 'gambling', habitLabel: '', reason: '', letter: '',
   monthlyLoss: 0, gamblingTypes: [], triggerTimes: [], plan: '', guardians: [], penalties: [], startedAt: Date.now(), points: 100, entries: [],
-  unlock: null, crisisUntil: 0, lastCheckIn: 0, checkIns: [], name: '', goalDays: 90, nextVerifyAt: 0, pactStatus: 'none', email: '', vowSeconds: 0, vowUri: '', role: 'none', paywallDismissed: false, startingNew: false, lang: null, hideHabit: false, streakStartedAt: Date.now(), relapses: [], weeklyDigest: false, theme: BAHCE ? 'system' : 'dark', haptics: true,
+  unlock: null, crisisUntil: 0, lastCheckIn: 0, checkIns: [], name: '', goalDays: 90, nextVerifyAt: 0, pactStatus: 'none', email: '', vowSeconds: 0, vowUri: '', role: 'none', paywallDismissed: false, startingNew: false, lang: null, hideHabit: false, streakStartedAt: Date.now(), relapses: [], weeklyDigest: false, theme: BAHCE ? 'system' : 'dark', haptics: true, shieldSeen: false,
 };
 
 

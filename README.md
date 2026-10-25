@@ -28,7 +28,7 @@ cd apps/mobile && npm install && npx expo start
 - Web'de mobil uygulama sınırlıdır (kamera yok); geliştirme testi için video dosyası seçme yedeği vardır.
 
 ## v2'ye bırakılanlar
-- **Android bahis engeli** (yerel VPN/DNS filtresi + cihaz yöneticisi): API tarafında sabotaj tespiti hazır, istemci modülü yok. v1'de uygulama `shield: unknown` gönderir; vasi ekranı bu durumda engel kutusunu göstermez, sözleşme de "erişim kapatılır" demez. v1'de korunan şey: uygulama silinir/sinyal 24 saat kesilirse vasilere haber gider.
+- ~~Android bahis engeli~~ **1.3.0 ile geldi:** `apps/mobile/modules/shield` (Kotlin, telefon içi VPN ile DNS filtresi; ön plan servisi). Kural ve liste `apps/api/shield` (`node scripts/shield-list.mjs` ile yenilenir). Expo Go'da modül yoktur, uygulama engelsiz çalışır (`shield: unknown`); gerçek deneme için geliştirme derlemesi: `npm run android:dev`. Play Console `VpnService` beyanı: `store/PLAY-VPN-BEYANI.md`.
 - Push bildirimleri (şimdilik e-posta).
 - Paket satışı (Google Play Billing) ve tamamlama ödülü: henüz yok; şu an paketler ücretsiz/demo. Para tutma (eski "Söz Kasası") fikri kaldırıldı.
 - Google Play yayını, sürüm imzalama.

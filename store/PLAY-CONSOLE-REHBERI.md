@@ -107,6 +107,6 @@ Kategori: "Sağlık ve fitness". Özelliklerde **Ruh ve davranış sağlığı /
 - **Üretime çıkış:** Sürümü **kademeli yayın** (%20 → %50 → %100) ile çıkar. **Yayın → Yayın ayarları → Yönetilen yayın**'ı aç; mağaza girişi (metin ve 8 görsel) ve uygulama sürümü incelemeden sonra aynı anda yayına alınır. Görselleri yeni tema canlıya çıkmadan yükleme (mağaza görseli yayındaki uygulamayı yansıtmalı).
 - **Veri güvenliği formu:** Yukarıdaki "Satın alma geçmişi" satırını ekle ve formu yeniden gönder; gizlilik politikası paket ödemesini anlatıyor olmalı (`site/src/legal/tr.mjs`, "paket satışı açıldığında" ifadeleri şimdiki zamana çevrilir).
 - **Sağlık beyanı:** Uygulama içeriği → Sağlık uygulamaları; açıklamadaki "teşhis, tedavi, iyileştirme veya önleme yapmaz" ifadesiyle tutarlı olsun.
-- `VpnService` beyanı bu sürümde **gerekmez** (bahis engelleyici sonraki sürümde).
+- `VpnService` beyanı 1.2.0'da **gerekmezdi**; **1.3.0'dan itibaren gerekir** (bahis engelleyici). Ön plan servisi (`systemExempted`) beyanı da aynı sürümde: bkz. `store/PLAY-VPN-BEYANI.md`.
 
 **Ülkeler:** Türkiye'den başla. İngilizce yardım hattı numaraları (ABD, İngiltere) henüz doğrulanmadı; diğer ülkeleri onlar doğrulanınca açmak daha güvenli.

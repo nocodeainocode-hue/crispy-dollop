@@ -21,6 +21,11 @@ google-services*.json
 *.tsbuildinfo
 !apps/web/.env.canli
 
+# yerel Android derleme çıktıları (engel modülü)
+apps/mobile/modules/*/android/build/
+.cxx/
+.gradle/
+
 # yerel Android derleme çıktıları
 apps/mobile/modules/*/android/build/
 .cxx/

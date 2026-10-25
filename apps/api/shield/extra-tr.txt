@@ -1,0 +1,15 @@
+# Türkiye'ye özel ek engel listesi (açık kaynak listede olmayanlar). Bir satıra bir alan adı; alt alan adları da engellenir.
+# Yasal bahis ve şans oyunları da dahil: bırakmak isteyen için yasal olanla yasa dışı arasında fark yok.
+# Yalnızca kumar/bahis sitesi olduğundan emin olunan adresler eklenir; emin değilsen ekleme (yanlış engel güveni bozar).
+bets10.com
+tipobet.com
+iddaa.com
+nesine.com
+misli.com
+bilyoner.com
+birebin.com
+oley.com
+tuttur.com
+millipiyangoonline.com
+sisalsans.com.tr
+tjk.org

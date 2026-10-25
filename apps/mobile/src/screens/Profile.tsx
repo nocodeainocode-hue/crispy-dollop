@@ -12,6 +12,8 @@ import { c, F, pebble } from '../theme';
 import type { Go } from '../nav';
 import { useL, useH, useHelp, currencySymbol, LANGS, dict, type Dict } from '../i18n';
 import { shareVow, vowExists } from '../vowStore';
+import { useShield } from '../useShield';
+import { shieldOn } from '../../modules/shield';
 
 const DAY = 86400000;
 const confirm = (L: Dict, msg: string, ok: () => void) =>
@@ -84,6 +86,7 @@ function Seg<K extends string>({ label, options, value, onPick }: { label: strin
 /** Profil: paket, kalan gün, hesap ve ayarlar. Yalnızca gerçekten çalışan ayarlar vardır. */
 export default function Profile({ go }: { go: Go }) {
   const a = useApp();
+  const sh = useShield(); // yalnız Android uygulamasında; Expo Go/web/iOS'ta null
   const srv = useServer();
   const L = useL(), H = useH(), help = useHelp();
   const [name, setName] = useState(a.name);
@@ -149,6 +152,7 @@ export default function Profile({ go }: { go: Go }) {
 
         <Section>{L.profile.myPact}</Section>
         <LinkRow label={L.profile.guardians} sub={a.guardians.length ? L.profile.guardiansSub(accepted) : L.profile.guardiansNone} onPress={() => go('guardians')} icon="witness" />
+        {!!sh && <LinkRow label={L.shield.profile} sub={shieldOn(sh) ? L.shield.profileOn(sh.blockedToday) : sh.wanted ? L.shield.profileOff : L.shield.profileNever} danger={sh.wanted && !shieldOn(sh)} onPress={() => go('shield')} icon="eyeOff" />}
         <LinkRow label={L.profile.vow} sub={a.vowSeconds && vowExists(a.vowUri) ? L.profile.vowAdded(a.vowSeconds) : L.profile.vowNone} onPress={() => { if (a.vowSeconds && vowExists(a.vowUri)) shareVow(a.vowUri, L.guardians.shareTitle).then(ok => { if (!ok) flash(L.guardians.shareUnavailable, false); }); else go('vow'); }} icon="video" />
         <LinkRow label={L.profile.journal} onPress={() => go('journal')} icon="journal" />
         <LinkRow label={L.profile.calm} onPress={() => go('calm')} icon="calm" />
