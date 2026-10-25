@@ -1,18 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Pressable, Animated } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Pressable } from 'react-native';
 import { useApp } from '../store';
 import { Screen, Body, ActionBar, T } from '../components/ui';
-import { ND, EASE, dur } from '../components/motion';
+import { dur } from '../components/motion';
 import { useL } from '../i18n';
 import { dayMessage } from '../dayMessage';
 import { c, pebble } from '../theme';
-import { GardenScene, tulipNo } from '../garden';
-
-const DAY = 86400000;
+import { settle } from '../haptics';
+import { MS } from '../art/plant';
+import { HomeScene, HOME_SCENE_MIN_H, DAY_MS, gardenStates, hardDays, tulipNo } from '../garden';
 
 /**
- * Günlük kontrol kaydedilince: sakin bir yaprak açılışı (her 7. günde lale). Gecikme, asma, halka, parıltı, konfeti yok.
- * Kişiye özel tek cümle ve (isteğe bağlı) "bugün seni ne tuttu?" cevabı (Günlük'e "dayandım" olarak düşer).
+ * Günlük kontrol kaydedilince: sakin bir yaprak açılışı (her 7. günde lale). Gecikme, asma, parıltı, konfeti yok.
+ * Çizim art/plant: bugünün yaprağı 1,6 sn açılır (lale günü: 1,9 sn hafif aşmayla + tek seferlik hardal halka), tepeler "done".
+ * Açılış bitince tek sakin haptik (settle). Kişiye özel tek cümle ve (isteğe bağlı) "bugün seni ne tuttu?" cevabı (Günlük'e "dayandım" olarak düşer).
  * `notice`: sunucuya gönderilemediyse görünür uyarı.
  */
 export default function DayDone({ urge, onDone, notice }: { urge: number | null; onDone: (helper: string) => void; notice?: string | null }) {
@@ -21,26 +22,26 @@ export default function DayDone({ urge, onDone, notice }: { urge: number | null;
   const [helper, setHelper] = useState('');
   const now = Date.now();
   const goal = a.goalDays;
-  const day = Math.max(1, Math.min(goal, Math.floor((now - a.startedAt) / DAY) + 1));
-  const streak = Math.max(1, Math.min(day, Math.floor((now - (a.streakStartedAt || a.startedAt)) / DAY) + 1));
+  const day = Math.max(1, Math.min(goal, Math.floor((now - a.startedAt) / DAY_MS) + 1));
+  const streak = Math.max(1, Math.min(day, Math.floor((now - (a.streakStartedAt || a.startedAt)) / DAY_MS) + 1));
   const msg = useMemo(() => dayMessage(L, { streak, day, goal, urge, triggerTimes: a.triggerTimes, reason: a.reason, letter: a.letter, now: new Date(now) }), [L]);
-  const hard = useMemo(() => [...new Set(a.relapses.map(t => Math.floor((t - a.startedAt) / DAY) + 1).filter(d => d >= 1 && d <= goal))].sort((x, y) => x - y), [a.relapses, a.startedAt, goal]);
+  const hard = useMemo(() => hardDays(a.relapses, a.startedAt, goal), [a.relapses, a.startedAt, goal]);
+  // Bugün tamam: bugünün yaprağı (7. günde lale) taze açılır; diğer günler store'dan
+  const states = useMemo(() => gardenStates({ goal, day, done: true, hard, checkIns: a.checkIns, startedAt: a.startedAt }), [goal, day, hard, a.checkIns, a.startedAt]);
   const tulip = tulipNo(day);
 
-  // Bugünün yaprağı (7. günde lale): 1,6 sn, ölçek + opaklık, aşma yok. Hareketi azalt açıksa doğrudan açık.
-  const open = useRef(new Animated.Value(dur(1) ? 0 : 1)).current;
+  // Açılış bitince tek haptik. Hareketi azalt açıkken dur() 0 verir: hemen. Gün başına bir mount: yalnız bir kez çalar.
   useEffect(() => {
-    const t = Animated.timing(open, { toValue: 1, duration: dur(1600), easing: EASE, useNativeDriver: ND });
-    t.start();
-    return () => t.stop();
+    const t = setTimeout(settle, dur(tulip ? MS.bloom : MS.unfurl));
+    return () => clearTimeout(t);
   }, []);
 
   return (
     <Screen>
       <Body>
         <View style={{ flex: 1 }}>
-          <GardenScene style={{ flex: 1, minHeight: 240 }} goal={goal} day={day} doneToday hard={hard} opening={open} pulse={false}
-            a11yLabel={tulip ? L.done.tulip(tulip) : L.done.leaf} />
+          <HomeScene style={{ flex: 1, minHeight: Math.max(240, HOME_SCENE_MIN_H) }} goalDays={goal} dayStates={states} intro={false} freshDay={day} hills="done"
+            swayMs={MS.swayDone} swayDeg={0.7} accessibilityLabel={tulip ? L.done.tulip(tulip) : L.done.leaf} />
           <View style={{ paddingHorizontal: 24, paddingTop: 14 }}>
             <T size={44} ls={-1} lh={50} maxFontSizeMultiplier={1.3}>{L.done.title(day)}</T>
             {tulip > 0 && <T size={26} lh={32} style={{ marginTop: 2 }}>{L.done.tulip(tulip)}</T>}
