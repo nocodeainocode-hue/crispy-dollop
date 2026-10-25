@@ -6,10 +6,9 @@ import { useL } from '../i18n';
 import { c, pebble } from '../theme';
 import type { Go } from '../nav';
 import { ND, EASE, dur } from '../components/motion';
-import { GardenScene, stageFor, gardenCounts } from '../garden';
+import { stageFor } from '../art/plant';
+import { HomeScene, HOME_SCENE_MIN_H, claimIntro, gardenCounts, gardenStates, hardDays, whyLabel, DAY_MS } from '../garden';
 import { ChipBtn, DotsBtn, Dock, MoreSheet, type SheetRow } from '../garden/HomeParts';
-
-const DAY = 86400000;
 
 // Exit.tsx de kullanıyor: değişmeden kalır.
 export function useNow(step = 30000) {
@@ -24,7 +23,7 @@ const dayKey = (t: number) => { const d = new Date(t); return `${d.getFullYear()
  * durum güncellenir; boşta Home yeniden çizilmez. Gün hesabı eskisiyle aynı (geçen 24 sa dilimi).
  */
 function useGardenDay(startedAt: number) {
-  const calc = () => { const n = Date.now(); return { n, day: Math.floor((n - startedAt) / DAY) + 1, key: dayKey(n) }; };
+  const calc = () => { const n = Date.now(); return { n, day: Math.floor((n - startedAt) / DAY_MS) + 1, key: dayKey(n) }; };
   const [st, setSt] = useState(calc);
   useEffect(() => {
     const tick = () => setSt(p => { const q = calc(); return q.day === p.day && q.key === p.key ? p : q; });
@@ -47,8 +46,15 @@ export default function Home({ go }: { go: Go }) {
   const completed = a.pactStatus === 'completed'; // ücretsiz mod: pakt bitti, paket bekleniyor
   const done = completed || a.checkIns.some(t => dayKey(t) === st.key) || (a.lastCheckIn > 0 && dayKey(a.lastCheckIn) === st.key);
   // Zor (tekrar oynama) günleri: yaprak silinmez, kenarı kıvrılır
-  const hard = useMemo(() => [...new Set(a.relapses.map(t => Math.floor((t - a.startedAt) / DAY) + 1).filter(d => d >= 1 && d <= goal))].sort((x, y) => x - y), [a.relapses, a.startedAt, goal]);
-  const counts = gardenCounts(goal, day, new Set(hard));
+  const hard = useMemo(() => hardDays(a.relapses, a.startedAt, goal), [a.relapses, a.startedAt, goal]);
+  // Sahne durumları store'dan: geçen gün done, zor gün curl, kaçırılan gün rest, bugün today (kontrol yapıldıysa done), sonrası future
+  const states = useMemo(() => gardenStates({ goal, day, done, hard, checkIns: a.checkIns, startedAt: a.startedAt }), [goal, day, done, hard, a.checkIns, a.startedAt]);
+  const counts = gardenCounts(goal, day, done, hard);
+  // Neden etiketi: yalnız kısa (en çok 3 sözcük) metin; uzun/kişisel metin sahnede gösterilmez (eski davranış korunur)
+  const why = useMemo(() => whyLabel(a.reason), [a.reason]);
+  const labels = useMemo(() => ({ today: H.note, why }), [H.note, why]);
+  // Yaprakların sırayla belirmesi: takvim gününde ilk girişte bir kez; sonra durağan. Mount boyunca sabit.
+  const [intro] = useState(() => claimIntro(st.key));
   const trialLeft = !completed && goal <= 7 ? goal - day : 99;
 
   // Gün sayısı yerleşir (0'dan sayma yok): 600 ms ölçek .94 → 1
@@ -58,7 +64,7 @@ export default function Home({ go }: { go: Go }) {
 
   const nav = (s: Parameters<Go>[0]) => () => { setMore(false); go(s); };
   const rows: SheetRow[] = [];
-  if (!completed) rows.push({ key: 'plan', label: H.myPack, onPress: nav('plan') });
+  if (!completed) rows.push({ key: 'plan', label: H.myPack, icon: 'pack', onPress: nav('plan') });
   if (!completed) rows.push({ key: 'relapse', label: H.relapse, onPress: nav('relapse') });
   if (!completed) rows.push({ key: 'exit', label: H.exit, onPress: nav('exit') });
   if (!a.vowUri) rows.push({ key: 'vow', label: H.vow, onPress: nav('vow') });
@@ -69,7 +75,7 @@ export default function Home({ go }: { go: Go }) {
   return (
     <Screen>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 2 }}>
-        <ChipBtn label={H.me} a11y={L.chips.profile} onPress={() => go('profile')} />
+        <ChipBtn label={H.me} a11y={L.chips.profile} icon="profile" onPress={() => go('profile')} />
         <DotsBtn a11y={H.more} onPress={() => setMore(true)} />
       </View>
       <Body>
@@ -85,11 +91,10 @@ export default function Home({ go }: { go: Go }) {
           </View>
           <T w="s" size={20} lh={26} color={c.dim} style={{ paddingHorizontal: 28, marginTop: 2 }}>{sentence}</T>
 
-          <GardenScene
-            style={{ flex: 1, minHeight: 190, marginTop: 4 }}
-            goal={goal} day={day} doneToday={done} hard={hard}
-            note={done ? undefined : H.note} pulse={!done}
-            a11yLabel={H.a11y(day, goal, H.stage[stageFor(goal)], counts.tulips, counts.curled)}
+          <HomeScene
+            style={{ flex: 1, minHeight: HOME_SCENE_MIN_H, marginTop: 4 }}
+            goalDays={goal} dayStates={states} intro={intro} labels={labels}
+            accessibilityLabel={H.a11y(day, goal, H.stage[stageFor(goal)], counts.tulips, counts.curled)}
           />
 
           {trialLeft <= 2 && (
@@ -107,8 +112,8 @@ export default function Home({ go }: { go: Go }) {
 
           <Dock items={[
             { key: 'calm', label: H.calm, glyph: 'calm', onPress: () => go('calm') },
-            { key: 'journal', label: H.journal, glyph: 'book', onPress: () => go('journal') },
-            { key: 'guardians', label: H.witnesses, glyph: 'pair', onPress: () => go('guardians') },
+            { key: 'journal', label: H.journal, glyph: 'journal', onPress: () => go('journal') },
+            { key: 'guardians', label: H.witnesses, glyph: 'witness', onPress: () => go('guardians') },
           ]} />
         </View>
       </Body>
