@@ -1,28 +1,35 @@
 import React, { createElement, useEffect, useRef, useState } from 'react';
-import { View, Platform } from 'react-native';
+import { View, Platform, Linking, Animated } from 'react-native';
 const VIDEO_BITRATE = 2_000_000; // 60 sn ≈ 15 MB
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { ActionBar, T, Kicker } from './ui';
-import { c, alpha, BAHCE } from '../theme';
+import { usePulse } from './motion';
+import { c, alpha, pebble } from '../theme';
 import { useL } from '../i18n';
 
 export type Vow = { uri: string; seconds: number; mime: string };
 export const MAX_SECONDS = 60;
 const mimeOf = (uri: string) => (/\.mov$/i.test(uri) ? 'video/quicktime' : /\.webm$/i.test(uri) ? 'video/webm' : 'video/mp4');
+type Props = { script: string[]; onChange: (v: Vow | null) => void; onSkip?: () => void };
 
 function Preview({ uri }: { uri: string }) {
   const player = useVideoPlayer({ uri }, p => { p.loop = false; });
   return <VideoView player={player} style={{ flex: 1 }} nativeControls contentFit="cover" />;
 }
 
-/** Okunacak metin: kameranın üstünde yarı saydam kutu */
+/** Kamera çerçevesi: kusurlu yuvarlak, kurşun kenar; kamera/önizleme içinde kırpılır. */
+function Frame({ children }: { children: React.ReactNode }) {
+  return <View style={[pebble(56, 'vow'), { flex: 1, margin: 16, marginBottom: 8, borderWidth: 2, borderColor: c.edge, overflow: 'hidden', backgroundColor: c.surf }]}>{children}</View>;
+}
+
+/** Okunacak metin: kameranın üstünde yarı saydam kâğıt kutu */
 function Teleprompter({ script }: { script: string[] }) {
   const L = useL();
   return (
-    <View style={{ position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: alpha(c.bg, 0.82), padding: 12 }}>
+    <View style={{ position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: alpha(c.bg, 0.88), paddingHorizontal: 16, paddingVertical: 12 }}>
       <Kicker color={c.acc2}>{L.recorder.teleprompter}</Kicker>
-      {script.map((l, i) => <T key={i} w="s" size={13} lh={18} style={{ marginTop: 4 }}>{l}</T>)}
+      {script.map((l, i) => <T key={i} w="s" size={15} lh={21} style={{ marginTop: 4 }}>{l}</T>)}
     </View>
   );
 }
@@ -31,28 +38,64 @@ function Teleprompter({ script }: { script: string[] }) {
 function Bar({ elapsed }: { elapsed: number }) {
   return (
     <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-      <View style={{ height: 6, backgroundColor: c.tint(0.22) }}><View style={{ height: '100%', width: `${(elapsed / MAX_SECONDS) * 100}%`, backgroundColor: c.acc }} /></View>
+      <View style={{ height: 8, backgroundColor: c.tint(0.22) }}><View style={{ height: '100%', width: `${(elapsed / MAX_SECONDS) * 100}%`, backgroundColor: c.act }} /></View>
     </View>
   );
+}
+
+/** Kayıt işareti: kil renkli nokta, yumuşak nabız (hareketi azalt açıkken durağan). */
+function RecDot() {
+  const p = usePulse(700);
+  return <Animated.View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: c.clay, marginRight: 8, opacity: p.interpolate({ inputRange: [0, 1], outputRange: [1, 0.35] }) }} />;
 }
 
 function Controls({ phase, elapsed, vow, err, onStart, onStop, onAgain }: { phase: string; elapsed: number; vow: Vow | null; err: string; onStart: () => void; onStop: () => void; onAgain: () => void }) {
   const L = useL();
   return (
     <>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 6 }}>
-        <T w="s" size={12} color={phase === 'recording' ? c.acc2 : c.dim}>{phase === 'recording' ? L.recorder.recording(Math.floor(elapsed), MAX_SECONDS) : phase === 'review' ? L.recorder.saved(vow?.seconds ?? 0) : L.recorder.max(MAX_SECONDS)}</T>
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 6 }}>
+        {phase === 'recording' && <RecDot />}
+        <T w="s" size={14} color={phase === 'recording' ? c.fg : c.dim}>{phase === 'recording' ? L.recorder.recording(Math.floor(elapsed), MAX_SECONDS) : phase === 'review' ? L.recorder.saved(vow?.seconds ?? 0) : L.recorder.max(MAX_SECONDS)}</T>
       </View>
-      {!!err && <T w="s" size={12} color={c.acc2} style={{ paddingHorizontal: 16, paddingBottom: 6 }}>{err}</T>}
-      {phase === 'idle' && <ActionBar label={L.recorder.start} kind="red" right="●" height={64} size={18} hoverRed={false} onPress={onStart} />}
-      {phase === 'recording' && <ActionBar label={L.recorder.stop} right="■" height={64} size={18} onPress={onStop} />}
-      {phase === 'review' && <ActionBar label={L.recorder.again} right="" kind="ghost" height={56} size={15} onPress={onAgain} />}
+      {!!err && <T w="s" size={14} color={c.acc2} style={{ paddingHorizontal: 16, paddingBottom: 6 }}>{err}</T>}
+      {phase === 'idle' && <ActionBar label={L.recorder.start} right="" height={64} size={20} onPress={onStart} />}
+      {phase === 'recording' && <ActionBar label={L.recorder.stop} right="" height={64} size={20} onPress={onStop} />}
+      {phase === 'review' && <ActionBar label={L.recorder.again} right="" kind="ghost" height={60} size={19} onPress={onAgain} />}
     </>
   );
 }
 
+/**
+ * Kayıttan önceki kapı: izin kendiliğinden istenmez. "Kaydı hazırla" ile istenir, "Şimdi değil" aynı boyutta ve eşit ağırlıktadır
+ * (video isteğe bağlı). İzin kalıcı olarak kapatılmışsa birincil düğme Ayarlar'a götürür.
+ */
+function ReadyCard({ blocked, onReady, onSkip }: { blocked?: boolean; onReady: () => void; onSkip: () => void }) {
+  const L = useL();
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', paddingTop: 8 }}>
+      <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+        <T size={28} lh={34}>{L.recorder.permTitle}</T>
+        <T w="r" size={16} lh={23} color={c.dim} style={{ marginTop: 8 }}>{blocked ? L.recorder.blocked : L.recorder.permBody}</T>
+      </View>
+      <ActionBar label={blocked ? L.recorder.openSettings : L.recorder.allow} right="" onPress={onReady} height={64} size={20} />
+      <ActionBar label={L.recorder.later} right="" kind="ghost" onPress={onSkip} height={64} size={20} />
+    </View>
+  );
+}
+
+/** Atlandı: kısa not ve geri dönüş yolu (video isteğe bağlıdır, imza videosuz da atılır). */
+function SkippedCard({ onAgain }: { onAgain: () => void }) {
+  const L = useL();
+  return (
+    <View style={{ flex: 1, justifyContent: 'center' }}>
+      <T w="r" size={16} lh={23} color={c.dim} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.recorder.skipped}</T>
+      <ActionBar label={L.recorder.allow} right="" kind="ghost" onPress={onAgain} height={60} size={19} />
+    </View>
+  );
+}
+
 // ───────────── Native (Android/iOS): expo-camera ─────────────
-function NativeRecorder({ script, onChange }: { script: string[]; onChange: (v: Vow | null) => void }) {
+function NativeRecorder({ script, onChange, onSkip }: Props) {
   const L = useL();
   const cam = useRef<CameraView>(null);
   const [camPerm, askCam] = useCameraPermissions();
@@ -61,13 +104,8 @@ function NativeRecorder({ script, onChange }: { script: string[]; onChange: (v: 
   const [elapsed, setElapsed] = useState(0);
   const [vow, setVow] = useState<Vow | null>(null);
   const [err, setErr] = useState('');
+  const [skipped, setSkipped] = useState(false);
   const startTs = useRef(0);
-
-  // Adım açılır açılmaz izinleri iste: kamera doğrudan açılsın
-  useEffect(() => {
-    if (camPerm && !camPerm.granted && camPerm.canAskAgain) askCam();
-    if (micPerm && !micPerm.granted && micPerm.canAskAgain) askMic();
-  }, [camPerm?.granted, micPerm?.granted]);
 
   useEffect(() => {
     if (phase !== 'recording') return;
@@ -88,48 +126,52 @@ function NativeRecorder({ script, onChange }: { script: string[]; onChange: (v: 
   const again = () => { setVow(null); setPhase('idle'); onChange(null); };
 
   if (!camPerm || !micPerm) return <View style={{ flex: 1 }} />;
+  if (skipped) return <SkippedCard onAgain={() => setSkipped(false)} />;
   if (!camPerm.granted || !micPerm.granted) {
-    return (
-      <View style={{ flex: 1, padding: 16, justifyContent: 'center' }}>
-        <T size={22} ls={-0.5}>{L.recorder.permTitle}</T>
-        <T w="r" size={13} lh={19} color={c.dim} style={{ marginTop: 8 }}>{L.recorder.permBody}</T>
-        <ActionBar label={L.recorder.allow} onPress={async () => { await askCam(); await askMic(); }} height={64} size={16} />
-      </View>
-    );
+    const blocked = (!camPerm.granted && !camPerm.canAskAgain) || (!micPerm.granted && !micPerm.canAskAgain);
+    // İzin yalnızca bu düğmeyle istenir; kalıcı olarak kapalıysa Ayarlar açılır
+    const ready = async () => {
+      if (blocked) { Linking.openSettings().catch(() => {}); return; }
+      await askCam(); await askMic();
+    };
+    return <ReadyCard blocked={blocked} onReady={ready} onSkip={() => { setSkipped(true); onSkip?.(); }} />;
   }
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ flex: 1, margin: 16, marginBottom: 8, borderWidth: 1, borderColor: c.line, overflow: 'hidden', backgroundColor: c.surf }}>
+      <Frame>
         {phase === 'review' && vow ? <Preview uri={vow.uri} /> : <CameraView ref={cam} style={{ flex: 1 }} facing="front" mode="video" videoQuality="720p" videoBitrate={VIDEO_BITRATE} />}
         {phase !== 'review' && <Teleprompter script={script} />}
         {phase === 'recording' && <Bar elapsed={elapsed} />}
-      </View>
+      </Frame>
       <Controls phase={phase} elapsed={elapsed} vow={vow} err={err} onStart={start} onStop={() => cam.current?.stopRecording()} onAgain={again} />
     </View>
   );
 }
 
 // ───────────── Web: tarayıcı kamerası (getUserMedia + MediaRecorder) ─────────────
-function WebRecorder({ script, onChange }: { script: string[]; onChange: (v: Vow | null) => void }) {
+function WebRecorder({ script, onChange, onSkip }: Props) {
   const L = useL();
   const live = useRef<HTMLVideoElement | null>(null);
   const stream = useRef<MediaStream | null>(null);
   const rec = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
   const startTs = useRef(0);
+  const [armed, setArmed] = useState(false); // "Kaydı hazırla" dokunuldu: kamera/mikrofon ancak şimdi istenir
+  const [skipped, setSkipped] = useState(false);
   const [phase, setPhase] = useState<'idle' | 'recording' | 'review'>('idle');
   const [elapsed, setElapsed] = useState(0);
   const [vow, setVow] = useState<Vow | null>(null);
   const [err, setErr] = useState('');
 
-  // Adım açılır açılmaz kamerayı aç
+  // Kapı geçilince kamerayı aç
   useEffect(() => {
+    if (!armed) return;
     let dead = false;
     navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'user' }, audio: true })
       .then(s => { if (dead) { s.getTracks().forEach(t => t.stop()); return; } stream.current = s; if (live.current) { live.current.srcObject = s; live.current.play().catch(() => {}); } })
       .catch(() => setErr(L.recorder.webDenied));
     return () => { dead = true; stream.current?.getTracks().forEach(t => t.stop()); };
-  }, []);
+  }, [armed]);
 
   useEffect(() => {
     if (phase !== 'recording') return;
@@ -156,24 +198,26 @@ function WebRecorder({ script, onChange }: { script: string[]; onChange: (v: Vow
   };
   const again = () => { setVow(null); setPhase('idle'); onChange(null); setTimeout(() => { if (live.current && stream.current) { live.current.srcObject = stream.current; live.current.play().catch(() => {}); } }, 50); };
 
+  if (skipped) return <SkippedCard onAgain={() => setSkipped(false)} />;
+  if (!armed) return <ReadyCard onReady={() => setArmed(true)} onSkip={() => { setSkipped(true); onSkip?.(); }} />;
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ flex: 1, margin: 16, marginBottom: 8, borderWidth: 1, borderColor: c.line, overflow: 'hidden', backgroundColor: c.surf }}>
+      <Frame>
         {phase === 'review' && vow
           ? createElement('video', { key: 'review', src: vow.uri, controls: true, playsInline: true, style: { width: '100%', height: '100%', objectFit: 'cover' } })
           : createElement('video', { key: 'live', ref: live, muted: true, playsInline: true, autoPlay: true, style: { width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' } })}
         {phase !== 'review' && <Teleprompter script={script} />}
         {phase === 'recording' && <Bar elapsed={elapsed} />}
-      </View>
+      </Frame>
       <Controls phase={phase} elapsed={elapsed} vow={vow} err={err} onStart={start} onStop={() => rec.current?.stop()} onAgain={again} />
     </View>
   );
 }
 
 /**
- * Teleprompter'lı imza videosu kaydı (≤60 sn): adım açılınca kamera doğrudan açılır, tek dokunuşla kayıt başlar.
- * onChange: kayıt hazır olunca Vow, silinince null.
+ * Teleprompter'lı imza videosu kaydı (≤60 sn, isteğe bağlı): kamera izni "Kaydı hazırla" ile istenir, "Şimdi değil" eşit önemdedir.
+ * onChange: kayıt hazır olunca Vow, silinince null. onSkip: "Şimdi değil" seçilince (isteğe bağlı) bildirilir.
  */
-export default function VowRecorder(props: { script: string[]; onChange: (v: Vow | null) => void }) {
+export default function VowRecorder(props: Props) {
   return Platform.OS === 'web' ? <WebRecorder {...props} /> : <NativeRecorder {...props} />;
 }

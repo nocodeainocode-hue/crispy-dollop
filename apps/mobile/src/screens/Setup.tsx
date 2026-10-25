@@ -6,10 +6,11 @@ import { API_URL } from '../api';
 import { useBilling } from '../billing';
 import { packPrices, withPack } from '../purchase';
 import VowRecorder, { type Vow } from '../components/VowRecorder';
-import { Screen, Body, Back, ActionBar, HoldBar, NumRow, Field, Opt, Science, T, Kicker, Hair, TopChips, StepProgress } from '../components/ui';
+import { Screen, Body, Back, ActionBar, HoldBar, Field, Opt, T, Kicker, TopChips, StepProgress } from '../components/ui';
+import { Why, PaperCard, PaperLine, CheckRow, TextLink, PlusMark, Dot } from '../components/SetupParts';
 import { useL, useH, currencySymbol, joinNames } from '../i18n';
 import { StepTransition, Rise } from '../components/motion';
-import { c, F } from '../theme';
+import { c, F, pebble } from '../theme';
 
 const TOTAL = 10; // alışkanlık adımı + L.setup.steps (9)
 const toggle = (arr: string[], v: string) => (arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
@@ -21,7 +22,8 @@ export default function Setup() {
   const L = useL(), H = useH();
   // Seçenekler kimlik olarak saklanır (types/when), ekranda o dilin etiketi gösterilir
   const STEPS = [H.stepName, ...L.setup.steps];
-  const PACKS = [{ d: 7, l: L.packs.trial, sub: L.packs.trialSub }, ...[30, 60, 90].map(d => ({ d, l: L.packs.name(d), sub: L.packs.sub[d] }))];
+  // 30/60/90 = Filiz/Fidan/Ağaç (L.setup.packLabel); deneme ayrı satır
+  const PACKS = [{ d: 7, l: L.packs.trial, sub: L.packs.trialSub }, ...[30, 60, 90].map(d => ({ d, l: L.setup.packLabel(d), sub: L.setup.packSub }))];
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1); // 1 ileri, -1 geri: geçiş animasyonunun yönü
   const [viaLogin, setViaLogin] = useState(false); // 1. adımdan "Zaten hesabım var" ile hesap adımına atlandı: geri, 1. adıma döner
@@ -86,8 +88,7 @@ export default function Setup() {
   const need = solo ? 0 : Math.min(2, filled.length);
   const names = joinNames(filled.map(g => g.name), L);
   const loggedIn = !!srv.token;
-  const [discount, setDiscount] = useState(0); // önceki paketi tamamlayana sonraki pakette indirim
-  useEffect(() => { if (loggedIn) srv.me().then(m => { setTrialUsed(m.trialUsed); setDiscount(m.nextPackDiscount ?? 0); }).catch(() => {}); }, [loggedIn]);
+  useEffect(() => { if (loggedIn) srv.me().then(m => { setTrialUsed(m.trialUsed); }).catch(() => {}); }, [loggedIn]);
   // Kısayolla giriş: paktı olan hesap senkronla ana ekrana geçer (App yönlendirir).
   // Pakt yoksa boş verilerle sözleşmeye gitmesin: kurulumu 1. adımdan başlat, giriş açık kalsın.
   useEffect(() => {
@@ -130,169 +131,177 @@ export default function Setup() {
   const valid = [types.length > 0, when.length > 0, reason.trim().length > 5, guardiansOk && !dupEmail, true, true, letter.trim().length > 10, loggedIn && !selfGuardian, sign.trim().length > 2 && consent && !trialBlocked][step];
   const signOk = !busy; // video isteğe bağlı: videosuz da imzalanabilir
 
-  // Adım değişmedikçe aynı bileşen kalır: yazı yazarken başlık animasyonu yeniden oynamaz
+  // Adım değişmedikçe aynı bileşen kalır: yazı yazarken başlık animasyonu yeniden oynamaz.
+  // Başlık + (en çok) tek kısa açıklama; uzun açıklamalar "Neden böyle?" katlısında.
   const Head = useMemo(() => ({ big, small }: { big: string; small?: string }) => (
     <View style={{ paddingHorizontal: 16, paddingTop: 4, paddingBottom: 14 }}>
       <Rise delay={0} y={8} ms={300}><Kicker color={c.acc2}>{L.setup.stepKicker(step + 1, TOTAL, STEPS[step])}</Kicker></Rise>
-      <Rise delay={70} y={16} ms={420}><T size={36} ls={-1.1} lh={38} style={{ marginTop: 6 }}>{big}</T></Rise>
-      {!!small && <Rise delay={170} y={10} ms={420}><T w="r" size={13} lh={19} color={c.dim} style={{ marginTop: 10 }}>{small}</T></Rise>}
+      <Rise delay={70} y={16} ms={420}><T size={36} ls={-1.1} lh={40} style={{ marginTop: 6 }}>{big}</T></Rise>
+      {!!small && <Rise delay={170} y={10} ms={420}><T w="r" size={16} lh={23} color={c.dim} style={{ marginTop: 10 }}>{small}</T></Rise>}
     </View>
   ), [step, L, H]);
   const guard = async (fn: () => Promise<void>) => { setBusy(true); setErr(''); try { await fn(); } catch (e: any) { setErr(e.message ?? L.common.error); } setBusy(false); };
+
+  const price = prices[goal];
+  const paidAtSign = goal !== 7 && canBuy && !bill?.demo;
 
   return (
     <Screen>
       <StepProgress step={step} total={TOTAL} />
       {step === 0 && <TopChips onGuardian={() => app.set({ role: 'guardian' })} />}
-      {step > 0 ? <Back onPress={() => { setDir(-1); setHold(0); setErr(''); if (viaLogin && step === 7) { setViaLogin(false); setStep(0); } else setStep(step - 1); }} /> : <View style={{ height: 38 }} />}
+      {step > 0 ? <Back onPress={() => { setDir(-1); setHold(0); setErr(''); if (viaLogin && step === 7) { setViaLogin(false); setStep(0); } else setStep(step - 1); }} /> : <View style={{ height: 64 }} />}
       <StepTransition k={step} dir={dir}>
       {step === TOTAL - 1 ? (
         // Video adımı: tam ekran kayıt alanı + imza çubuğu
         <>
-          <View style={{ paddingHorizontal: 16 }}><Kicker color={c.acc2}>{L.setup.stepKicker(step + 1, TOTAL, STEPS[step])}</Kicker><T size={32} ls={-1} lh={34} style={{ marginTop: 4 }}>{L.setup.vowTitle}</T></View>
+          <View style={{ paddingHorizontal: 16 }}><Kicker color={c.acc2}>{L.setup.stepKicker(step + 1, TOTAL, STEPS[step])}</Kicker><T size={32} ls={-1} lh={36} style={{ marginTop: 4 }}>{L.setup.vowTitle}</T></View>
           <VowRecorder script={script} onChange={v => { setVow(v); setHold(0); }} />
         </>
       ) : (
       <Body>
         {step === 0 && <>
-          <Head big={L.setup.brand} small={H.intro} />
+          <Head big={L.setup.typesTitle} small={H.intro} />
           {notice
-            ? <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingBottom: 12 }}>{L.setup.loggedInNoPact}</T>
-            : !loggedIn && <Pressable onPress={() => { setDir(1); setViaLogin(true); setStep(7); }} style={{ paddingHorizontal: 16, paddingBottom: 12 }}><T w="s" size={12.5} color={c.acc2}>{L.setup.haveAccount}</T></Pressable>}
-          <Hair />
+            ? <T w="s" size={15} lh={21} color={c.acc2} style={{ paddingHorizontal: 16, paddingBottom: 12 }}>{L.setup.loggedInNoPact}</T>
+            : !loggedIn && <TextLink label={L.setup.haveAccount} onPress={() => { setDir(1); setViaLogin(true); setStep(7); }} />}
           {Object.entries(H.types).map(([x, label], i) => <Opt delay={120 + i * 50} key={x} label={label} on={types.includes(x)} onPress={() => setTypes(toggle(types, x))} />)}
-          <Science src={H.introSrc}>{H.introScience}</Science>
+          <Why src={H.introSrc}>{H.introScience}</Why>
         </>}
 
         {step === 1 && <>
           <Head big={L.setup.triggersTitle} small={H.whenSmall} />
-          <Hair />
           {Object.entries(H.when).map(([x, label], i) => <Opt delay={120 + i * 50} key={x} label={label} on={when.includes(x)} onPress={() => setWhen(toggle(when, x))} />)}
-          <View style={{ paddingTop: 14 }}>
+          <View style={{ paddingTop: 16 }}>
             <Field label={L.setup.lossLabel(currencySymbol(L))} placeholder={L.setup.lossPh} keyboardType="numeric" value={loss} onChangeText={setLoss} />
-            <T w="r" size={11.5} color={c.mute} style={{ paddingHorizontal: 16, marginBottom: 10 }}>{L.setup.lossNote}</T>
-            <Field label={L.setup.planLabel(when[0] ? H.when[when[0]] ?? when[0] : undefined)} placeholder={H.planPh} value={plan} onChangeText={setPlan} multiline style={{ minHeight: 70 }} />
+            <T w="r" size={13} lh={18} color={c.dim} style={{ paddingHorizontal: 16, marginBottom: 12 }}>{L.setup.lossNote}</T>
+            <Field label={L.setup.planLabel(when[0] ? H.when[when[0]] ?? when[0] : undefined)} placeholder={H.planPh} value={plan} onChangeText={setPlan} multiline style={{ minHeight: 76 }} />
           </View>
-          <Science src={H.whenSrc}>{H.whenScience}</Science>
+          <Why src={H.whenSrc}>{H.whenScience}</Why>
         </>}
 
         {step === 2 && <>
           <Head big={L.setup.reasonTitle} small={L.setup.reasonSmall} />
           <Field multiline placeholder={L.setup.reasonPh} value={reason} onChangeText={setReason} />
-          <Science src={L.setup.reasonSrc}>{L.setup.reasonScience}</Science>
+          <Why src={L.setup.reasonSrc}>{L.setup.reasonScience}</Why>
         </>}
 
         {step === 3 && <>
           <Head big={L.setup.guardiansTitle} small={H.guardiansSmall} />
-          <Hair />
           {!solo && gs.map((g, i) => {
-            // Kapalı kutu: boşsa "eklemek için dokun", doluysa özet; hatalıysa kırmızı uyarı (ilerleyememenin sebebi görünür kalsın)
+            // Kapalı kart: boşsa "eklemek için dokun", doluysa özet; hatalıysa kil kenar + kısa uyarı (ilerleyememenin sebebi görünür kalsın)
             const used = !!(g.name.trim() || g.email.trim());
             const bad = used && (!g.name.trim() || !EMAIL.test(g.email.trim()) || !!emailErr(g, i));
             if (openG !== g.id) return (
-              <Pressable key={g.id} onPress={() => setOpenG(g.id)} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, borderBottomWidth: 1, borderColor: c.line }}>
-                <View style={{ flex: 1 }}>
-                  <Kicker color={c.dim}>{L.setup.keyLabel(i + 1, i >= 1)}</Kicker>
-                  <T w={used ? 'b' : 's'} size={used ? 15 : 13.5} color={used ? c.fg : c.acc2} numberOfLines={1} style={{ marginTop: 4 }}>{used ? [g.name.trim(), g.email.trim()].filter(Boolean).join(' · ') : L.setup.tapToAdd}</T>
-                  {bad && <T w="s" size={12} color={c.acc2} style={{ marginTop: 2 }}>{L.setup.invalidShort}</T>}
+              <Pressable key={g.id} onPress={() => setOpenG(g.id)} accessibilityRole="button" accessibilityLabel={`${L.setup.keyLabel(i + 1, i >= 1)}. ${used ? [g.name.trim(), g.email.trim()].filter(Boolean).join(' · ') : L.setup.tapToAdd}`}>
+                <View style={[pebble(64, g.id), { marginHorizontal: 16, marginVertical: 5, minHeight: 64, flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingLeft: 22, paddingRight: 18, borderWidth: 2, borderColor: bad ? c.clay : c.line, backgroundColor: used ? c.sageWash : c.surf }]}>
+                  <View style={{ flex: 1 }}>
+                    <Kicker color={c.dim}>{L.setup.keyLabel(i + 1, i >= 1)}</Kicker>
+                    <T w={used ? 'b' : 's'} size={used ? 17 : 15} color={used ? c.fg : c.act} numberOfLines={1} style={{ marginTop: 4 }}>{used ? [g.name.trim(), g.email.trim()].filter(Boolean).join(' · ') : L.setup.tapToAdd}</T>
+                    {bad && <T w="s" size={13} color={c.acc2} style={{ marginTop: 2 }}>{L.setup.invalidShort}</T>}
+                  </View>
+                  {used ? <T w="s" size={14} color={c.dim} style={{ marginLeft: 12 }}>{L.setup.edit}</T> : <View style={{ marginLeft: 12 }}><PlusMark /></View>}
                 </View>
-                <T size={18} color={used ? c.dim : c.acc2} style={{ marginLeft: 12 }}>{used ? '✎' : '+'}</T>
               </Pressable>
             );
             return (
-            <View key={g.id} style={{ paddingTop: 12, paddingBottom: 2, borderBottomWidth: 1, borderColor: c.line }}>
-              <Pressable onPress={() => setOpenG(null)} hitSlop={8} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 6 }}>
-                <Kicker color={c.dim}>{L.setup.keyLabel(i + 1, i >= 1)}</Kicker>
-                <T w="s" size={12.5} color={c.dim}>{L.setup.collapse} ▴</T>
-              </Pressable>
-              <Field placeholder={L.setup.phName} value={g.name} onChangeText={t => setGs(gs.map(x => x.id === g.id ? { ...x, name: t } : x))} />
-              {!!nameErr(g) && <T w="s" size={12} color={c.acc2} style={{ paddingHorizontal: 16, marginTop: -4, marginBottom: 6 }}>{nameErr(g)}</T>}
-              <Field placeholder={L.setup.phEmail} keyboardType="email-address" autoCapitalize="none" value={g.email} onChangeText={t => setGs(gs.map(x => x.id === g.id ? { ...x, email: t } : x))} style={emailErr(g, i) ? { borderColor: c.acc } : undefined} />
-              {!!emailErr(g, i) && <T w="s" size={12} lh={16} color={c.acc2} style={{ paddingHorizontal: 16, marginTop: -4, marginBottom: 6 }}>{emailErr(g, i)}</T>}
-              <Field placeholder={L.setup.phPhone} keyboardType="phone-pad" value={g.phone} onChangeText={t => setGs(gs.map(x => x.id === g.id ? { ...x, phone: t } : x))} />
-            </View>
+              <View key={g.id} style={[pebble(72, g.id), { marginHorizontal: 16, marginVertical: 5, paddingVertical: 6, borderWidth: 2, borderColor: c.act, backgroundColor: c.surf }]}>
+                <Pressable onPress={() => setOpenG(null)} hitSlop={8} accessibilityRole="button" accessibilityLabel={L.setup.collapse} style={{ minHeight: 48, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 22 }}>
+                  <Kicker color={c.dim}>{L.setup.keyLabel(i + 1, i >= 1)}</Kicker>
+                  <T w="s" size={14} color={c.act}>{L.setup.collapse}</T>
+                </Pressable>
+                <Field placeholder={L.setup.phName} value={g.name} onChangeText={t => setGs(gs.map(x => x.id === g.id ? { ...x, name: t } : x))} />
+                {!!nameErr(g) && <T w="s" size={13} color={c.acc2} style={{ paddingHorizontal: 22, marginTop: -4, marginBottom: 6 }}>{nameErr(g)}</T>}
+                <Field placeholder={L.setup.phEmail} keyboardType="email-address" autoCapitalize="none" value={g.email} onChangeText={t => setGs(gs.map(x => x.id === g.id ? { ...x, email: t } : x))} style={emailErr(g, i) ? { borderColor: c.clay } : undefined} />
+                {!!emailErr(g, i) && <T w="s" size={13} lh={18} color={c.acc2} style={{ paddingHorizontal: 22, marginTop: -4, marginBottom: 6 }}>{emailErr(g, i)}</T>}
+                <Field placeholder={L.setup.phPhone} keyboardType="phone-pad" value={g.phone} onChangeText={t => setGs(gs.map(x => x.id === g.id ? { ...x, phone: t } : x))} />
+              </View>
             );
           })}
-          {dupEmail && <T w="s" size={12} lh={17} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 6 }}>{L.setup.dupNote}</T>}
+          {dupEmail && <T w="s" size={13} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 6 }}>{L.setup.dupNote}</T>}
           <View style={{ paddingTop: 10 }}>
             {!solo && <Opt label={L.setup.hideOpt} sub={L.setup.hideOptSub} on={hideHabit} onPress={() => setHideHabit(!hideHabit)} />}
             <Opt label={L.setup.soloOpt} sub={L.setup.soloOptSub} on={solo} onPress={() => setSolo(!solo)} />
           </View>
-          {solo && <T w="r" size={12.5} lh={18} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.setup.soloNote}</T>}
-          <Science src={L.setup.guardiansSrc}>{H.guardiansScience}</Science>
+          {solo && <T w="r" size={14} lh={20} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.setup.soloNote}</T>}
+          <Why src={L.setup.guardiansSrc}>{H.guardiansScience}</Why>
         </>}
 
         {step === 4 && <>
           <Head big={L.setup.packTitle} small={L.setup.packSmall} />
-          <Hair />
           {PACKS.map((x, i) => {
             const soon = !canBuy && x.d !== 7;
             return <Opt delay={120 + i * 60} key={x.d} label={x.l} sub={soon ? L.packs.soon : prices[x.d] ? `${prices[x.d]} · ${x.sub}` : x.sub} on={goal === x.d} onPress={() => { if (!soon) setGoal(x.d); }} />;
           })}
-          {bill?.demo && discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
-          {(bill?.demo || !canBuy) && <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{bill?.demo ? L.setup.demoNote : L.setup.soonNote}</T>}
-          {canBuy && !bill?.demo && <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.packs.oneTime}</T>}
-          <Science src={L.setup.packSrc}>{L.setup.packScience}</Science>
+          {(bill?.demo || !canBuy) && <T w="r" size={14} lh={20} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{bill?.demo ? L.setup.demoNote : L.setup.soonNote}</T>}
+          {canBuy && !bill?.demo && <T w="s" size={14} lh={20} color={c.fg} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.packs.oneTime}</T>}
+          <Why src={L.setup.packSrc}>{L.setup.packScience}</Why>
         </>}
 
         {step === 5 && <>
           <Head big={H.consequencesTitle} small={L.setup.consequencesSmall} />
-          <Hair />
-          <Rise delay={140}><NumRow no="01">{L.setup.consequence1}</NumRow></Rise>
-          <Rise delay={200}><NumRow no="02">{L.setup.consequence2}</NumRow></Rise>
-          <Rise delay={260}><NumRow no="03" last>{L.setup.consequence3}</NumRow></Rise>
-          <Science src={L.setup.consequencesSrc}>{L.setup.consequencesScience}</Science>
+          <Rise delay={140}>
+            <PaperCard seed="consequences" tilt={0.7}>
+              <PaperLine>{L.setup.consequence1}</PaperLine>
+              <PaperLine>{L.setup.consequence2}</PaperLine>
+              <PaperLine last>{L.setup.consequence3}</PaperLine>
+            </PaperCard>
+          </Rise>
+          <Why src={L.setup.consequencesSrc}>{L.setup.consequencesScience}</Why>
         </>}
 
         {step === 6 && <>
           <Head big={L.setup.letterTitle} small={H.letterSmall} />
           <Field multiline placeholder={H.letterPh} value={letter} onChangeText={setLetter} />
-          <Science src={L.setup.letterSrc}>{L.setup.letterScience}</Science>
+          <Why src={L.setup.letterSrc}>{L.setup.letterScience}</Why>
         </>}
 
         {step === 7 && <>
           <Head big={L.setup.accountTitle} small={L.setup.accountSmall} />
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
-            <Kicker color={net === 'ok' ? c.fg : net === 'fail' ? c.acc2 : c.dim}>{net === 'ok' ? L.setup.netOk : net === 'fail' ? L.setup.netFail : L.setup.netChecking}</Kicker>
-            {net === 'fail' && <T w="r" size={12} lh={17} color={c.dim} style={{ marginTop: 4 }}>{L.setup.netHelp(API_URL, __DEV__)}</T>}
-            {__DEV__ && <T w="r" size={11} color={c.mute} style={{ marginTop: 4, fontFamily: F.mono }}>API: {API_URL}</T>}
+            <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 28 }}>
+              <Dot color={net === 'ok' ? c.act : net === 'fail' ? c.clay : c.edge} />
+              <T w="s" size={14} color={net === 'fail' ? c.acc2 : c.dim}>{net === 'ok' ? L.setup.netOk : net === 'fail' ? L.setup.netFail : L.setup.netChecking}</T>
+            </View>
+            {net === 'fail' && <T w="r" size={14} lh={20} color={c.dim} style={{ marginTop: 4 }}>{L.setup.netHelp(API_URL, __DEV__)}</T>}
+            {__DEV__ && <T w="r" size={13} color={c.dim} style={{ marginTop: 4, fontFamily: F.mono }}>API: {API_URL}</T>}
           </View>
-          {loggedIn && selfGuardian && <T w="s" size={12} lh={17} color={c.acc2} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.setup.selfGuardianErr(selfEmail)}</T>}
+          {loggedIn && selfGuardian && <T w="s" size={14} lh={20} color={c.acc2} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.setup.selfGuardianErr(selfEmail)}</T>}
           {loggedIn ? <View style={{ paddingHorizontal: 16 }}><Kicker color={c.acc2}>{L.setup.loggedIn}</Kicker><T size={18} style={{ marginTop: 4 }}>{app.email || email}</T></View> : <>
             <Field label={L.setup.nameLabel} placeholder={L.setup.namePh} value={acctName} onChangeText={setAcctName} />
             <Field label={L.setup.emailLabel} placeholder={L.setup.emailPh} keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} editable={!codeSent} />
             {codeSent && <Field label={L.setup.codeLabel} placeholder="123456" keyboardType="number-pad" maxLength={6} value={code} onChangeText={setCode} />}
-            {!!err && <T w="s" size={12} color={c.acc2} style={{ paddingHorizontal: 16 }}>{err}</T>}
+            {!!err && <T w="s" size={14} color={c.acc2} style={{ paddingHorizontal: 16 }}>{err}</T>}
             {!codeSent
-              ? <ActionBar label={L.setup.sendCode} disabled={busy || !EMAIL.test(email.trim()) || acctName.trim().length < 2} height={56} size={16} onPress={() => guard(async () => { await srv.requestCode(email.trim().toLowerCase(), acctName.trim()); setCodeSent(true); })} />
-              : <ActionBar label={L.setup.verify} disabled={busy || code.length !== 6} height={56} size={16} onPress={() => guard(async () => { await srv.verify(email.trim().toLowerCase(), code, acctName.trim()); })} />}
-            {codeSent && <ActionBar label={L.setup.otherEmail} right="" kind="ghost" height={48} size={13} onPress={() => { setCodeSent(false); setCode(''); setErr(''); }} />}
+              ? <ActionBar label={L.setup.sendCode} disabled={busy || !EMAIL.test(email.trim()) || acctName.trim().length < 2} height={60} size={19} onPress={() => guard(async () => { await srv.requestCode(email.trim().toLowerCase(), acctName.trim()); setCodeSent(true); })} />
+              : <ActionBar label={L.setup.verify} disabled={busy || code.length !== 6} height={60} size={19} onPress={() => guard(async () => { await srv.verify(email.trim().toLowerCase(), code, acctName.trim()); })} />}
+            {codeSent && <ActionBar label={L.setup.otherEmail} right="" kind="ghost" height={60} size={19} onPress={() => { setCodeSent(false); setCode(''); setErr(''); }} />}
           </>}
         </>}
 
         {step === 8 && <>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 14 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 6 }}>
             <Kicker color={c.acc2}>{L.setup.contractKicker(goal)}</Kicker>
-            <T size={38} ls={-1.1} lh={38} style={{ marginTop: 6 }}>{H.contractTitle}</T>
+            <T size={38} ls={-1.1} lh={42} style={{ marginTop: 6 }}>{H.contractTitle}</T>
           </View>
-          <Hair />
-          <NumRow no="01">{H.contract1}</NumRow>
-          <NumRow no="02">{solo ? H.contract2Solo : H.contract2}</NumRow>
-          <NumRow no="03" last>{solo ? L.setup.contract3Solo : L.setup.contract3(names, need)}</NumRow>
-          <View style={{ borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.line, padding: 14 }}>
-            <Kicker>{L.setup.packKicker}</Kicker>
-            <T size={40} ls={-1.6} style={{ marginTop: 4 }}>{L.setup.packDays(goal)}</T>
-            <T w="r" size={12} color={c.dim} style={{ marginTop: 4 }}>{L.setup.packKind(goal === 7)}</T>
-          </View>
-          <T w="r" size={11.5} color={trialBlocked ? c.acc2 : c.mute} style={{ paddingHorizontal: 16, paddingTop: 8 }}>{trialBlocked ? (canBuy ? L.setup.trialUsed : L.setup.trialUsedSoon) : bill?.demo ? L.setup.demoShort : ''}</T>
+          <PaperCard seed="contract" tilt={-0.8}>
+            <PaperLine>{H.contract1}</PaperLine>
+            <PaperLine>{solo ? H.contract2Solo : H.contract2}</PaperLine>
+            <PaperLine last>{solo ? L.setup.contract3Solo : L.setup.contract3(names, need)}</PaperLine>
+          </PaperCard>
+          {/* Paket damgası: gün sayısı, ad, (Play'den gelen) fiyat ve "tek seferlik" notu imzadan önce görünür */}
+          <PaperCard seed="stamp" tilt={1} pad={16} mx={40}>
+            <Kicker color={c.dim}>{L.setup.packKicker}</Kicker>
+            <T size={40} ls={-1.2} lh={46} style={{ marginTop: 2 }}>{L.setup.packDays(goal)}</T>
+            <T w="s" size={15} color={c.dim} style={{ marginTop: 2 }}>{L.setup.packKind(goal)}</T>
+            {paidAtSign && !!price && <T size={26} lh={32} style={{ marginTop: 8 }}>{price}</T>}
+            {paidAtSign && <T w="s" size={14} lh={20} color={c.fg} style={{ marginTop: 4 }}>{L.packs.oneTime}</T>}
+          </PaperCard>
+          {(trialBlocked || bill?.demo) && <T w="r" size={14} lh={20} color={trialBlocked ? c.acc2 : c.dim} style={{ paddingHorizontal: 16, paddingTop: 6 }}>{trialBlocked ? (canBuy ? L.setup.trialUsed : L.setup.trialUsedSoon) : L.setup.demoShort}</T>}
           <View style={{ paddingTop: 14 }}>
-            <Field label={L.setup.signLabel} placeholder={L.setup.signPh} value={sign} onChangeText={setSign} />
-            <Pressable onPress={() => setConsent(!consent)} style={{ flexDirection: 'row', paddingHorizontal: 16, paddingTop: 4 }}>
-              <T size={15} color={consent ? c.acc2 : c.dim} style={{ marginRight: 8 }}>{consent ? '■' : '□'}</T>
-              <T w="r" size={11.5} lh={16} color={c.dim} style={{ flex: 1 }}>{L.setup.consent}</T>
-            </Pressable>
+            <Field label={L.setup.signLabel} placeholder={L.setup.signPh} value={sign} onChangeText={setSign} style={{ fontFamily: F.hand, fontSize: 30, paddingVertical: 8 }} />
+            <CheckRow on={consent} onPress={() => setConsent(!consent)}>{L.setup.consent}</CheckRow>
           </View>
-          <Science src={H.contractSrc}>{H.contractScience}</Science>
+          <Why src={H.contractSrc}>{H.contractScience}</Why>
         </>}
         <View style={{ flex: 1, minHeight: 12 }} />
       </Body>
@@ -300,16 +309,16 @@ export default function Setup() {
       </StepTransition>
 
       {step === 3 && !valid && (
-        <T w="s" size={12} lh={17} color={c.acc2} style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+        <T w="s" size={14} lh={19} color={c.acc2} style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
           {dupEmail ? L.setup.dupBottom : filled.length === 0 ? L.setup.guardiansOrSolo : L.setup.guardiansInvalid}
         </T>
       )}
       {step < TOTAL - 2 && <ActionBar label={L.common.continue} disabled={!valid} onPress={() => { setDir(1); setStep(step + 1); }} />}
       {step === TOTAL - 2 && <ActionBar label={L.setup.toVideo} disabled={!valid} onPress={() => { setDir(1); setStep(step + 1); }} />}
       {step === TOTAL - 1 && <>
-        {!!err && <T w="s" size={12} color={c.acc2} style={{ paddingHorizontal: 16, paddingVertical: 6 }}>{err}</T>}
-        <T w="r" size={12} color={c.dim} style={{ paddingHorizontal: 16, paddingVertical: 8 }}>{busy ? L.setup.signing : vow ? L.setup.holdWithVow : L.setup.holdNoVow}</T>
-        {goal !== 7 && canBuy && !bill?.demo && !busy && <T w="r" size={12} color={c.dim} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.setup.payAtSign}</T>}
+        {!!err && <T w="s" size={14} color={c.acc2} style={{ paddingHorizontal: 16, paddingVertical: 6 }}>{err}</T>}
+        <T w="r" size={15} color={c.dim} style={{ paddingHorizontal: 16, paddingVertical: 8 }}>{busy ? L.setup.signing : vow ? L.setup.holdWithVow : L.setup.holdNoVow}</T>
+        {paidAtSign && !busy && <T w="r" size={14} lh={19} color={c.dim} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.setup.payAtSign}</T>}
         {signOk
           ? <HoldBar label={L.setup.hold} pct={hold} onDown={() => { holding.current = true; }} onUp={() => { holding.current = false; }} />
           : <ActionBar label={busy ? L.setup.uploading : L.setup.hold} right="" kind="ghost" disabled onPress={() => {}} height={78} size={20} />}
