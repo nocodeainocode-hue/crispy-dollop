@@ -281,8 +281,12 @@ function Chip({ label, onPress }: { label: string; onPress: () => void }) {
 /** Sağ üst köşe: "PROFİL" (varsa) ve "VASİ" rozetleri. VASİ aynı uygulamada vasi tarafına geçirir. */
 export function TopChips({ onGuardian, onProfile }: { onGuardian: () => void; onProfile?: () => void }) {
   const L = useL();
+  const ins = useSafeAreaInsets();
+  // Bahçe: 8 px'lik ilerleme çubuğu ekranın üst boşluğunda başlar; rozetler çubuğun altında durur (üst üste binmesin)
+  const padTop = Platform.OS === 'web' ? 18 : Math.max(ins.top + 8, 24);
+  const top = BAHCE ? padTop + 16 : Platform.OS === 'web' ? 20 : 54;
   return (
-    <View style={{ position: 'absolute', top: Platform.OS === 'web' ? 20 : 54, right: 16, zIndex: 10, flexDirection: 'row' }}>
+    <View style={{ position: 'absolute', top, right: 16, zIndex: 10, flexDirection: 'row' }}>
       {onProfile && <Chip label={L.chips.profile} onPress={onProfile} />}
       <Chip label={L.chips.guardian} onPress={onGuardian} />
     </View>
