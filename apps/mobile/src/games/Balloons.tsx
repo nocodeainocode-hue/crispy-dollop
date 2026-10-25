@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Pressable, Animated, Easing } from 'react-native';
 import { ND } from '../components/motion';
 import { T, Kicker } from '../components/ui';
-import { c } from '../theme';
+import { c, alpha, BAHCE } from '../theme';
 import { useL } from '../i18n';
 
 // Gerçek balonlar: aşağıdan yükselir, havada sallanır, dokununca parçalanarak patlar. Puan yok, süre yok.
-const COLORS = ['#EC3013', '#FFB703', '#2EC4B6', '#8E7DFF', '#FF6FA3', '#A7A29C', '#4CC9F0']; // nötr gri: iki temada da görünür
+// Balonlar iki temada da görünür olmalı (nötr gri dahil). Bahçe: sakin, doygunluğu düşük tonlar.
+const COLORS = BAHCE ? ['#CF5F44', '#DCA83F', '#6BA38A', '#7A9CC6', '#C97AA0', '#A7A29C', '#8FAA87'] : ['#EC3013', '#FFB703', '#2EC4B6', '#8E7DFF', '#FF6FA3', '#A7A29C', '#4CC9F0'];
 type B = { id: number; x: number; size: number; color: string; rise: number; sway: number; swayMs: number };
 
 function Particle({ angle, dist, color, delay }: { angle: number; dist: number; color: string; delay: number }) {
@@ -97,7 +98,7 @@ export default function Balloons() {
 
   return (
     <View style={{ flex: 1 }}>
-      <View onLayout={e => setSize({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })} style={{ flex: 1, minHeight: 420, overflow: 'hidden', borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.line, backgroundColor: 'rgba(76,201,240,0.05)' }}>
+      <View onLayout={e => setSize({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })} style={{ flex: 1, minHeight: 420, overflow: 'hidden', borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.line, backgroundColor: BAHCE ? alpha(c.sage, 0.14) : 'rgba(76,201,240,0.05)' }}>
         {!!size.h && bs.map(b => <Balloon key={b.id} b={b} h={size.h} onGone={gone} onPopped={onPopped} />)}
         <View pointerEvents="none" style={{ position: 'absolute', top: 10, left: 14 }}>
           <Kicker color={c.dim}>{L.games.popped}</Kicker>

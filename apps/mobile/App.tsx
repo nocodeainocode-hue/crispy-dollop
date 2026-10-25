@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, useColorScheme } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Archivo_400Regular, Archivo_600SemiBold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo';
+import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces/600SemiBold';
+import { Nunito_500Medium } from '@expo-google-fonts/nunito/500Medium';
+import { Nunito_700Bold } from '@expo-google-fonts/nunito/700Bold';
+import { Nunito_800ExtraBold } from '@expo-google-fonts/nunito/800ExtraBold';
+import { Caveat_600SemiBold } from '@expo-google-fonts/caveat/600SemiBold';
 import { Provider, useApp } from './src/store';
 import { ServerProvider, useServer } from './src/server';
 import GuardianApp from './src/screens/GuardianApp';
@@ -18,7 +23,7 @@ import Exit from './src/screens/Exit';
 import Journal from './src/screens/Journal';
 import Calm from './src/screens/Calm';
 import type { Scr } from './src/nav';
-import { c, applyTheme, type ThemeName } from './src/theme';
+import { c, applyTheme, BAHCE, type ThemeName } from './src/theme';
 import { StepTransition } from './src/components/motion';
 
 function Root() {
@@ -28,7 +33,7 @@ function Root() {
   const system = useColorScheme();
   // Kriz ekranı bilinçli olarak her temada koyu-kırmızı: dikkati toplayan an
   const inCrisis = a.role !== 'guardian' && a.onboarded && !!srv.token && (a.crisisUntil > Date.now() || scr === 'crisis');
-  const theme: ThemeName = inCrisis ? 'dark' : a.theme === 'system' ? (system === 'light' ? 'light' : 'dark') : a.theme;
+  const theme: ThemeName = inCrisis && !BAHCE ? 'dark' : a.theme === 'system' ? (system === 'light' ? 'light' : 'dark') : a.theme;
   applyTheme(theme); // çocuklar bu render'da yeni paleti okur; aşağıdaki key içeriği yeniden kurar
 
   if (!a.ready || !srv.authReady) return <View style={{ flex: 1, backgroundColor: c.bg, justifyContent: 'center' }}><ActivityIndicator color={c.acc} /></View>;
@@ -68,7 +73,12 @@ function Root() {
 }
 
 export default function App() {
-  const [loaded] = useFonts({ Archivo_400Regular, Archivo_600SemiBold, Archivo_800ExtraBold });
-  if (!loaded) return <View style={{ flex: 1, backgroundColor: c.bg }} />;
+  const [loaded, fontError] = useFonts(BAHCE
+    ? { Fraunces_600SemiBold, Nunito_500Medium, Nunito_700Bold, Nunito_800ExtraBold, Caveat_600SemiBold }
+    : { Archivo_400Regular, Archivo_600SemiBold, Archivo_800ExtraBold });
+  // Açılış güvenlik ağı: yazı tipi yüklenemez ya da 3 sn içinde gelmezse sistem yazı tipiyle açılır (boş ekranda takılma olmaz).
+  const [late, setLate] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setLate(true), 3000); return () => clearTimeout(t); }, []);
+  if (!loaded && !fontError && !late) return <View style={{ flex: 1, backgroundColor: c.bg }} />;
   return <SafeAreaProvider><Provider><ServerProvider><Root /></ServerProvider></Provider></SafeAreaProvider>;
 }

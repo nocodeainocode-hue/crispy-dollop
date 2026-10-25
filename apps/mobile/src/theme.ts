@@ -1,31 +1,18 @@
 import { Platform } from 'react-native';
+import { CLASSIC_DARK, CLASSIC_LIGHT, DAY, NIGHT, alpha, type Palette } from './palette';
 
-// QuitVow v3 — "Modernist": hairlines, sharp corners, one red accent. Koyu (varsayılan, marka) ve açık palet.
+// QuitVow görünümü. İki "skin": 'classic' (v3 Modernist: hairline, keskin köşe, tek kırmızı vurgu) ve 'bahce' (Büyüyen Bahçe).
+// Bayrak derleme zamanında okunur. Varsayılan 'bahce'; eski görünüm yalnızca EXPO_PUBLIC_SKIN=classic ile (geri dönüş yolu, F10'da silinir).
 // Bileşenler `c` nesnesini okur; tema değişince `applyTheme` aynı nesnenin değerlerini değiştirir ve App içeriği yeniden kurulur.
-type Palette = {
-  bg: string; surf: string; fg: string; dim: string; mute: string; line: string; acc: string; acc2: string; cell: string; ink: string;
-  glow: string;     // ekran üstündeki kırmızımsı ışık
-  outer: string;    // geniş ekranda (web) telefon sütununun dışı
-  subOn: string;    // seçili satırdaki (zemin = fg) ikincil metin
-  blue: string;     // sudoku: kullanıcının yazdığı rakam
-  amber: string;    // sudoku: ipucu
-  tint: (a: number) => string; // metin renginin saydam hali (çizgi, zemin dokusu)
-  grid: number;     // arka plan ızgarasının yoğunluğu
-};
+export type SkinName = 'classic' | 'bahce';
+export const SKIN: SkinName = process.env.EXPO_PUBLIC_SKIN === 'classic' ? 'classic' : 'bahce';
+export const BAHCE = SKIN === 'bahce';
 
-const DARK: Palette = {
-  bg: '#0A0A0C', surf: '#101012', fg: '#E9E7E7', dim: '#A09C9C', mute: '#77736F',
-  line: 'rgba(233,231,231,0.22)', acc: '#EC3013', acc2: '#FF5A3D', cell: '#34322F', ink: '#0A0A0C',
-  glow: '#2A0E09', outer: '#000000', subOn: '#444444', blue: '#9ED0FF', amber: '#FFB703',
-  tint: a => `rgba(233,231,231,${a})`, grid: 0.045,
-};
+export { alpha };
+export type { Palette };
 
-const LIGHT: Palette = {
-  bg: '#F3F1EC', surf: '#FFFFFF', fg: '#141416', dim: '#5B5752', mute: '#8C8781',
-  line: 'rgba(20,20,22,0.16)', acc: '#E0300F', acc2: '#C42A0C', cell: '#D9D5CF', ink: '#F3F1EC',
-  glow: '#F7DED5', outer: '#E4E1DB', subOn: '#BDB8B1', blue: '#1F67A8', amber: '#A86F00',
-  tint: a => `rgba(20,20,22,${a})`, grid: 0.03,
-};
+const DARK: Palette = BAHCE ? NIGHT : CLASSIC_DARK;
+const LIGHT: Palette = BAHCE ? DAY : CLASSIC_LIGHT;
 
 export type ThemeName = 'dark' | 'light';
 export type ThemePref = ThemeName | 'system';
@@ -39,7 +26,27 @@ export function applyTheme(t: ThemeName) {
   current = t;
 }
 
-export const F = {
-  r: 'Archivo_400Regular', s: 'Archivo_600SemiBold', b: 'Archivo_800ExtraBold',
-  mono: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'ui-monospace, Menlo, monospace' }) as string,
-};
+// Yazı aileleri. Bahçe: Nunito (gövde/düğme), Fraunces (büyük başlık ve sayılar), Caveat (el notu). Özel ailelere fontWeight VERİLMEZ
+// (Android sentetik kalın üretir); ağırlık dosya adındadır. Klasik: Archivo (d ve hand eski karşılıklara bağlı).
+export const F = BAHCE
+  ? { r: 'Nunito_500Medium', s: 'Nunito_700Bold', b: 'Nunito_800ExtraBold', d: 'Fraunces_600SemiBold', hand: 'Caveat_600SemiBold', mono: 'Nunito_800ExtraBold' }
+  : {
+      r: 'Archivo_400Regular', s: 'Archivo_600SemiBold', b: 'Archivo_800ExtraBold', d: 'Archivo_800ExtraBold', hand: 'Archivo_600SemiBold',
+      mono: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'ui-monospace, Menlo, monospace' }) as string,
+    };
+
+/**
+ * "Kusurlu yuvarlak": her köşesi farklı yarıçaplı çakıl biçimi. Aynı (h, seed) her zaman aynı biçimi verir; Math.random yok.
+ * Her dikey kenarda iki köşenin oranı toplamı <= 1 (taşma/kırpılma olmaz). Klasik görünümde keskin köşe (0).
+ */
+const PEBBLES = [[0.53, 0.43, 0.57, 0.47], [0.47, 0.55, 0.42, 0.5], [0.56, 0.46, 0.5, 0.4], [0.42, 0.5, 0.5, 0.48]] as const;
+function hash(s: string | number) { let h = 7; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; }
+export function pebble(h: number, seed: string | number = 0) {
+  if (!BAHCE) return { borderRadius: 0 };
+  const [tl, tr, br, bl] = PEBBLES[hash(seed) % PEBBLES.length];
+  return { borderTopLeftRadius: Math.round(h * tl), borderTopRightRadius: Math.round(h * tr), borderBottomRightRadius: Math.round(h * br), borderBottomLeftRadius: Math.round(h * bl) };
+}
+
+/** Kenar boşluğu, dokunma hedefi ve hareket süresi ölçekleri (tek yerden). */
+export const SP = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
+export const HIT = { min: 48, primary: 60, crisis: 84 } as const;

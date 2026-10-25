@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Pressable, Animated } from 'react-native';
 import { ND } from '../components/motion';
 import { T, ActionBar } from '../components/ui';
-import { c } from '../theme';
+import { c, alpha, BAHCE } from '../theme';
 import { useL } from '../i18n';
 
 // Hafıza kartları: 8 çift, sayaç ve süre yok.
-const SYMS: [string, string][] = [['●', '#EC3013'], ['▲', '#FFB703'], ['■', '#2EC4B6'], ['★', '#FF6FA3'], ['✚', '#4CC9F0'], ['♥', '#FF5A3D'], ['☾', '#8E7DFF'], ['◆', '#9BE564']];
+const SYMS: [string, string][] = BAHCE
+  ? [['●', '#CF5F44'], ['▲', '#DCA83F'], ['■', '#6BA38A'], ['★', '#C97AA0'], ['✚', '#7A9CC6'], ['♥', '#B9714D'], ['☾', '#8E86C9'], ['◆', '#8FAA87']]
+  : [['●', '#EC3013'], ['▲', '#FFB703'], ['■', '#2EC4B6'], ['★', '#FF6FA3'], ['✚', '#4CC9F0'], ['♥', '#FF5A3D'], ['☾', '#8E7DFF'], ['◆', '#9BE564']];
 type Card = { id: number; sym: string; color: string };
 
 const deal = (): Card[] => {

@@ -3,7 +3,7 @@ import { View, Pressable, Animated } from 'react-native';
 import { useApp } from '../store';
 import { Screen, Body, ActionBar, T, Kicker, Hair, TopChips } from '../components/ui';
 import { useL, useH, money } from '../i18n';
-import { c } from '../theme';
+import { c, alpha, BAHCE } from '../theme';
 import type { Go } from '../nav';
 import { Rise, useCountUp, useIntro, usePulse } from '../components/motion';
 
@@ -46,7 +46,7 @@ export default function Home({ go }: { go: Go }) {
           <View>
             <Kicker>{L.home.dayKicker(a.name)}</Kicker>
             <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-              <T size={92} ls={-5.5} lh={92} style={{ textShadowColor: 'rgba(236,48,19,.7)', textShadowRadius: 28 }}>{shownDay}</T>
+              <T size={92} ls={-5.5} lh={92} style={{ textShadowColor: BAHCE ? 'transparent' : 'rgba(236,48,19,.7)', textShadowRadius: BAHCE ? 0 : 28 }}>{shownDay}</T>
               <T size={28} ls={-0.6} color={c.mute}> /{goal}</T>
             </View>
           </View>
@@ -63,7 +63,7 @@ export default function Home({ go }: { go: Go }) {
             const t0 = Math.min(0.72, (i / goal) * 0.72); // her hücre sırayla belirir
             return (
               <Animated.View key={d} style={{ width: '10%', padding: 1.5, opacity: intro.interpolate({ inputRange: [t0, t0 + 0.28], outputRange: [0, 1], extrapolate: 'clamp' }), transform: [{ scale: intro.interpolate({ inputRange: [t0, t0 + 0.28], outputRange: [0.6, 1], extrapolate: 'clamp' }) }] }}>
-                <View style={{ aspectRatio: 1, backgroundColor: past ? c.fg : cur ? c.acc : rel ? 'rgba(236,48,19,0.16)' : 'transparent', borderWidth: 1.5, borderColor: cur || rel ? c.acc : past ? c.fg : ms ? c.fg : c.cell, justifyContent: 'flex-end', padding: 2 }}>
+                <View style={{ aspectRatio: 1, backgroundColor: past ? c.fg : cur ? c.acc : rel ? alpha(c.acc, 0.16) : 'transparent', borderWidth: 1.5, borderColor: cur || rel ? c.acc : past ? c.fg : ms ? c.fg : c.cell, justifyContent: 'flex-end', padding: 2 }}>
                   {rel && <T size={13} color={cur ? c.ink : c.acc2} style={{ position: 'absolute', alignSelf: 'center', top: '18%' }}>✕</T>}
                   {ms && !rel && <T size={8} color={past ? c.ink : c.fg}>{d}</T>}
                   {cur && <Animated.View pointerEvents="none" style={{ position: 'absolute', left: -1.5, right: -1.5, top: -1.5, bottom: -1.5, borderWidth: 2, borderColor: c.acc2, opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0, 0.9] }), transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.35] }) }] }} />}
@@ -94,7 +94,7 @@ export default function Home({ go }: { go: Go }) {
         </View>
         <View style={{ flex: 1, minHeight: 14 }} />
         {!completed && a.goalDays <= 7 && goal - day <= 2 && (
-          <Pressable onPress={() => go('plan')} style={{ marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: 'rgba(236,48,19,0.45)', backgroundColor: 'rgba(236,48,19,0.07)', padding: 12 }}>
+          <Pressable onPress={() => go('plan')} style={{ marginHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: alpha(c.acc, 0.45), backgroundColor: alpha(c.acc, 0.07), padding: 12 }}>
             <Kicker color={c.acc2}>{goal - day <= 0 ? L.home.trialLastDay : L.home.trialLeft(goal - day)}</Kicker>
             <T w="r" size={12.5} lh={18} color={c.dim} style={{ marginTop: 4 }}>{L.home.trialBody}</T>
             <T w="s" size={12.5} color={c.acc2} style={{ marginTop: 6 }}>{L.home.myPack}</T>

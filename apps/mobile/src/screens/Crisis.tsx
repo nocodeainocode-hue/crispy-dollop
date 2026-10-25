@@ -8,7 +8,7 @@ import Calm from './Calm';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { vowExists } from '../vowStore';
 import { useL, useH, useHelp } from '../i18n';
-import { c } from '../theme';
+import { c, alpha, BAHCE } from '../theme';
 import type { Go } from '../nav';
 
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -19,7 +19,7 @@ function CalmBanner({ onPress }: { onPress: () => void }) {
   const p = usePulse(900);
   const L = useL();
   return (
-    <Pressable onPress={onPress} style={{ borderTopWidth: 2, borderBottomWidth: 2, borderColor: c.acc, backgroundColor: 'rgba(236,48,19,0.14)', paddingHorizontal: 16, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+    <Pressable onPress={onPress} style={{ borderTopWidth: 2, borderBottomWidth: 2, borderColor: c.acc, backgroundColor: alpha(c.acc, 0.14), paddingHorizontal: 16, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <View style={{ flex: 1 }}>
         <T size={21} ls={-0.5}>{L.crisis.calmTitle}</T>
         <T w="r" size={12} lh={17} color={c.dim} style={{ marginTop: 3 }}>{L.crisis.calmSub}</T>
@@ -84,7 +84,7 @@ export default function Crisis({ go }: { go: Go }) {
       <Body>
         <View style={{ paddingHorizontal: 16, paddingTop: 6 }}>
           <Kicker>{L.crisis.kicker}</Kicker>
-          <T size={104} ls={-6} lh={96} style={{ marginTop: 6, textShadowColor: 'rgba(236,48,19,.8)', textShadowRadius: 32 }}>{mmss(left)}</T>
+          <T size={104} ls={-6} lh={96} style={{ marginTop: 6, textShadowColor: BAHCE ? 'transparent' : 'rgba(236,48,19,.8)', textShadowRadius: BAHCE ? 0 : 32 }}>{mmss(left)}</T>
           <T size={26} ls={-0.5} lh={28} style={{ marginTop: 8 }}>{phase}</T>
           <Kicker style={{ marginTop: 16 }}>{L.crisis.waveKicker}</Kicker>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 96, borderBottomWidth: 1, borderColor: c.line, marginTop: 6 }}>

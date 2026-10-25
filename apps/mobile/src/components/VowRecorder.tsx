@@ -4,7 +4,7 @@ const VIDEO_BITRATE = 2_000_000; // 60 sn ≈ 15 MB
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { ActionBar, T, Kicker } from './ui';
-import { c } from '../theme';
+import { c, alpha, BAHCE } from '../theme';
 import { useL } from '../i18n';
 
 export type Vow = { uri: string; seconds: number; mime: string };
@@ -20,7 +20,7 @@ function Preview({ uri }: { uri: string }) {
 function Teleprompter({ script }: { script: string[] }) {
   const L = useL();
   return (
-    <View style={{ position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: 'rgba(10,10,12,0.78)', padding: 12 }}>
+    <View style={{ position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: alpha(c.bg, 0.82), padding: 12 }}>
       <Kicker color={c.acc2}>{L.recorder.teleprompter}</Kicker>
       {script.map((l, i) => <T key={i} w="s" size={13} lh={18} style={{ marginTop: 4 }}>{l}</T>)}
     </View>
@@ -31,7 +31,7 @@ function Teleprompter({ script }: { script: string[] }) {
 function Bar({ elapsed }: { elapsed: number }) {
   return (
     <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-      <View style={{ height: 6, backgroundColor: 'rgba(233,231,231,0.22)' }}><View style={{ height: '100%', width: `${(elapsed / MAX_SECONDS) * 100}%`, backgroundColor: c.acc }} /></View>
+      <View style={{ height: 6, backgroundColor: c.tint(0.22) }}><View style={{ height: '100%', width: `${(elapsed / MAX_SECONDS) * 100}%`, backgroundColor: c.acc }} /></View>
     </View>
   );
 }

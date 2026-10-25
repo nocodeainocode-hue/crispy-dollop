@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BAHCE } from './theme';
 
 /** Alışkanlık paketi kimliği. Her paketin metinleri i18n sözlüğünde `habits.<id>` altında. */
 export type HabitId = 'gambling';
@@ -51,7 +52,7 @@ export type State = {
 const init: State = {
   ready: false, onboarded: false, habit: 'gambling', habitLabel: '', reason: '', letter: '',
   monthlyLoss: 0, gamblingTypes: [], triggerTimes: [], plan: '', guardians: [], penalties: [], startedAt: Date.now(), points: 100, entries: [],
-  unlock: null, crisisUntil: 0, lastCheckIn: 0, checkIns: [], name: '', goalDays: 90, nextVerifyAt: 0, pactStatus: 'none', email: '', vowSeconds: 0, vowUri: '', role: 'none', paywallDismissed: false, startingNew: false, lang: null, hideHabit: false, streakStartedAt: Date.now(), relapses: [], weeklyDigest: false, theme: 'dark',
+  unlock: null, crisisUntil: 0, lastCheckIn: 0, checkIns: [], name: '', goalDays: 90, nextVerifyAt: 0, pactStatus: 'none', email: '', vowSeconds: 0, vowUri: '', role: 'none', paywallDismissed: false, startingNew: false, lang: null, hideHabit: false, streakStartedAt: Date.now(), relapses: [], weeklyDigest: false, theme: BAHCE ? 'system' : 'dark',
 };
 
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { T, ActionBar } from '../components/ui';
-import { c } from '../theme';
+import { c, alpha, BAHCE } from '../theme';
 import { useL } from '../i18n';
 
 import { LEVELS, fits, makePuzzle } from './sudokuLogic';
@@ -66,7 +66,7 @@ export default function Sudoku() {
               return (
                 <Pressable key={col} onPress={() => setSel(i)} style={{ flex: 1, aspectRatio: 1, alignItems: 'center', justifyContent: 'center',
                   borderRightWidth: col === 8 ? 0 : thickR ? 2 : 0.5, borderBottomWidth: r === 8 ? 0 : thickB ? 2 : 0.5, borderRightColor: thickR ? c.fg : c.line, borderBottomColor: thickB ? c.fg : c.line, // yalnızca blok sınırı kalın/koyu
-                  backgroundColor: sel === i ? 'rgba(236,48,19,0.45)' : bad ? 'rgba(236,48,19,0.18)' : v !== 0 && v === selVal ? c.tint(0.22) : peer ? c.tint(0.07) : 'transparent' }}>
+                  backgroundColor: sel === i ? alpha(c.acc, 0.45) : bad ? alpha(c.acc, 0.18) : v !== 0 && v === selVal ? c.tint(0.22) : peer ? c.tint(0.07) : 'transparent' }}>
                   {v !== 0 && <T w={given || hintedCell ? 'b' : 'r'} size={20} color={bad ? c.acc2 : hintedCell ? c.amber : given ? c.fg : c.blue}>{v}</T>}
                 </Pressable>
               );

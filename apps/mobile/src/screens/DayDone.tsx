@@ -5,7 +5,7 @@ import { Screen, Body, ActionBar, Opt, T, Kicker, Hair } from '../components/ui'
 import { ND, EASE, dur, Rise } from '../components/motion';
 import { useL, money } from '../i18n';
 import { dayMessage } from '../dayMessage';
-import { c } from '../theme';
+import { c, alpha, BAHCE } from '../theme';
 
 const DAY = 86400000;
 
@@ -27,7 +27,7 @@ export default function DayDone({ urge, onDone }: { urge: number | null; onDone:
   const fill = useRef(new Animated.Value(0)).current;
   useEffect(() => { Animated.timing(fill, { toValue: 1, duration: dur(900), easing: EASE, useNativeDriver: false }).start(); }, []);
   const scale = fill.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0.4, 1.12, 1] });
-  const bg = fill.interpolate({ inputRange: [0, 0.5, 1], outputRange: ['rgba(236,48,19,0)', '#EC3013', c.fg] });
+  const bg = fill.interpolate({ inputRange: [0, 0.5, 1], outputRange: [alpha(c.acc, 0), c.acc, c.fg] });
 
   return (
     <Screen>
