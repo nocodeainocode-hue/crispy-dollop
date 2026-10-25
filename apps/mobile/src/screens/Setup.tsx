@@ -1,18 +1,20 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, PixelRatio, useWindowDimensions } from 'react-native';
 import { useApp } from '../store';
 import { useServer } from '../server';
 import { API_URL } from '../api';
 import { useBilling } from '../billing';
 import { packPrices, withPack } from '../purchase';
 import VowRecorder, { type Vow } from '../components/VowRecorder';
-import { Screen, Body, Back, ActionBar, HoldBar, Field, Opt, T, Kicker, TopChips, StepProgress } from '../components/ui';
-import { Why, PaperCard, PaperLine, CheckRow, TextLink, PlusMark, Dot } from '../components/SetupParts';
+import { Screen, Body, Back, ActionBar, Field, Opt, T, Kicker, TopChips, StepProgress } from '../components/ui';
+import { Why, PaperCard, PaperLine, CheckRow, TextLink, PlusMark, Dot, PackPick, OneTimeStamp, SignHold, TierPlant } from '../components/SetupParts';
 import { useL, useH, currencySymbol, joinNames } from '../i18n';
 import { StepTransition, Rise } from '../components/motion';
+import { tick, settle } from '../haptics';
 import { c, F, pebble } from '../theme';
 
 const TOTAL = 10; // alışkanlık adımı + L.setup.steps (9)
+const PAID = [30, 60, 90]; // Filiz / Fidan / Ağaç; adlar L.plan.tier'dan (tek yer), deneme ayrı satır
 const toggle = (arr: string[], v: string) => (arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,8 +24,9 @@ export default function Setup() {
   const L = useL(), H = useH();
   // Seçenekler kimlik olarak saklanır (types/when), ekranda o dilin etiketi gösterilir
   const STEPS = [H.stepName, ...L.setup.steps];
-  // 30/60/90 = Filiz/Fidan/Ağaç (L.setup.packLabel); deneme ayrı satır
-  const PACKS = [{ d: 7, l: L.packs.trial, sub: L.packs.trialSub }, ...[30, 60, 90].map(d => ({ d, l: L.setup.packLabel(d), sub: L.setup.packSub }))];
+  // Dar ekranda ya da büyük yazıda üç paket kartı yan yana sığmaz: kart solda, bilgi sağda (Plan ile aynı mantık, daha dar eşik)
+  const { width: winW } = useWindowDimensions();
+  const packRow = winW < 340 || PixelRatio.getFontScale() > 1.3;
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1); // 1 ileri, -1 geri: geçiş animasyonunun yönü
   const [viaLogin, setViaLogin] = useState(false); // 1. adımdan "Zaten hesabım var" ile hesap adımına atlandı: geri, 1. adıma döner
@@ -127,9 +130,10 @@ export default function Setup() {
     }), 40);
     return () => clearInterval(t);
   }, [step]);
+  // Söz verildi anı: tek ve sakin yerleşme titreşimi (imza başlarken tick, tamamlanınca settle)
+  useEffect(() => { if (step === TOTAL - 1 && hold >= 100) settle(); }, [hold >= 100]);
 
-  const valid = [types.length > 0, when.length > 0, reason.trim().length > 5, guardiansOk && !dupEmail, true, true, letter.trim().length > 10, loggedIn && !selfGuardian, sign.trim().length > 2 && consent && !trialBlocked][step];
-  const signOk = !busy; // video isteğe bağlı: videosuz da imzalanabilir
+  const valid =[types.length > 0, when.length > 0, reason.trim().length > 5, guardiansOk && !dupEmail, true, true, letter.trim().length > 10, loggedIn && !selfGuardian, sign.trim().length > 2 && consent && !trialBlocked][step];
 
   // Adım değişmedikçe aynı bileşen kalır: yazı yazarken başlık animasyonu yeniden oynamaz.
   // Başlık + (en çok) tek kısa açıklama; uzun açıklamalar "Neden böyle?" katlısında.
@@ -228,12 +232,19 @@ export default function Setup() {
 
         {step === 4 && <>
           <Head big={L.setup.packTitle} small={L.setup.packSmall} />
-          {PACKS.map((x, i) => {
-            const soon = !canBuy && x.d !== 7;
-            return <Opt delay={120 + i * 60} key={x.d} label={x.l} sub={soon ? L.packs.soon : prices[x.d] ? `${prices[x.d]} · ${x.sub}` : x.sub} on={goal === x.d} onPress={() => { if (!soon) setGoal(x.d); }} />;
-          })}
+          <Opt delay={120} label={L.packs.trial} sub={L.packs.trialSub} on={goal === 7} onPress={() => setGoal(7)} />
+          {/* Tek seferlik damgası fiyatlardan önce görünür */}
+          {canBuy && !bill?.demo && <Rise delay={170} y={10}><OneTimeStamp text={L.packs.oneTime} /></Rise>}
+          <View accessibilityRole="radiogroup" style={packRow ? { paddingHorizontal: 16, paddingTop: 10 } : { flexDirection: 'row', paddingHorizontal: 16, paddingTop: 14, gap: 10 }}>
+            {PAID.map((d, i) => (
+              <Rise key={d} delay={220 + i * 70} y={10} style={packRow ? undefined : { flex: 1 }}>
+                <PackPick d={d} variant={i} name={L.plan.tier[d]} days={L.plan.tierDays(d)} price={prices[d]} soon={!canBuy} soonLabel={L.packs.soon}
+                  on={goal === d} onPress={() => setGoal(d)} row={packRow} />
+              </Rise>
+            ))}
+          </View>
+          <T w="r" size={14} lh={20} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 12 }}>{L.setup.packSub}</T>
           {(bill?.demo || !canBuy) && <T w="r" size={14} lh={20} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{bill?.demo ? L.setup.demoNote : L.setup.soonNote}</T>}
-          {canBuy && !bill?.demo && <T w="s" size={14} lh={20} color={c.fg} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.packs.oneTime}</T>}
           <Why src={L.setup.packSrc}>{L.setup.packScience}</Why>
         </>}
 
@@ -290,12 +301,17 @@ export default function Setup() {
           </PaperCard>
           {/* Paket damgası: gün sayısı, ad, (Play'den gelen) fiyat ve "tek seferlik" notu imzadan önce görünür */}
           <PaperCard seed="stamp" tilt={1} pad={16} mx={40}>
-            <Kicker color={c.dim}>{L.setup.packKicker}</Kicker>
-            <T size={40} ls={-1.2} lh={46} style={{ marginTop: 2 }}>{L.setup.packDays(goal)}</T>
-            <T w="s" size={15} color={c.dim} style={{ marginTop: 2 }}>{L.setup.packKind(goal)}</T>
-            {paidAtSign && !!price && <T size={26} lh={32} style={{ marginTop: 8 }}>{price}</T>}
-            {paidAtSign && <T w="s" size={14} lh={20} color={c.fg} style={{ marginTop: 4 }}>{L.packs.oneTime}</T>}
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flex: 1 }}>
+                <Kicker color={c.dim}>{L.setup.packKicker}</Kicker>
+                <T size={40} ls={-1.2} lh={46} style={{ marginTop: 2 }}>{L.setup.packDays(goal)}</T>
+                <T w="s" size={15} color={c.dim} style={{ marginTop: 2 }}>{goal === 7 ? L.setup.packTrialKind : L.plan.tier[goal] ?? ''}</T>
+                {paidAtSign && !!price && <T size={26} lh={32} style={{ marginTop: 8 }}>{price}</T>}
+              </View>
+              {goal !== 7 && <View style={{ marginLeft: 8 }}><TierPlant d={goal} height={84} /></View>}
+            </View>
           </PaperCard>
+          {paidAtSign && <OneTimeStamp text={L.packs.oneTime} />}
           {(trialBlocked || bill?.demo) && <T w="r" size={14} lh={20} color={trialBlocked ? c.acc2 : c.dim} style={{ paddingHorizontal: 16, paddingTop: 6 }}>{trialBlocked ? (canBuy ? L.setup.trialUsed : L.setup.trialUsedSoon) : L.setup.demoShort}</T>}
           <View style={{ paddingTop: 14 }}>
             <Field label={L.setup.signLabel} placeholder={L.setup.signPh} value={sign} onChangeText={setSign} style={{ fontFamily: F.hand, fontSize: 30, paddingVertical: 8 }} />
@@ -319,9 +335,8 @@ export default function Setup() {
         {!!err && <T w="s" size={14} color={c.acc2} style={{ paddingHorizontal: 16, paddingVertical: 6 }}>{err}</T>}
         <T w="r" size={15} color={c.dim} style={{ paddingHorizontal: 16, paddingVertical: 8 }}>{busy ? L.setup.signing : vow ? L.setup.holdWithVow : L.setup.holdNoVow}</T>
         {paidAtSign && !busy && <T w="r" size={14} lh={19} color={c.dim} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.setup.payAtSign}</T>}
-        {signOk
-          ? <HoldBar label={L.setup.hold} pct={hold} onDown={() => { holding.current = true; }} onUp={() => { holding.current = false; }} />
-          : <ActionBar label={busy ? L.setup.uploading : L.setup.hold} right="" kind="ghost" disabled onPress={() => {}} height={78} size={20} />}
+        {/* Video isteğe bağlı: videosuz da imzalanabilir. Tutma sayacı yukarıdaki aralıkta; burası yalnız görünüm + haptik. */}
+        <SignHold label={L.setup.hold} doneLabel={L.setup.vowMade} pct={hold} busy={busy} onDown={() => { holding.current = true; tick(); }} onUp={() => { holding.current = false; }} />
       </>}
     </Screen>
   );

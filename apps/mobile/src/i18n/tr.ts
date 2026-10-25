@@ -3,9 +3,6 @@
 const up = (s: string) => s.toLocaleUpperCase('tr-TR');
 /** "2'si", "1'i": sayıdan sonra gelen iyelik eki */
 const si = (n: number) => `${n}'${[1, 5, 8].includes(n % 10) ? 'i' : [3, 4].includes(n % 10) ? 'ü' : n % 10 === 6 ? 'sı' : n % 10 === 0 ? 'ı' : n % 10 === 9 ? 'u' : 'si'}`;
-/** Paket adı: 30/60/90 gün = Filiz/Fidan/Ağaç (7 gün deneme). */
-const tier = (d: number): string => (d >= 90 ? 'Ağaç' : d >= 60 ? 'Fidan' : d >= 30 ? 'Filiz' : 'Deneme');
-
 const tr = {
   locale: 'tr-TR',
   langName: 'Türkçe',
@@ -79,7 +76,6 @@ const tr = {
     contract3Solo: 'Kilitler 7 gün beklemeden açılmaz. İstediğim an şahit ekleyebilirim.',
     packTitle: 'Paketini\nseç.',
     packSmall: 'Süre boyunca şahitlerin, kriz modun ve araçların açık.',
-    packLabel: (d: number) => `${tier(d)} · ${d} gün`,
     packSub: 'Analiz + paylaşılabilir özet',
     demoNote: 'Demo: şu an ödeme alınmıyor. Ücretli paketler Google Play üzerinden satılacak.',
     packScience: 'Net ve süresi belli hedefler, belirsiz niyetlere göre davranışı daha çok değiştirir. 7 günlük denemeyle sistemi tanıyıp sonra uzun pakete geçebilirsin.',
@@ -104,7 +100,7 @@ const tr = {
     contractKicker: (d: number) => `SÖZLEŞME · ${d} GÜN`,
     contract3: (names: string, need: number) => `${names} yanımda. Kilitleri ${si(need)} onaylamadan açamam.`,
     packKicker: 'PAKET', packDays: (d: number) => `${d} gün`,
-    packKind: (d: number) => (d === 7 ? 'Ücretsiz deneme' : tier(d)),
+    packTrialKind: 'Ücretsiz deneme', // 30/60/90 adları tek yerden: plan.tier
     trialUsed: 'Ücretsiz denemeni kullandın. Geri dön ve bir paket seç.',
     demoShort: 'Demo: şu an ödeme alınmıyor.',
     soonNote: 'Uzun paketler çok yakında Google Play üzerinden açılacak. Şimdilik 7 günlük ücretsiz denemeyle başla.',
@@ -115,7 +111,7 @@ const tr = {
     signing: 'Pakt kuruluyor…', holdWithVow: 'Hazırsan basılı tut.',
     holdNoVow: 'Video isteğe bağlı. Atlayıp imzalayabilirsin.',
     payAtSign: 'İmzaladığında Google Play ödemesi açılır (tek seferlik, abonelik değil).',
-    hold: 'Basılı tut, imzala', uploading: 'Yükleniyor…', toVideo: 'İmzaya geç',
+    hold: 'Basılı tut, imzala', vowMade: 'Söz verildi.', uploading: 'Yükleniyor…', toVideo: 'İmzaya geç',
     guardiansFallback: 'Şahitlerim',
   },
   home: {
@@ -331,7 +327,7 @@ const tr = {
     body: 'Sözünü tuttun. Daveti kabul etmiş şahitlerine haber gitti.',
     bodyRelapsed: (n: number) => `Paketini sonuna kadar götürdün; son ${n} günün temiz. Zor günlerde de bırakmadın.`,
     discount: (p: number) => `Ödülün: bir sonraki paketinde %${p} indirim. Ödeme açıldığında otomatik uygulanır.`,
-    certKicker: 'BAHÇE BELGESİ', certPack: (d: number) => `${tier(d)} · ${d} gün`, certDates: (a: string, b: string) => `${a} – ${b}`,
+    certKicker: 'BAHÇE BELGESİ', certPack: (name: string, d: number) => `${name} · ${d} gün`, certDates: (a: string, b: string) => `${a} – ${b}`,
     certClean: 'Hiç bozmadan', certCleanLast: (n: number) => `Son ${n} gün temiz`,
     certText: (name: string, d: number, a: string, b: string, clean: string) => `QuitVow tamamlama belgesi
 ${name}

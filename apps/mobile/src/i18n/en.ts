@@ -2,9 +2,6 @@ import type { Dict } from './tr';
 
 // English. Must implement the exact shape of tr.ts (Dict); a missing key is a type error.
 const up = (s: string) => s.toLocaleUpperCase('en-US');
-/** Pack name: 30/60/90 days = Sprout/Sapling/Tree (7-day trial). */
-const tier = (d: number): string => (d >= 90 ? 'Tree' : d >= 60 ? 'Sapling' : d >= 30 ? 'Sprout' : 'Trial');
-
 const en: Dict = {
   locale: 'en-US',
   langName: 'English',
@@ -78,7 +75,6 @@ const en: Dict = {
     contract3Solo: "The locks won't open without a 7-day wait. I can add a witness any time.",
     packTitle: 'Choose your\npack.',
     packSmall: 'Your witnesses, crisis mode and tools stay open throughout.',
-    packLabel: (d: number) => `${tier(d)} · ${d} days`,
     packSub: 'Analysis + shareable summary',
     demoNote: 'Demo: no payment is taken right now. Paid packs will be sold through Google Play.',
     packScience: 'Clear, time-bound goals change behaviour more than vague intentions. Try the 7-day trial first, then move to a longer pack.',
@@ -103,7 +99,7 @@ const en: Dict = {
     contractKicker: (d: number) => `CONTRACT · ${d} DAYS`,
     contract3: (names: string, need: number) => `${names} ${names.includes(' and ') ? 'are' : 'is'} with me. I can't open the locks unless ${need} of them approve.`,
     packKicker: 'PACK', packDays: (d: number) => `${d} days`,
-    packKind: (d: number) => (d === 7 ? 'Free trial' : tier(d)),
+    packTrialKind: 'Free trial', // 30/60/90 names come from one place: plan.tier
     trialUsed: 'You already used your free trial. Go back and choose a pack.',
     demoShort: 'Demo: no payment is taken right now.',
     soonNote: 'Longer packs are coming soon via Google Play. For now, start with the free 7-day trial.',
@@ -114,7 +110,7 @@ const en: Dict = {
     signing: 'Setting up your pact…', holdWithVow: 'Press and hold when ready.',
     holdNoVow: 'The video is optional. You can skip it and sign.',
     payAtSign: 'When you sign, the Google Play payment opens (one-time, not a subscription).',
-    hold: 'Press and hold to sign', uploading: 'Uploading…', toVideo: 'On to signing',
+    hold: 'Press and hold to sign', vowMade: 'Vow made.', uploading: 'Uploading…', toVideo: 'On to signing',
     guardiansFallback: 'My witnesses',
   },
   home: {
@@ -330,7 +326,7 @@ const en: Dict = {
     body: 'You kept your word. Witnesses who accepted your invite were told.',
     bodyRelapsed: (n: number) => `You saw your pack through to the end; your last ${n} days were clean. You didn't give up on the hard days.`,
     discount: (p: number) => `Your reward: ${p}% off your next pack, applied automatically once payments open.`,
-    certKicker: 'GARDEN CERTIFICATE', certPack: (d: number) => `${tier(d)} · ${d} days`, certDates: (a: string, b: string) => `${a} – ${b}`,
+    certKicker: 'GARDEN CERTIFICATE', certPack: (name: string, d: number) => `${name} · ${d} days`, certDates: (a: string, b: string) => `${a} – ${b}`,
     certClean: 'Without a single slip', certCleanLast: (n: number) => `Last ${n} days clean`,
     certText: (name: string, d: number, a: string, b: string, clean: string) => `QuitVow certificate of completion
 ${name}
