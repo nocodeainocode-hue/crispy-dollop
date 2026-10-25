@@ -56,8 +56,11 @@ class ShieldVpnService : VpnService() {
       ContextCompat.startForegroundService(ctx, Intent(ctx, ShieldVpnService::class.java).setAction(ACTION_START))
     }
     fun stop(ctx: Context) {
-      // stopService her durumda çalışır (startService arka planda yasaktır); onDestroy tüneli kapatır
-      runCatching { ctx.stopService(Intent(ctx, ShieldVpnService::class.java)) }
+      // Tünel kuruluyken sistem servise BAĞLI kalır (onRevoke iletebilmek için); bu yüzden stopService tek başına onDestroy'u
+      // çağırmaz ve engel açık kalır. Tünel doğrudan kapatılır: fd kapanınca sistem bağı bırakır, servis de durur.
+      val s = instance
+      if (s != null) { s.shutdown(); s.stopForegroundCompat(); s.stopSelf() }
+      else runCatching { ctx.stopService(Intent(ctx, ShieldVpnService::class.java)) }
     }
     /** Kurallar/liste güncellenince çalışan filtreyi durdurmadan yeniler */
     fun reload(ctx: Context) {

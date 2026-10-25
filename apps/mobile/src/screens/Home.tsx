@@ -44,6 +44,7 @@ export default function Home({ go }: { go: Go }) {
   const { height } = useWindowDimensions();
   const [more, setMore] = useState(false);
   const sh = useShield(); // bahis engeli (yalnız Android uygulaması)
+  const told = a.pactStatus === 'active' && a.guardians.some(g => g.status === 'accepted'); // engel kapanınca şahitlere haber gitti mi
   const st = useGardenDay(a.startedAt);
   const goal = a.goalDays;
   const day = Math.max(1, Math.min(goal, st.day));
@@ -107,7 +108,7 @@ export default function Home({ go }: { go: Go }) {
             <Pressable onPress={() => go('shield')} accessibilityRole="button" style={[pebble(60, 'shield'), { marginHorizontal: 16, marginTop: 8, minHeight: 56, paddingHorizontal: 20, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: sh.wanted ? c.clay : c.edge, backgroundColor: sh.wanted ? c.clayWash : c.surf }]}>
               <View style={{ flex: 1 }}>
                 <T w="s" size={16} lh={21} color={sh.wanted ? c.clay : c.fg}>{sh.wanted ? L.shield.homeOff : L.shield.homeCta}</T>
-                <T w="r" size={14} lh={19} color={c.dim}>{sh.wanted ? L.shield.homeOffSub : L.shield.homeCtaSub}</T>
+                <T w="r" size={14} lh={19} color={c.dim}>{sh.wanted ? (told ? L.shield.homeOffSub : L.shield.homeOffSubPlain) : L.shield.homeCtaSub}</T>
               </View>
               <Chev color={sh.wanted ? c.clay : c.dim} />
             </Pressable>

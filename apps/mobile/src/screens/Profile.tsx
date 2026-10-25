@@ -152,7 +152,7 @@ export default function Profile({ go }: { go: Go }) {
 
         <Section>{L.profile.myPact}</Section>
         <LinkRow label={L.profile.guardians} sub={a.guardians.length ? L.profile.guardiansSub(accepted) : L.profile.guardiansNone} onPress={() => go('guardians')} icon="witness" />
-        {!!sh && <LinkRow label={L.shield.profile} sub={shieldOn(sh) ? L.shield.profileOn(sh.blockedToday) : sh.wanted ? L.shield.profileOff : L.shield.profileNever} danger={sh.wanted && !shieldOn(sh)} onPress={() => go('shield')} icon="eyeOff" />}
+        {!!sh && <LinkRow label={L.shield.profile} sub={shieldOn(sh) ? L.shield.profileOn(sh.blockedToday) : sh.wanted ? (a.pactStatus === 'active' && accepted > 0 ? L.shield.profileOff : L.shield.profileOffPlain) : L.shield.profileNever} danger={sh.wanted && !shieldOn(sh)} onPress={() => go('shield')} icon="eyeOff" />}
         <LinkRow label={L.profile.vow} sub={a.vowSeconds && vowExists(a.vowUri) ? L.profile.vowAdded(a.vowSeconds) : L.profile.vowNone} onPress={() => { if (a.vowSeconds && vowExists(a.vowUri)) shareVow(a.vowUri, L.guardians.shareTitle).then(ok => { if (!ok) flash(L.guardians.shareUnavailable, false); }); else go('vow'); }} icon="video" />
         <LinkRow label={L.profile.journal} onPress={() => go('journal')} icon="journal" />
         <LinkRow label={L.profile.calm} onPress={() => go('calm')} icon="calm" />
