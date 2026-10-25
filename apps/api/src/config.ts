@@ -33,7 +33,8 @@ export const config = {
   unlockWaitMs: 72 * 3600 * 1000,
   // Kabul etmiş vasi yoksa (vasisiz başlayan ya da davetler henüz kabul edilmedi) anahtarın yerini daha uzun bekleme tutar
   soloUnlockWaitMs: 7 * 24 * 3600 * 1000,
-  // Paketi sonuna kadar götürene (arada tekrar oynamış olsa bile) bir sonraki pakette indirim
-  completionDiscountPct: 40,
+  // Paketi sonuna kadar götürene bir sonraki pakette indirim. Varsayılan 0 (kapalı): Google Play tarafında bu indirimin karşılığı yok,
+  // mobil uygulama da göstermiyor. 0 iken mail indirim cümlesi içermez ve /me nextPackDiscount 0 döner.
+  completionDiscountPct: 0,
 };
 export type Config = typeof config;
