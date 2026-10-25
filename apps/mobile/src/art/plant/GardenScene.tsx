@@ -13,7 +13,7 @@ import {
 import {
   MS, UNFURL_SWING, UnfurlAnim, bloomAnim, introAnim, introDelay, introTotal, unfurlAnim, useBudPulse, useSceneClock, useSway, useWind, windOffset,
 } from './motion';
-import { CRISIS, HALO_RGB, HILLS, SOIL2, TULIP_CURL_DEG } from './paths';
+import { CRISIS, HALO_RGB, SOIL2, TULIP_CURL_DEG } from './paths';
 import { Mat, mat6, mul, rotM, trans } from './wobble';
 
 const AG = Animated.createAnimatedComponent(G);
@@ -320,4 +320,3 @@ function CrisisScene({ layout, states, width, animate, plant, rootProgress, labe
   );
 }
 
-export { HILLS };

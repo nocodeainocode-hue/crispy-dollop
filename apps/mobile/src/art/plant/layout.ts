@@ -41,7 +41,7 @@ export interface Branch { fx: number; fy: number; c1x: number; c1y: number; c2x:
 export interface Limb { index: number; startDay: number; days: number; branch?: Branch }
 /** [çatallanma t, yön, uç x (merkeze göre), uç y] (340x400 kutuda; kutu ölçeğine uydurulur). 1. dal sol (31-60), 2. dal sağ (61-90). */
 const BRANCHES: ReadonlyArray<readonly [number, 1 | -1, number, number]> = [
-  [0.55, -1, -105, 70], [0.3, 1, 108, 100], [0.78, -1, -70, 48], [0.66, 1, 80, 62], [0.9, 1, 40, 20],
+  [0.42, -1, -108, 46], [0.24, 1, 112, 60], [0.78, -1, -70, 48], [0.66, 1, 80, 62], [0.9, 1, 40, 20],
 ];
 export function trunkPoint(g: Geo, t: number): Pt {
   return { x: g.w / 2 + g.amp * Math.sin(t * 6.4 + 0.55) * (1 - 0.42 * t), y: g.bot - t * (g.bot - g.top) };
