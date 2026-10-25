@@ -166,7 +166,7 @@ export function PackPick({ d, name, days, price, soon, soonLabel, on, onPress, r
   );
 }
 
-/** "Tek seferlik ödeme. Abonelik değildir…": ilk cümle başlık, kalanı metin; art/misc kil damgası. Fiyattan önce görünür. */
+/** "Tek seferlik ödeme. Abonelik değildir…": ilk cümle başlık, kalanı metin; art/misc kil damgası. Fiyatın hemen altında durur. */
 export function OneTimeStamp({ text }: { text: string }) {
   const i = text.indexOf('. ');
   const head = i > 0 ? text.slice(0, i + 1) : text, rest = i > 0 ? text.slice(i + 2) : '';

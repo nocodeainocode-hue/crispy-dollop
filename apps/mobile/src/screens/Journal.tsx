@@ -4,7 +4,7 @@ import { useApp } from '../store';
 import { Screen, Body, Back, ActionBar, Field, T, Kicker } from '../components/ui';
 import { Rise } from '../components/motion';
 import { Chip } from '../components/PaperKit';
-import { GIcon, PaperGrain, type IconName } from '../art/misc';
+import { GIcon, type IconName } from '../art/misc';
 import { c, F, pebble } from '../theme';
 import Analysis from '../components/Analysis';
 import type { Go } from '../nav';
@@ -91,7 +91,6 @@ export default function Journal({ go }: { go: Go }) {
         <View style={stack ? undefined : { flex: 1 }}><ActionBar label={L.journal.resisted} right="" kind="ghost" height={64} size={19} onPress={() => save('iyi')} /></View>
         <View style={stack ? undefined : { flex: 1 }}><ActionBar label={L.journal.save} right="" height={64} size={19} disabled={!mood && !trg} onPress={() => save('tetik')} /></View>
       </View>
-      <PaperGrain />
     </Screen>
   );
 }

@@ -236,8 +236,6 @@ export default function Setup() {
         {step === 4 && <>
           <Head big={L.setup.packTitle} small={L.setup.packSmall} />
           <Opt delay={120} label={L.packs.trial} sub={L.packs.trialSub} on={goal === 7} onPress={() => setGoal(7)} />
-          {/* Tek seferlik damgası fiyatlardan önce görünür */}
-          {canBuy && <Rise delay={170} y={10}><OneTimeStamp text={L.packs.oneTime} /></Rise>}
           <View accessibilityRole="radiogroup" style={packRow ? { paddingHorizontal: 16, paddingTop: 10 } : { flexDirection: 'row', paddingHorizontal: 16, paddingTop: 14, gap: 10 }}>
             {PAID.map((d, i) => (
               <Rise key={d} delay={220 + i * 70} y={10} style={packRow ? undefined : { flex: 1 }}>
@@ -246,6 +244,8 @@ export default function Setup() {
               </Rise>
             ))}
           </View>
+          {/* Önce fiyatlar, hemen altında "tek seferlik, abonelik değil" damgası */}
+          {canBuy && <Rise delay={420} y={10}><OneTimeStamp text={L.packs.oneTime} /></Rise>}
           <T w="r" size={14} lh={20} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 12 }}>{L.setup.packSub}</T>
           {(bill?.demo || !canBuy) && <T w="r" size={14} lh={20} color={c.dim} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{bill?.demo ? L.setup.demoNote : L.setup.soonNote}</T>}
           <Why src={L.setup.packSrc}>{L.setup.packScience}</Why>

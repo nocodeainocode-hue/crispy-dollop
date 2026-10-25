@@ -56,7 +56,7 @@ export const DAY: Palette = {
   edge: '#6A7864', act: '#3B6748', onAct: '#FBF6EA', sage: '#8FAA87', sageWash: '#CBD9BE',
   clay: '#A24622', onClay: '#FBF6EA', clayWash: '#EDC3A8', mustard: '#DCA83F', tulip: '#CF5F44',
   water: '#3F7089', onWater: '#FBF6EA', waterWash: '#CFE0E6', soil: '#C9AE86', pot: '#C98660', sky: '#DCE5CC',
-  hill: '#D5E0BF', hill2: '#B8CBA6', shadow: 'rgba(36,53,42,0.2)', grainA: 0.5,
+  hill: '#D5E0BF', hill2: '#B8CBA6', shadow: 'rgba(36,53,42,0.2)', grainA: 0.12,
 };
 
 /** Bahçe, gece: derin yeşil zemin, krem mürekkep yazı. */
@@ -68,7 +68,7 @@ export const NIGHT: Palette = {
   edge: '#8C9C86', act: '#A9CBA0', onAct: '#142019', sage: '#7FA27A', sageWash: '#314A39',
   clay: '#F0A584', onClay: '#2A1710', clayWash: '#5A3A2B', mustard: '#EBBD5C', tulip: '#F08C6D',
   water: '#9CC3D6', onWater: '#142019', waterWash: '#2A4350', soil: '#3B3A2C', pot: '#B9714D', sky: '#22362A',
-  hill: '#2B4034', hill2: '#35503F', shadow: 'rgba(10,16,12,0.5)', grainA: 0.28,
+  hill: '#2B4034', hill2: '#35503F', shadow: 'rgba(10,16,12,0.5)', grainA: 0.1,
 };
 
 /** "#RRGGBB" + alfa -> "rgba(r,g,b,a)". Sabit renkleri palete bağlı saydamlara çevirmek için. */
