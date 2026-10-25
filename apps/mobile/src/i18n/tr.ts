@@ -27,6 +27,7 @@ const tr = {
     left: (d: number, h: number) => (d > 0 ? `${d} gün ${h} sa` : `${h} sa`),
   },
   packs: {
+    oneTime: 'Tek seferlik ödeme. Abonelik değildir, otomatik yenilenmez.',
     trial: '7 günlük deneme', trialSub: 'Ücretsiz · hesap başına bir kez',
     name: (d: number) => `${d} günlük mücadele paketi`,
     sub: { 30: 'İlk ayı atlat · detaylı analiz + uzman raporu', 60: 'Alışkanlığın kökünü kurut · analiz + rapor', 90: 'En kalıcı yol · analiz + rapor' } as Record<number, string>,
@@ -107,6 +108,7 @@ const tr = {
     vowTitle: 'Sözünü\nsöyle.',
     signing: 'Pakt kuruluyor…', holdWithVow: 'Bastır ve tut. Söz, acele edilmeden verilir.',
     holdNoVow: 'Video isteğe bağlı: istemezsen doğrudan basılı tutup imzalayabilirsin.',
+    payAtSign: 'İmzaladığında Google Play ödemesi açılır (tek seferlik, abonelik değil).',
     hold: 'Basılı tut, imzala', uploading: 'Yükleniyor…', toVideo: 'Devam: imza videosu',
     guardiansFallback: 'Şahitlerim',
   },

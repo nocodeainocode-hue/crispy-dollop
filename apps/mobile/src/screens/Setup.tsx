@@ -231,6 +231,7 @@ export default function Setup() {
           })}
           {bill?.demo && discount > 0 && <T w="s" size={12.5} lh={18} color={c.acc2} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.plan.discount(discount)}</T>}
           {(bill?.demo || !canBuy) && <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{bill?.demo ? L.setup.demoNote : L.setup.soonNote}</T>}
+          {canBuy && !bill?.demo && <T w="r" size={11.5} lh={16} color={c.mute} style={{ paddingHorizontal: 16, paddingTop: 10 }}>{L.packs.oneTime}</T>}
           <Science src={L.setup.packSrc}>{L.setup.packScience}</Science>
         </>}
 
@@ -308,6 +309,7 @@ export default function Setup() {
       {step === TOTAL - 1 && <>
         {!!err && <T w="s" size={12} color={c.acc2} style={{ paddingHorizontal: 16, paddingVertical: 6 }}>{err}</T>}
         <T w="r" size={12} color={c.dim} style={{ paddingHorizontal: 16, paddingVertical: 8 }}>{busy ? L.setup.signing : vow ? L.setup.holdWithVow : L.setup.holdNoVow}</T>
+        {goal !== 7 && canBuy && !bill?.demo && !busy && <T w="r" size={12} color={c.dim} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{L.setup.payAtSign}</T>}
         {signOk
           ? <HoldBar label={L.setup.hold} pct={hold} onDown={() => { holding.current = true; }} onUp={() => { holding.current = false; }} />
           : <ActionBar label={busy ? L.setup.uploading : L.setup.hold} right="" kind="ghost" disabled onPress={() => {}} height={78} size={20} />}

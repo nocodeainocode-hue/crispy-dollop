@@ -26,6 +26,7 @@ const en: Dict = {
     left: (d: number, h: number) => (d > 0 ? `${d} d ${h} h` : `${h} h`),
   },
   packs: {
+    oneTime: 'One-time payment. Not a subscription; it never renews automatically.',
     trial: '7-day trial', trialSub: 'Free · once per account',
     name: (d: number) => `${d}-day challenge pack`,
     sub: { 30: 'Get through the first month · detailed analysis + specialist report', 60: 'Pull the habit out by the roots · analysis + report', 90: 'The most lasting path · analysis + report' },
@@ -106,6 +107,7 @@ const en: Dict = {
     vowTitle: 'Say your\nvow.',
     signing: 'Setting up your pact…', holdWithVow: "Press and hold. A vow isn't rushed.",
     holdNoVow: "The video is optional: if you don't want one, just press and hold to sign.",
+    payAtSign: 'When you sign, the Google Play payment opens (one-time, not a subscription).',
     hold: 'Press and hold to sign', uploading: 'Uploading…', toVideo: 'Continue: vow video',
     guardiansFallback: 'My witnesses',
   },
