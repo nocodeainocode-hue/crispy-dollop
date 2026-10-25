@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Pressable, PixelRatio, useWindowDimensions } from 'react-native';
+import { View, Pressable, PixelRatio, Platform, useWindowDimensions } from 'react-native';
 import { useApp } from '../store';
 import { useServer } from '../server';
 import { API_URL } from '../api';
 import { useBilling } from '../billing';
-import { packPrices, withPack } from '../purchase';
+import { packPrices, withPack, LIST_PRICES } from '../purchase';
 import VowRecorder, { type Vow } from '../components/VowRecorder';
 import { Screen, Body, Back, ActionBar, Field, Opt, T, Kicker, TopChips, StepProgress } from '../components/ui';
 import { Why, PaperCard, PaperLine, CheckRow, TextLink, PlusMark, Dot, PackPick, OneTimeStamp, SignHold, TierPlant } from '../components/SetupParts';
@@ -41,7 +41,10 @@ export default function Setup() {
   const bill = useBilling();
   const canBuy = bill?.billing !== false; // bilinmiyorken engelleme; sunucu zaten paketi doğrular
   const [prices, setPrices] = useState<Record<number, string>>({});
-  useEffect(() => { if (bill && bill.billing && !bill.demo) packPrices().then(r => setPrices(r.prices)); }, [bill]);
+  // Sunucu bilinmiyorken (null) de fiyat çekilir; "yakında" ve demo dışında her durumda dener
+  useEffect(() => { if (bill?.billing !== false && !bill?.demo) packPrices().then(r => setPrices(r.prices)); }, [bill]);
+  const priceOf = (d: number): string | undefined =>
+    prices[d] ?? (bill?.demo || Platform.OS !== 'android' ? LIST_PRICES[d] : undefined);
   // Satış kapalıyken (Play ödemesi bağlanana kadar) yalnızca ücretsiz deneme seçilebilir
   useEffect(() => { if (!canBuy && goal !== 7) setGoal(7); }, [canBuy]);
   const [solo, setSolo] = useState(false); // vasisiz başla: zaman kilidi
@@ -146,7 +149,7 @@ export default function Setup() {
   ), [step, L, H]);
   const guard = async (fn: () => Promise<void>) => { setBusy(true); setErr(''); try { await fn(); } catch (e: any) { setErr(e.message ?? L.common.error); } setBusy(false); };
 
-  const price = prices[goal];
+  const price = priceOf(goal);
   const paidAtSign = goal !== 7 && canBuy && !bill?.demo;
 
   return (
@@ -234,11 +237,11 @@ export default function Setup() {
           <Head big={L.setup.packTitle} small={L.setup.packSmall} />
           <Opt delay={120} label={L.packs.trial} sub={L.packs.trialSub} on={goal === 7} onPress={() => setGoal(7)} />
           {/* Tek seferlik damgası fiyatlardan önce görünür */}
-          {canBuy && !bill?.demo && <Rise delay={170} y={10}><OneTimeStamp text={L.packs.oneTime} /></Rise>}
+          {canBuy && <Rise delay={170} y={10}><OneTimeStamp text={L.packs.oneTime} /></Rise>}
           <View accessibilityRole="radiogroup" style={packRow ? { paddingHorizontal: 16, paddingTop: 10 } : { flexDirection: 'row', paddingHorizontal: 16, paddingTop: 14, gap: 10 }}>
             {PAID.map((d, i) => (
               <Rise key={d} delay={220 + i * 70} y={10} style={packRow ? undefined : { flex: 1 }}>
-                <PackPick d={d} variant={i} name={L.plan.tier[d]} days={L.plan.tierDays(d)} price={prices[d]} soon={!canBuy} soonLabel={L.packs.soon}
+                <PackPick d={d} variant={i} name={L.plan.tier[d]} days={L.plan.tierDays(d)} price={priceOf(d)} soon={!canBuy} soonLabel={L.packs.soon}
                   on={goal === d} onPress={() => setGoal(d)} row={packRow} />
               </Rise>
             ))}

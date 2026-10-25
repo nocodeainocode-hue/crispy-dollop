@@ -9,6 +9,8 @@ import { ApiError } from './api';
 const iap = () => require('expo-iap') as typeof import('expo-iap');
 const sku = (days: number) => `pack_${days}`;
 export const PACK_DAYS = [30, 60, 90];
+/** Liste fiyatı (store/ODEME-REHBERI.md). Yalnızca mağaza fiyatı alınamayan ortamlarda (demo sunucu, web, Expo Go) gösterilir; gerçek Android'de Play'in yerel fiyatı geçerlidir. */
+export const LIST_PRICES: Record<number, string> = { 30: '349 ₺', 60: '549 ₺', 90: '749 ₺' };
 
 type Srv = {
   me: () => Promise<{ demoPurchases: boolean; playEnabled?: boolean; billingRef?: string }>;
